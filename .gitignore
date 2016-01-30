@@ -61,6 +61,7 @@ target/
 
 # vim
 *.swo
+*.swp
 
 # zip
 *.zip

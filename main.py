@@ -87,13 +87,15 @@ def home():
     context = {'symbol': c.symbol}
     return render_template('index.html', company=context)
 
-PER_PAGE = 100
+PER_PAGE = 50
 def get_listings(page, buy=True, date=None, roe=15.0):
     """
     """
 
     if not date:
-        date = session.query(Indicators).order_by(desc('date')).limit(1).all()[0].date
+        #date = session.query(Indicators).order_by(desc('date')).limit(1).all()[0].date
+        # Look for the second to last date we had values...
+        date = session.query(Indicators.date).order_by(desc(Indicators.date)).distinct().limit(2).all()[-1].date
 
     count = session.query(Indicators).filter(Indicators.buy == True).filter(Indicators.date == \
             date.strftime("%Y-%m-%d")).filter(Indicators.roe > roe).count()
@@ -134,12 +136,26 @@ def listings(page):
     listings, count = get_listings(page)
     print "page", page, "count", count
 
-    #pagination = Pagination(page, PER_PAGE, count)
-    pagination = Pagination(1, 20, 100)
+    pagination = Pagination(page, PER_PAGE, count)
+    #pagination = Pagination(1, 20, 100)
     return render_template('listings.html', 
                            pagination=pagination,
                            listings=listings,
                            count=count)
+
+@app.route('/users/', defaults={'page': 1})
+@app.route('/users/page/<int:page>')
+def show_users(page):
+    count = 250
+    users = 50
+    if not users and page != 1:
+        abort(404)
+    pagination = Pagination(page, PER_PAGE, count)
+    return render_template('users.html',
+        pagination=pagination,
+        users=users
+    )
+
 
 @app.route('/logout')
 @login_required

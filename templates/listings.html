@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block body %}
+ 
+{% include 'nav.html' %}
+<br>
+<div class="row">
+<div class="medium-7 large-6 columns">
+<h1>Current Listings</h1>
+<p>Retrieved <b>{{ count }}</b> listings.</p>
+{% macro render_pagination(pagination) %}
+  <div>
+  {% if pagination.has_prev %}
+    <a href="{{ url_for_other_page(pagination.page - 1)
+      }}">&laquo; Prev</a>
+  {% endif %}
+  {%- for page in pagination.iter_pages() %}
+    {% if page %}
+      {% if page != pagination.page %}
+        <a href="{{ url_for_other_page(page) }}">{{ page }}</a>
+      {% else %}
+        <strong>{{ page }}</strong>
+      {% endif %}
+    {% else %}
+      <span class=ellipsis>…</span>
+    {% endif %}
+  {%- endfor %}
+  {% if pagination.has_next %}
+    <a href="{{ url_for_other_page(pagination.page + 1)
+      }}">Next &raquo;</a>
+  {% endif %}
+  </div>
+{% endmacro %}
+{{ render_pagination(pagination) }}
+<table class="table">
+<thead>
+    <tr>
+        <th>Symbol</th>
+        <th>ROE (%)</th>
+        <th>Free Cash</th>
+        <th>Profit Margin (%)</th>
+        <th>Operating Margin (%)</th>
+        <th>Operating Margin (%)</th>
+        <th>Total Debt/Equity(%)</th>
+    </tr>
+</thead>
+<tbody>
+{% for listing in listings %}
+<tr>
+    <td>{{ listing.company.symbol }}</td>
+    <td>{{ listing.roe }}</td>
+    <td>{{ convert_to_cash(listing.fcf) }}</td>
+    <td>{{ listing.pm }}</td>
+    <td>{{ listing.om }}</td>
+    <td>{{ listing.peg }}</td>
+    <td>{{ listing.tde }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+
+
+</div>
+</div>
+<footer>
+<div class="row">
+<div class="medium-6 columns">
+<ul class="menu">
+<li><a href="#">Legal</a></li>
+<li><a href="#">Partner</a></li>
+<li><a href="#">Explore</a></li>
+</ul>
+</div>
+<div class="medium-6 columns">
+<ul class="menu float-right">
+<li class="menu-text">Copyright</li>
+</ul>
+</div>
+</div>
+</footer>
+{% endblock %}
