@@ -4,33 +4,15 @@ from math import ceil
 
 # Flask specific
 from flask import Flask, render_template, redirect, \
-       send_from_directory
+       send_from_directory, request
 from flask_login import logout_user
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.security import Security, SQLAlchemyUserDatastore, \
     UserMixin, RoleMixin, login_required
 
-
-# Stock Database specific
-from sqlalchemy import create_engine, desc
-from sqlalchemy.ext.automap import automap_base
-from sqlalchemy.orm import Session
-
 # App imports
 from utils import convert_to_cash, Pagination, url_for_other_page
-
-Base = automap_base()
-# using environment variables for now..
-engine = create_engine("%s://%s:%s@%s/%s" % (os.environ['swtype'],
-                                             os.environ['swuser'],
-                                             os.environ['swpassword'],
-                                             os.environ['swhost'],
-                                             os.environ['swdatabase'])
-                       )
-Base.prepare(engine, reflect=True)
-Company = Base.classes.company
-Indicators = Base.classes.indicators
-session = Session(engine)
+from database import session, Indicators, Company, desc, asc
 
 # Create app
 app = Flask(__name__)
@@ -88,7 +70,7 @@ def home():
     return render_template('index.html', company=context)
 
 PER_PAGE = 50
-def get_listings(page, buy=True, date=None, roe=15.0):
+def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=15.0):
     """
     """
 
@@ -118,13 +100,28 @@ def get_listings(page, buy=True, date=None, roe=15.0):
     last = start + PER_PAGE
 
     print "retrieving", start, last
+
+    # Set the sort field
+    if hasattr(Indicators, str(sort_field)):
+        if eval(reverse):
+            print "sort ascending on", sort_field, reverse
+            sort = asc(sort_field)
+        else:
+            print "sort descending on", sort_field, reverse
+            sort = desc(sort_field)
+    else:
+        if reverse:
+            sort = asc("roe")
+        else:
+            sort = desc("roe")
+
     listings = session.query(Indicators).filter(Indicators.buy == True).filter(Indicators.date == \
-            date.strftime("%Y-%m-%d")).filter(Indicators.roe > roe).slice(start, last).all()
+            date.strftime("%Y-%m-%d")).filter(Indicators.roe > roe).order_by(sort).slice(start, last).all()
     return listings, count
 
 #@app.route('/listings')
 @app.route('/listings/', defaults={'page': 1})
-@app.route('/listings/page/<int:page>')
+@app.route('/listings/<int:page>')
 @login_required
 def listings(page):
     """
@@ -132,30 +129,18 @@ def listings(page):
     """
     # Get most recent date
 
-
-    listings, count = get_listings(page)
+    listings, count = get_listings(page, request.args.get('sort'), request.args.get('reverse'))
     print "page", page, "count", count
+
+    reverse = False if request.args.get('reverse') == "True" else True
 
     pagination = Pagination(page, PER_PAGE, count)
     #pagination = Pagination(1, 20, 100)
     return render_template('listings.html', 
                            pagination=pagination,
                            listings=listings,
-                           count=count)
-
-@app.route('/users/', defaults={'page': 1})
-@app.route('/users/page/<int:page>')
-def show_users(page):
-    count = 250
-    users = 50
-    if not users and page != 1:
-        abort(404)
-    pagination = Pagination(page, PER_PAGE, count)
-    return render_template('users.html',
-        pagination=pagination,
-        users=users
-    )
-
+                           count=count,
+                           reverse=reverse)
 
 @app.route('/logout')
 @login_required
