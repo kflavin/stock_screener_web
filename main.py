@@ -103,7 +103,7 @@ def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=15.0)
 
     # Set the sort field
     if hasattr(Indicators, str(sort_field)):
-        if eval(reverse):
+        if reverse:
             print "sort ascending on", sort_field, reverse
             sort = asc(sort_field)
         else:
@@ -129,10 +129,13 @@ def listings(page):
     """
     # Get most recent date
 
-    listings, count = get_listings(page, request.args.get('sort'), request.args.get('reverse'))
+    sort = request.args.get('sort') if request.args.get('sort') else "roe"
+    reverse = True if request.args.get('reverse') == "True" else False
+    flip = False if reverse else True
+
+    listings, count = get_listings(page, sort, reverse)
     print "page", page, "count", count
 
-    reverse = False if request.args.get('reverse') == "True" else True
 
     pagination = Pagination(page, PER_PAGE, count)
     #pagination = Pagination(1, 20, 100)
@@ -140,7 +143,9 @@ def listings(page):
                            pagination=pagination,
                            listings=listings,
                            count=count,
-                           reverse=reverse)
+                           sort=sort,
+                           reverse=reverse,
+                           flip=flip)
 
 @app.route('/logout')
 @login_required

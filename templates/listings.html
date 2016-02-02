@@ -11,12 +11,12 @@
   <div>
   {% if pagination.has_prev %}
     <a href="{{ url_for_other_page(pagination.page - 1)
-      }}">&laquo; Prev</a>
+        }}?sort={{sort}}&reverse={{reverse}}">&laquo; Prev</a>
   {% endif %}
   {%- for page in pagination.iter_pages() %}
     {% if page %}
       {% if page != pagination.page %}
-        <a href="{{ url_for_other_page(page) }}">{{ page }}</a>
+      <a href="{{ url_for_other_page(page) }}?sort={{sort}}&reverse={{reverse}}">{{ page }}</a>
       {% else %}
         <strong>{{ page }}</strong>
       {% endif %}
@@ -26,7 +26,7 @@
   {%- endfor %}
   {% if pagination.has_next %}
     <a href="{{ url_for_other_page(pagination.page + 1)
-      }}">Next &raquo;</a>
+        }}?sort={{sort}}&reverse={{reverse}}">Next &raquo;</a>
   {% endif %}
   </div>
 {% endmacro %}
@@ -36,11 +36,11 @@
     <tr>
         <th>Symbol</th>
         <th><a href="{{ request.path }}?sort=roe&reverse={{ reverse }}">ROE (%)</a></th>
-        <th>Free Cash</th>
-        <th>Profit Margin (%)</th>
-        <th>Operating Margin (%)</th>
-        <th>Operating Margin (%)</th>
-        <th>Total Debt/Equity(%)</th>
+        <th><a href="{{ request.path }}?sort=fcf&reverse={{ reverse }}">Free Cash</a></th>
+        <th><a href="{{ request.path }}?sort=pm&reverse={{ reverse }}">Profit Margin (%)</a></th>
+        <th><a href="{{ request.path }}?sort=om&reverse={{ reverse }}">Operating Margin (%)</a></th>
+        <th><a href="{{ request.path }}?sort=peg&reverse={{ reverse }}">PEG (%)</a></th>
+        <th><a href="{{ request.path }}?sort=tde&reverse={% if sort == "tde" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">Total Debt/Equity</a></th>
     </tr>
 </thead>
 <tbody>
@@ -52,7 +52,7 @@
     <td>{{ listing.pm }}</td>
     <td>{{ listing.om }}</td>
     <td>{{ listing.peg }}</td>
-    <td>{{ listing.tde }}</td>
+    <td>{% if listing.tde %}{{ '%.2f' % listing.tde }}{% else %}-{% endif  %}</td>
 </tr>
 {% endfor %}
 </tbody>
