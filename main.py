@@ -11,7 +11,8 @@ from flask.ext.security import Security, SQLAlchemyUserDatastore, \
     UserMixin, RoleMixin, login_required
 
 # App imports
-from utils import convert_to_cash, Pagination, url_for_other_page
+from utils import convert_to_cash
+from pages import Pagination, url_for_other_page
 from database import session, Indicators, Company, desc, asc
 
 # Create app
@@ -70,7 +71,7 @@ def home():
     return render_template('index.html', company=context)
 
 PER_PAGE = 50
-def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=15.0):
+def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=15.0, pm=10.0, om=10.0, tde=100.0):
     """
     """
     # Set the sort field
@@ -87,13 +88,18 @@ def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=15.0)
         sorter = desc(sort_field)
 
     if not date:
-        #date = session.query(Indicators).order_by(desc('date')).limit(1).all()[0].date
         # Look for the second to last date we had values...
+        #date = session.query(Indicators).order_by(desc('date')).limit(1).all()[0].date
         date = session.query(Indicators.date).order_by(desc(Indicators.date)).distinct().limit(2).all()[-1].date
 
-    count = session.query(Indicators).filter(Indicators.buy == True).filter(Indicators.date == \
-            date.strftime("%Y-%m-%d")).filter(Indicators.roe > roe).count()
-    print "count is", count
+    # We need the count ahead of time to figure out the pagination.
+    count = session.query(Indicators).\
+            filter(Indicators.buy == True).\
+            filter(Indicators.date == date.strftime("%Y-%m-%d")).\
+            filter(Indicators.roe > roe).\
+            filter(Indicators.pm > pm).\
+            filter(Indicators.tde < tde).\
+            count()
 
     pages = ceil(count / float(PER_PAGE))
 
@@ -112,16 +118,22 @@ def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=15.0)
                 filter(Indicators.buy == True).\
                 filter(Indicators.date == date.strftime("%Y-%m-%d")).\
                 filter(Indicators.roe > roe).\
+                filter(Indicators.pm > pm).\
+                filter(Indicators.tde < tde).\
                 order_by(sorter).\
-                slice(start, last).all()
+                slice(start, last).\
+                all()
     else:
         listings = session.query(Indicators).\
                 filter(Indicators.buy == True).\
                 filter(Indicators.date == \
                 date.strftime("%Y-%m-%d")).\
                 filter(Indicators.roe > roe).\
+                filter(Indicators.pm > pm).\
+                filter(Indicators.tde < tde).\
                 order_by(sorter).\
-                slice(start, last).all()
+                slice(start, last).\
+                all()
 
     return listings, count
 
@@ -140,8 +152,6 @@ def listings(page):
     flip = False if reverse else True
 
     listings, count = get_listings(page, sort, reverse)
-    print "page", page, "count", count
-
 
     pagination = Pagination(page, PER_PAGE, count)
     #pagination = Pagination(1, 20, 100)
