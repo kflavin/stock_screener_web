@@ -73,6 +73,18 @@ PER_PAGE = 50
 def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=15.0):
     """
     """
+    # Set the sort field
+    if hasattr(Indicators, str(sort_field)):
+        sorter = sort_field
+    elif sort_field == "symbol":
+        sorter = "Company.symbol"
+    else:
+        sorter = "roe"
+
+    if reverse:
+        sorter = asc(sort_field)
+    else:
+        sorter = desc(sort_field)
 
     if not date:
         #date = session.query(Indicators).order_by(desc('date')).limit(1).all()[0].date
@@ -83,12 +95,6 @@ def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=15.0)
             date.strftime("%Y-%m-%d")).filter(Indicators.roe > roe).count()
     print "count is", count
 
-    # Flask handles, unnecessary?
-    ## Sanitize input, then calculate first record.
-    #if re.match(r"\d+", str(offset)):
-    #    start = offset * (PER_PAGE-1)
-    #else:
-    #    start = 0
     pages = ceil(count / float(PER_PAGE))
 
     if page > pages:
@@ -99,24 +105,24 @@ def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=15.0)
     start = (page-1) * PER_PAGE
     last = start + PER_PAGE
 
-    print "retrieving", start, last
-
-    # Set the sort field
-    if hasattr(Indicators, str(sort_field)):
-        if reverse:
-            print "sort ascending on", sort_field, reverse
-            sort = asc(sort_field)
-        else:
-            print "sort descending on", sort_field, reverse
-            sort = desc(sort_field)
+    # sorting on a symbol requires a join
+    if sort_field == "symbol":
+        listings = session.query(Indicators).\
+                join(Company, Company.id == Indicators.company_id).\
+                filter(Indicators.buy == True).\
+                filter(Indicators.date == date.strftime("%Y-%m-%d")).\
+                filter(Indicators.roe > roe).\
+                order_by(sorter).\
+                slice(start, last).all()
     else:
-        if reverse:
-            sort = asc("roe")
-        else:
-            sort = desc("roe")
+        listings = session.query(Indicators).\
+                filter(Indicators.buy == True).\
+                filter(Indicators.date == \
+                date.strftime("%Y-%m-%d")).\
+                filter(Indicators.roe > roe).\
+                order_by(sorter).\
+                slice(start, last).all()
 
-    listings = session.query(Indicators).filter(Indicators.buy == True).filter(Indicators.date == \
-            date.strftime("%Y-%m-%d")).filter(Indicators.roe > roe).order_by(sort).slice(start, last).all()
     return listings, count
 
 #@app.route('/listings')
