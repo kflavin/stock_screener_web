@@ -34,12 +34,12 @@
 <table class="table">
 <thead>
     <tr>
-        <th>Symbol</th>
-        <th><a href="{{ request.path }}?sort=roe&reverse={{ reverse }}">ROE (%)</a></th>
-        <th><a href="{{ request.path }}?sort=fcf&reverse={{ reverse }}">Free Cash</a></th>
-        <th><a href="{{ request.path }}?sort=pm&reverse={{ reverse }}">Profit Margin (%)</a></th>
-        <th><a href="{{ request.path }}?sort=om&reverse={{ reverse }}">Operating Margin (%)</a></th>
-        <th><a href="{{ request.path }}?sort=peg&reverse={{ reverse }}">PEG (%)</a></th>
+        <th><a href="{{ request.path }}?sort=symbol&reverse={% if sort == "symbol" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">Symbol</a></th>
+        <th><a href="{{ request.path }}?sort=roe&reverse={% if sort == "roe" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">ROE (%)</a></th>
+        <th><a href="{{ request.path }}?sort=fcf&reverse={% if sort == "fcf" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">Free Cash</a></th>
+        <th><a href="{{ request.path }}?sort=pm&reverse={% if sort == "pm" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">Profit Margin (%)</a></th>
+        <th><a href="{{ request.path }}?sort=om&reverse={% if sort == "om" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">Operating Margin (%)</a></th>
+        <th><a href="{{ request.path }}?sort=peg&reverse={% if sort == "peg" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">PEG (%)</a></th>
         <th><a href="{{ request.path }}?sort=tde&reverse={% if sort == "tde" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">Total Debt/Equity</a></th>
     </tr>
 </thead>
@@ -47,11 +47,11 @@
 {% for listing in listings %}
 <tr>
     <td>{{ listing.company.symbol }}</td>
-    <td>{{ listing.roe }}</td>
-    <td>{{ convert_to_cash(listing.fcf) }}</td>
-    <td>{{ listing.pm }}</td>
-    <td>{{ listing.om }}</td>
-    <td>{{ listing.peg }}</td>
+    <td>{% if listing.roe %}{{ '%.2f' % listing.roe }}{% else %}-{% endif  %}</td>
+    <td>{% if listing.fcf %}{{ convert_to_cash(listing.fcf) }}{% else %}-{% endif %}</td>
+    <td>{% if listing.pm %}{{ '%.2f' % listing.pm }}{% else %}-{% endif  %}</td>
+    <td>{% if listing.om %}{{ '%.2f' % listing.om }}{% else %}-{% endif  %}</td>
+    <td>{% if listing.peg %}{{ '%.2f' % listing.peg }}{% else %}-{% endif  %}</td>
     <td>{% if listing.tde %}{{ '%.2f' % listing.tde }}{% else %}-{% endif  %}</td>
 </tr>
 {% endfor %}
