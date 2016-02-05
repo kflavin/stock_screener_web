@@ -169,7 +169,7 @@ def logout():
     logout_user()
     return redirect('/')
 
-@app.route('/css/<path:path>')
+@app.route('/static/<path:path>')
 def send_css(path):
     print "Your path is", path
     return send_from_directory('static/css', path)

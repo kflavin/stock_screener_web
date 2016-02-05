@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 {% block body %}
  
-{% include 'nav.html' %}
 <br>
 <div class="row">
-<div class="medium-7 large-6 columns">
+<div>
 <h1>Current Listings</h1>
 <p>Retrieved <b>{{ count }}</b> listings.</p>
 {% macro render_pagination(pagination) %}
