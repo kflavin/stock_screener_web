@@ -4,16 +4,13 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <link rel="stylesheet" href="/static/dist/css/bootstrap.min.css" />
   <link rel="stylesheet" href="/static/dist/js/boostrap.min.js" />
+  <link rel="stylesheet" href="/static/css/stocks.css" />
   <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
 <div class="container-fluid">
 
-{% include 'nav.html' %}
-<div class="row">
-<div class="col-md-2"></div>
-<div class="col-md-8">{% block body %}{% endblock %}</div>
-</div>
+{% block body %}{% endblock %}
 
 </div>
 </body>
