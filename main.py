@@ -19,7 +19,7 @@ from database import session, Indicators, Company, desc, asc
 app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['SECRET_KEY'] = 'super-secret'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
+app.config['SQLALCHEMY_DATABASE_URI'] = '***REMOVED***://***REMOVED***:***REMOVED***@***REMOVED***/***REMOVED***'
 
 # Add custom function to Jinja template
 app.jinja_env.globals.update(convert_to_cash=convert_to_cash)
@@ -55,8 +55,10 @@ security = Security(app, user_datastore)
 # Create a user to test with
 @app.before_first_request
 def create_user():
+    print "Creating everything......."
     db.create_all()
-    user_datastore.create_user(email='admin', password='password')
+    if db.session.query(User).filter_by(email='admin').count() == 0:
+        user_datastore.create_user(email='admin', password='password')
     db.session.commit()
 
 # Views

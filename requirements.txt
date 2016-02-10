@@ -2,3 +2,6 @@ SQLAlchemy==1.0.9
 flask
 Flask-Security
 Flask-SQLAlchemy
+Flask-script
+Flask-migrate
+coverage
