@@ -3,12 +3,11 @@ import os
 import unittest
 import coverage
 
+from stocks_web.models import User, Role
+from stocks_web import app, db
+
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
-
-from stocks_web import app, db
-from stocks_web.models import User, Role
-
 
 #app.config.from_object(os.environ['APP_SETTINGS'])
 
@@ -63,7 +62,7 @@ def drop_db():
 @manager.command
 def create_admin():
     """Creates the admin user."""
-    db.session.add(User("admin", "password"))
+    db.session.add(User(email="root", password="password"))
     db.session.commit()
 
 

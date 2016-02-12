@@ -6,8 +6,10 @@ from flask_login import logout_user
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from stocks_web import app, db
 from stocks_web import session, Indicators, Company, desc, asc
-from stocks_web.models import User, Role
+from stocks_web import User, Role
 from stocks_web.pages import Pagination
+
+from datetime import datetime
 
 # Setup Flask-Security
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
@@ -19,7 +21,7 @@ def create_user():
     print "Creating everything......."
     db.create_all()
     if db.session.query(User).filter_by(email='admin').count() == 0:
-        user_datastore.create_user(email='admin', password='password')
+        user_datastore.create_user(email='admin', password='password', confirmed_at=datetime.now())
     db.session.commit()
 
 # Views

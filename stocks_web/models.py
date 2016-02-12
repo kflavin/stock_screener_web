@@ -1,5 +1,7 @@
 from flask.ext.security import UserMixin, RoleMixin
-from stocks_web import db
+from flask.ext.sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
 
 # Define models
 roles_users = db.Table('roles_users',
@@ -19,3 +21,8 @@ class User(db.Model, UserMixin):
     confirmed_at = db.Column(db.DateTime())
     roles = db.relationship('Role', secondary=roles_users,
                             backref=db.backref('users', lazy='dynamic'))
+    #last_login_at = db.Column(db.DateTime())
+    #current_login_at = db.Column(db.DateTime())
+    #last_login_ip = db.Column(db.String(255))
+    #current_login_ip = db.Column(db.String(255))
+    #login_count = db.Column(db.Integer)

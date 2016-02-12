@@ -1,8 +1,8 @@
 import os
-from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from utils import convert_to_cash
 from stocks_web.pages import url_for_other_page
+from stocks_web.models import db
 from flask import Flask
 
 # Stock Database specific
@@ -12,9 +12,7 @@ from sqlalchemy.orm import Session
 
 # Create app
 app = Flask(__name__)
-app.config['DEBUG'] = True
-app.config['SECRET_KEY'] = 'super-secret'
-app.config['SQLALCHEMY_DATABASE_URI'] = '***REMOVED***://***REMOVED***:***REMOVED***@***REMOVED***/***REMOVED***'
+app.config.from_object('stocks_web.config')
 
 # Add custom functions to Jinja templates
 app.jinja_env.globals.update(convert_to_cash=convert_to_cash)
@@ -35,9 +33,8 @@ Company = Base.classes.company
 Indicators = Base.classes.indicators
 session = Session(engine)
 
-# Create database connection object for website specific models
-db = SQLAlchemy(app)
+# Initialize website specific models
+db.init_app(app)
 
-from stocks_web import views
 from stocks_web.models import User, Role
-
+from stocks_web import views
