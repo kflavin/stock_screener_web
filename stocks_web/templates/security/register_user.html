@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block body %}
+{% from "security/_utils.html" import render_field_sronly_with_errors, render_checkbox_field %}
+{% from "security/_macros.html" import render_field_with_errors, render_field %}
+
+<div class="row">
+<div class="col-md-offset-4 col-md-4">
+<form class="form-signin" action="{{ url_for_security('login') }}" method="POST" name="register_user_form">
+<h2 class="form-signin-heading">Register</h2>
+<div>
+{% include "security/_messages.html" %}
+{{ register_user_form.hidden_tag() }}
+{{ render_field_sronly_with_errors(register_user_form.email, placeholder="Email Address", class_="form-control") }}
+{{ render_field_sronly_with_errors(register_user_form.password, placeholder="Password", class_="form-control") }}
+{{ render_field(register_user_form.submit, class_="btn btn-lg btn-primary btn-block") }}
+</div>
+
+<p class="text-center"><a href="/register">Register</a></p>
+<p class="text-center"><a href="#">Forgot your password?</a></p>
+</form>
+</div>
+</div>
+
+<h1>Register</h1>
+<form action="/register" method="POST" name="register_user_form">
+  <div style="display:none;"><input id="csrf_token" name="csrf_token" type="hidden" value="1457928100##9a647786b0a370e1a7e3d04d23eda7dcbf4fbf95"></div>
+  <p>
+    <label for="email">Email Address</label> <input id="email" name="email" type="text" value="">
+  </p>
+
+  <p>
+    <label for="password">Password</label> <input id="password" name="password" type="password" value="">
+  </p>
+
+  <p><input id="submit" name="submit" type="submit" value="Register"></p>
+
+</form>
+
+<h2>Menu</h2>
+<ul>
+  <li><a href="/login">Login</a></li>
+  <li><a href="/register">Register</a><br/></li>
+  <li><a href="/reset">Forgot password</a><br/></li>
+  <li><a href="/confirm">Confirm account</a></li>
+</ul>
+
+{% endblock %}
+
+

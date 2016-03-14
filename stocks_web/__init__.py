@@ -4,6 +4,7 @@ from utils import convert_to_cash
 from stocks_web.pages import url_for_other_page
 from stocks_web.models import db
 from flask import Flask
+from flask_mail import Mail
 
 # Stock Database specific
 from sqlalchemy import create_engine, desc, asc
@@ -13,6 +14,7 @@ from sqlalchemy.orm import Session
 # Create app
 app = Flask(__name__)
 app.config.from_object('stocks_web.config')
+mail = Mail(app)
 
 # Add custom functions to Jinja templates
 app.jinja_env.globals.update(convert_to_cash=convert_to_cash)
