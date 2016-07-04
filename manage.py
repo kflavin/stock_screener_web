@@ -3,10 +3,14 @@ import os
 import unittest
 import coverage
 
-from stocks_web.models import User, Role
-from stocks_web import app, db
+#from stocks_web.models import User, Role
+#from stocks_web import app, db
+from app.models import User, Role
+from app import create_app, db
 
-from flask.ext.script import Manager
+app = create_app(os.getenv('FLASK_CONFIG') or 'default')
+
+from flask.ext.script import Manager, Shell
 from flask.ext.migrate import Migrate, MigrateCommand
 
 #app.config.from_object(os.environ['APP_SETTINGS'])
@@ -14,9 +18,11 @@ from flask.ext.migrate import Migrate, MigrateCommand
 migrate = Migrate(app, db)
 manager = Manager(app)
 
-# migrations
-manager.add_command('db', MigrateCommand)
-
+# configure shell and migration commands
+def make_shell_context():
+    return dict(app=app, db=db, User=User, Role=Role)
+manager.add_command("shell", Shell(make_context=make_shell_context))
+manager.add_command("db", MigrateCommand)
 
 @manager.command
 def test():
