@@ -1,0 +1,36 @@
+{% extends "main.html" %}
+{% import "_macros.html" as macros %}
+{% block content %}
+ 
+<br>
+<div class="row">
+<div>
+<h1>Current Listings</h1>
+<p>Retrieved <b>{{ count }}</b> listings.</p>
+
+{{ macros.pagination_widget(pagination, '.listings', order_by=order_by, direction=direction) }}
+
+  {{ macros.generate_sorted_table(request.path, order_bys, order_by, direction, listings) }}
+
+{{ macros.pagination_widget(pagination, '.listings') }}
+
+
+</div>
+</div>
+<footer>
+<div class="row">
+<div class="medium-6 columns">
+<ul class="menu">
+<li><a href="#">Legal</a></li>
+<li><a href="#">Partner</a></li>
+<li><a href="#">Explore</a></li>
+</ul>
+</div>
+<div class="medium-6 columns">
+<ul class="menu float-right">
+<li class="menu-text">Copyright</li>
+</ul>
+</div>
+</div>
+</footer>
+{% endblock %}

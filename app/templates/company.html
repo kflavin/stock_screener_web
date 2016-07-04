@@ -1,0 +1,21 @@
+{% extends "main.html" %}
+{% import "_macros.html" as macros %}
+{% block content %}
+ 
+<br>
+<div class="row">
+<div>
+<h1>Companies</h1>
+<p>Retrieved <b>{{ count }}</b> listings.</p>
+
+{{ macros.pagination_widget(pagination, '.company', order_by=order_by, direction=direction) }}
+
+  {{ macros.generate_sorted_table(request.path, order_bys, order_by, direction, companies) }}
+
+{{ macros.pagination_widget(pagination, '.company') }}
+
+
+</div>
+</div>
+{% include '_footer.html' %}
+{% endblock %}

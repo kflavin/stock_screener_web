@@ -59,9 +59,10 @@ docs/_build/
 target/
 
 
-# vim
+# editors
 *.swo
 *.swp
+.idea
 
 # zip
 *.zip
@@ -71,3 +72,13 @@ alembic.ini
 
 # Project specific
 config.py
+
+
+# misc
+environment
+notes
+*.old
+*.backup
+todo
+unittest
+
