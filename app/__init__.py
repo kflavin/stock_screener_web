@@ -42,7 +42,7 @@ def create_app(config_name):
     app.register_blueprint(main_blueprint)
 
     # Add custom functions to Jinja templates
-    #app.jinja_env.globals.update(convert_to_cash=convert_to_cash)
+    app.jinja_env.globals.update(convert_to_cash=convert_to_cash)
     #app.jinja_env.globals.update(url_for_other_page=url_for_other_page)
     #app.jinja_env.globals['url_for_other_page'] = url_for_other_page
 
