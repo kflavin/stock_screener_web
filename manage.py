@@ -71,6 +71,13 @@ def create_admin():
     db.session.add(User(email="root", password="password"))
     db.session.commit()
 
+@manager.command
+def make_data():
+    """
+    Generate some fake data
+    """
+    Company.generate_fake(3000)
+    Indicators.generate_fake(12)
 
 if __name__ == '__main__':
     manager.run()

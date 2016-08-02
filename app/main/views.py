@@ -4,10 +4,13 @@ from flask import Flask, render_template, redirect, \
 from flask.ext.security import login_required
 from flask_login import logout_user
 #from app import app, db
-from app import session, Indicators, Company, desc, asc
+#from app import session, Indicators, Company, desc, asc
+#from app import desc, asc
+from sqlalchemy import create_engine, desc, asc
 from app.main.pages import Pagination
 from . import main
 from .. import db
+from ..models import Indicators, Company
 
 from datetime import datetime
 
@@ -27,12 +30,12 @@ def home():
     """
     Welcome screen
     """
-    c = session.query(Company).filter_by(symbol="AAPL").all()[0]
+    c = db.session.query(Company).filter_by(symbol="AAPL").all()[0]
     context = {'symbol': c.symbol}
     return render_template('index.html', company=context)
 
 PER_PAGE = 50
-def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=15.0, pm=10.0, om=10.0, tde=100.0):
+def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=0.15, pm=10.0, om=10.0, tde=100.0):
     """
     """
     # Set the sort field
@@ -51,18 +54,25 @@ def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=15.0,
     if not date:
         # Look for the second to last date we had values...
         #date = session.query(Indicators).order_by(desc('date')).limit(1).all()[0].date
-        date = session.query(Indicators.date).order_by(desc(Indicators.date)).distinct().limit(2).all()[-1].date
+        date = db.session.query(Indicators.date).order_by(desc(Indicators.date)).distinct().limit(2).all()[-1].date
 
     # We need the count ahead of time to figure out the pagination.
-    count = session.query(Indicators).\
-            filter(Indicators.buy == True).\
+    count = db.session.query(Indicators).\
             filter(Indicators.date == date.strftime("%Y-%m-%d")).\
             filter(Indicators.roe > roe).\
-            filter(Indicators.pm > pm).\
-            filter(Indicators.tde < tde).\
             count()
+    #count = db.session.query(Indicators).\
+    #        filter(Indicators.buy == True).\
+    #        filter(Indicators.date == date.strftime("%Y-%m-%d")).\
+    #        filter(Indicators.roe > roe).\
+    #        filter(Indicators.pm > pm).\
+    #        filter(Indicators.tde < tde).\
+    #        count()
 
-    pages = ceil(count / float(PER_PAGE))
+    if count == 0:
+        pages = 1
+    else:
+        pages = ceil(count / float(PER_PAGE))
 
     if page > pages:
         page = pages
@@ -74,24 +84,38 @@ def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=15.0,
 
     # sorting on a symbol requires a join
     if sort_field == "symbol":
-        listings = session.query(Indicators).\
+        #listings = db.session.query(Indicators).\
+        #        join(Company, Company.id == Indicators.company_id).\
+        #        filter(Indicators.buy == True).\
+        #        filter(Indicators.date == date.strftime("%Y-%m-%d")).\
+        #        filter(Indicators.roe > roe).\
+        #        filter(Indicators.pm > pm).\
+        #        filter(Indicators.tde < tde).\
+        #        order_by(sorter).\
+        #        slice(start, last).\
+        #        all()
+        listings = db.session.query(Indicators).\
                 join(Company, Company.id == Indicators.company_id).\
-                filter(Indicators.buy == True).\
                 filter(Indicators.date == date.strftime("%Y-%m-%d")).\
                 filter(Indicators.roe > roe).\
-                filter(Indicators.pm > pm).\
-                filter(Indicators.tde < tde).\
                 order_by(sorter).\
                 slice(start, last).\
                 all()
     else:
-        listings = session.query(Indicators).\
-                filter(Indicators.buy == True).\
+        #listings = db.session.query(Indicators).\
+        #        filter(Indicators.buy == True).\
+        #        filter(Indicators.date == \
+        #        date.strftime("%Y-%m-%d")).\
+        #        filter(Indicators.roe > roe).\
+        #        filter(Indicators.pm > pm).\
+        #        filter(Indicators.tde < tde).\
+        #        order_by(sorter).\
+        #        slice(start, last).\
+        #        all()
+        listings = db.session.query(Indicators).\
                 filter(Indicators.date == \
                 date.strftime("%Y-%m-%d")).\
                 filter(Indicators.roe > roe).\
-                filter(Indicators.pm > pm).\
-                filter(Indicators.tde < tde).\
                 order_by(sorter).\
                 slice(start, last).\
                 all()

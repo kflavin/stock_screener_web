@@ -74,7 +74,7 @@ class Indicators(db.Model):
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 
     @staticmethod
-    def generate_fake(count=100):
+    def generate_fake(count=10):
         import forgery_py
         from random import random, seed
         from sqlalchemy.exc import IntegrityError
@@ -82,16 +82,19 @@ class Indicators(db.Model):
 
         seed()
         companies = Company.query.all()
-        for company in companies:
-            i = Indicators(date=datetime.now(),
-                           roe = "{0:.2f}".format(random()*0.5),
-                           company_id = company.id
-                           )
-            db.session.add(i)
-            try:
-                db.session.commit()
-            except IntegrityError:
-                db.session.rollback()
+        for c in range(1, count):
+            date = forgery_py.date.date(True)
+
+            for company in companies:
+                i = Indicators(date=date,
+                               roe = "{0:.2f}".format(random()*0.5),
+                               company_id = company.id
+                               )
+                db.session.add(i)
+                try:
+                    db.session.commit()
+                except IntegrityError:
+                    db.session.rollback()
 
     def __repr__(self):
         return "<Symbol: {symbol}, Date: {date}>".format(symbol=self.company.symbol, date=self.date)
