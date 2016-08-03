@@ -77,7 +77,7 @@ def make_data():
     Generate some fake data
     """
     Company.generate_fake(3000)
-    Indicators.generate_fake(12)
+    Indicators.generate_fake(500)
 
 if __name__ == '__main__':
     manager.run()

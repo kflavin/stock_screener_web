@@ -122,7 +122,60 @@ def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=0.15,
 
     return listings, count
 
-#@app.route('/listings')
+@main.route('/company/', defaults={'page': 1})
+@main.route('/company/<int:page>')
+@login_required
+def get_company(page):
+    """
+    List of all companies we're tracking.
+    """
+    sort = request.args.get('sort') if request.args.get('sort') else "roe"
+    reverse = True if request.args.get('reverse') == "True" else False
+    flip = False if reverse else True
+
+    companies = Company.query.all()
+    count = len(companies)
+    pagination = Pagination(page, PER_PAGE, count)
+
+    return render_template('company.html',
+                           pagination=pagination,
+                           companies = companies,
+                           count=count,
+                           sort=sort,
+                           reverse=reverse,
+                           flip=flip
+                           )
+
+
+@main.route('/indicator/<string:symbol>/', defaults={'page': 1})
+@main.route('/indicator/<string:symbol>/<int:page>')
+@login_required
+def get_indicator(symbol, page):
+    sort = request.args.get('sort') if request.args.get('sort') else "roe"
+    reverse = True if request.args.get('reverse') == "True" else False
+    flip = False if reverse else True
+
+    c = Company.query.filter_by(symbol=symbol).first()
+    indicators = c.indicators.all()
+    count = len(indicators)
+
+
+    pagination = Pagination(page, PER_PAGE, count)
+
+    return render_template('indicator.html',
+                           pagination=pagination,
+                           indicators = indicators,
+                           count=count,
+                           sort=sort,
+                           reverse=reverse,
+                           flip=flip
+                           )
+
+    
+
+
+
+
 @main.route('/listings/', defaults={'page': 1})
 @main.route('/listings/<int:page>')
 @login_required
@@ -130,7 +183,6 @@ def listings(page):
     """
     Show most recent listings.
     """
-    # Get most recent date
 
     sort = request.args.get('sort') if request.args.get('sort') else "roe"
     reverse = True if request.args.get('reverse') == "True" else False
@@ -139,7 +191,6 @@ def listings(page):
     listings, count = get_listings(page, sort, reverse)
 
     pagination = Pagination(page, PER_PAGE, count)
-    #pagination = Pagination(1, 20, 100)
     return render_template('listings.html', 
                            pagination=pagination,
                            listings=listings,

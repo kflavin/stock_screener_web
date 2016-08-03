@@ -4,6 +4,7 @@
 <ul class="nav nav-pills" role="tablist">
 <li role="presentation" {% if request.path == "/" %}class="active"{% endif %}><a href="/">Home</span></a></li>
 <li role="presentation" {% if request.path.startswith("/listings") %}class="active"{% endif %}><a href="/listings">Listings</span></a></li>
+<li role="presentation" {% if request.path.startswith("/company") %}class="active"{% endif %}><a href="/company">Companies</span></a></li>
 <li role="presentation"><a href="#">Messages <span class="badge">3</span></a></li>
 </ul>
 </div>

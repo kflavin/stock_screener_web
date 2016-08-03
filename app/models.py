@@ -83,7 +83,7 @@ class Indicators(db.Model):
         seed()
         companies = Company.query.all()
         for c in range(1, count):
-            date = forgery_py.date.date(True)
+            date = forgery_py.date.date(True, 0, 1500)
 
             for company in companies:
                 i = Indicators(date=date,
