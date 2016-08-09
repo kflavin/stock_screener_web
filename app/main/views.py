@@ -1,6 +1,6 @@
 from math import ceil
 from flask import Flask, render_template, redirect, \
-       send_from_directory, request
+       send_from_directory, request, current_app
 from flask.ext.security import login_required
 from flask_login import logout_user
 #from app import app, db
@@ -22,6 +22,7 @@ from datetime import datetime
 #    if db.session.query(User).filter_by(email='admin').count() == 0:
 #        user_datastore.create_user(email='admin', password='password', confirmed_at=datetime.now())
 #    db.session.commit()
+
 
 # Views
 @main.route('/')
@@ -125,25 +126,35 @@ def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=0.15,
 @main.route('/company/', defaults={'page': 1})
 @main.route('/company/<int:page>')
 @login_required
-def get_company(page):
+def company(page):
     """
     List of all companies we're tracking.
     """
-    sort = request.args.get('sort') if request.args.get('sort') else "roe"
-    reverse = True if request.args.get('reverse') == "True" else False
-    flip = False if reverse else True
+    order_bys = ['symbol', 'name']
 
-    companies = Company.query.all()
-    count = len(companies)
-    pagination = Pagination(page, PER_PAGE, count)
+    if request.args.get("direction") == "False":
+        direction = False
+    else:
+        direction = True
 
-    return render_template('company.html',
+    if request.args.get('order_by') in order_bys:
+        order_by = request.args.get('order_by')
+    else:
+        order_by = "symbol"
+
+    which_way = "asc" if direction == True else "desc"
+    order = getattr(getattr(Company, order_by), which_way)()
+
+    #pagination = Company.query.order_by(Company.symbol.desc()).paginate(page, current_app.config['COMPANIES_PER_PAGE'], error_out=False)
+    pagination = Company.query.order_by(order).paginate(page, current_app.config['COMPANIES_PER_PAGE'], error_out=False)
+    companies = pagination.items
+
+    return render_template('company2.html',
                            pagination=pagination,
                            companies = companies,
-                           count=count,
-                           sort=sort,
-                           reverse=reverse,
-                           flip=flip
+                           order_by = order_by,
+                           direction = direction,
+                           order_bys = order_bys
                            )
 
 

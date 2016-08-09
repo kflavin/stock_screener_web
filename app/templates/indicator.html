@@ -1,0 +1,70 @@
+{% extends "main.html" %}
+{% block content %}
+ 
+<br>
+<div class="row">
+<div>
+<h1>Indicators</h1>
+<p>Retrieved <b>{{ count }}</b> listings.</p>
+{% macro render_pagination(pagination) %}
+  <div>
+  {% if pagination.has_prev %}
+    <a href="{{ url_for_other_page(pagination.page - 1)
+        }}?sort={{sort}}&reverse={{reverse}}">&laquo; Prev</a>
+  {% endif %}
+  {%- for page in pagination.iter_pages() %}
+    {% if page %}
+      {% if page != pagination.page %}
+      <a href="{{ url_for_other_page(page) }}?sort={{sort}}&reverse={{reverse}}">{{ page }}</a>
+      {% else %}
+        <strong>{{ page }}</strong>
+      {% endif %}
+    {% else %}
+      <span class=ellipsis>…</span>
+    {% endif %}
+  {%- endfor %}
+  {% if pagination.has_next %}
+    <a href="{{ url_for_other_page(pagination.page + 1)
+        }}?sort={{sort}}&reverse={{reverse}}">Next &raquo;</a>
+  {% endif %}
+  </div>
+{% endmacro %}
+{{ render_pagination(pagination) }}
+<table class="table">
+<thead>
+    <tr>
+        <th><a href="{{ request.path }}?sort=date&reverse={% if sort == "date" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">Date</a></th>
+        <th><a href="{{ request.path }}?sort=roe&reverse={% if sort == "roe" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">ROE</a></th>
+    </tr>
+</thead>
+<tbody>
+{% for indicator in indicators %}
+<tr>
+    <td>{{ indicator.date }}</td>
+    <td>{{ indicator.roe }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+
+
+</div>
+</div>
+<footer>
+<div class="row">
+<div class="medium-6 columns">
+<ul class="menu">
+<li><a href="#">Legal</a></li>
+<li><a href="#">Partner</a></li>
+<li><a href="#">Explore</a></li>
+</ul>
+</div>
+<div class="medium-6 columns">
+<ul class="menu float-right">
+<li class="menu-text">Copyright</li>
+</ul>
+</div>
+</div>
+</footer>
+{% endblock %}
