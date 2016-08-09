@@ -15,7 +15,7 @@
 <thead>
     <tr>
       {% for obs in order_bys %}
-      <th><a href="{{ request.path }}?order_by={{obs}}&direction={% if order_by == obs %}{{ not direction }}{% else %}{{ True }}{% endif %}">{{obs}}</a></th>
+      <th><a href="{{ request.path }}?order_by={{obs}}&direction={% if order_by == obs %}{{ not direction }}{% else %}{{ True }}{% endif %}">{{obs|capitalize}}</a></th>
       {% endfor %}
     </tr>
 </thead>
