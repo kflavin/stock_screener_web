@@ -10,10 +10,7 @@
 
 {{ macros.pagination_widget(pagination, '.company', order_by=order_by, direction=direction) }}
 
-
-<table class="table">
   {{ macros.generate_sorted_table(request.path, order_bys, order_by, direction, companies) }}
-</table>
 
 {{ macros.pagination_widget(pagination, '.company') }}
 
