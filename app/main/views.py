@@ -149,7 +149,7 @@ def company(page):
     pagination = Company.query.order_by(order).paginate(page, current_app.config['COMPANIES_PER_PAGE'], error_out=False)
     companies = pagination.items
 
-    return render_template('company2.html',
+    return render_template('company.html',
                            pagination=pagination,
                            companies = companies,
                            order_by = order_by,

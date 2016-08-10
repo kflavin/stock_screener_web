@@ -27,3 +27,24 @@
     </li>
 </ul>
 {% endmacro %}
+
+{% macro generate_sorted_table(path, order_bys, order_by, direction, objs) %}
+<table class="table">
+<thead>
+    <tr>
+      {% for obs in order_bys %}
+      <th><a href="{{ path }}?order_by={{obs}}&direction={% if order_by == obs %}{{ not direction }}{% else %}{{ True }}{% endif %}">{{obs|capitalize}}</a></th>
+      {% endfor %}
+    </tr>
+</thead>
+<tbody>
+{% for obj in objs %}
+<tr>
+    {% for obs in order_bys %}
+      <td>{{ obj[obs] }}</td>
+    {% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endmacro %}
