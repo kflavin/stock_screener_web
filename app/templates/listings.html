@@ -1,4 +1,5 @@
 {% extends "main.html" %}
+{% import "_macros.html" as macros %}
 {% block content %}
  
 <br>
@@ -6,57 +7,12 @@
 <div>
 <h1>Current Listings</h1>
 <p>Retrieved <b>{{ count }}</b> listings.</p>
-{% macro render_pagination(pagination) %}
-  <div>
-  {% if pagination.has_prev %}
-    <a href="{{ url_for_other_page(pagination.page - 1)
-        }}?sort={{sort}}&reverse={{reverse}}">&laquo; Prev</a>
-  {% endif %}
-  {%- for page in pagination.iter_pages() %}
-    {% if page %}
-      {% if page != pagination.page %}
-      <a href="{{ url_for_other_page(page) }}?sort={{sort}}&reverse={{reverse}}">{{ page }}</a>
-      {% else %}
-        <strong>{{ page }}</strong>
-      {% endif %}
-    {% else %}
-      <span class=ellipsis>…</span>
-    {% endif %}
-  {%- endfor %}
-  {% if pagination.has_next %}
-    <a href="{{ url_for_other_page(pagination.page + 1)
-        }}?sort={{sort}}&reverse={{reverse}}">Next &raquo;</a>
-  {% endif %}
-  </div>
-{% endmacro %}
-{{ render_pagination(pagination) }}
-<table class="table">
-<thead>
-    <tr>
-        <th><a href="{{ request.path }}?sort=symbol&reverse={% if sort == "symbol" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">Symbol</a></th>
-        <th><a href="{{ request.path }}?sort=roe&reverse={% if sort == "roe" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">ROE (%)</a></th>
-        <th><a href="{{ request.path }}?sort=fcf&reverse={% if sort == "fcf" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">Free Cash</a></th>
-        <th><a href="{{ request.path }}?sort=pm&reverse={% if sort == "pm" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">Profit Margin (%)</a></th>
-        <th><a href="{{ request.path }}?sort=om&reverse={% if sort == "om" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">Operating Margin (%)</a></th>
-        <th><a href="{{ request.path }}?sort=peg&reverse={% if sort == "peg" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">PEG (%)</a></th>
-        <th><a href="{{ request.path }}?sort=tde&reverse={% if sort == "tde" %}{{ flip }}{% else %}{{ reverse }}{% endif %}">Total Debt/Equity</a></th>
-    </tr>
-</thead>
-<tbody>
-{% for listing in listings %}
-<tr>
-    <td>{{ listing.company.symbol }}</td>
-    <td>{% if listing.roe %}{{ '%.2f' % listing.roe }}{% else %}-{% endif  %}</td>
-    <td>{% if listing.fcf %}{{ convert_to_cash(listing.fcf) }}{% else %}-{% endif %}</td>
-    <td>{% if listing.pm %}{{ '%.2f' % listing.pm }}{% else %}-{% endif  %}</td>
-    <td>{% if listing.om %}{{ '%.2f' % listing.om }}{% else %}-{% endif  %}</td>
-    <td>{% if listing.peg %}{{ '%.2f' % listing.peg }}{% else %}-{% endif  %}</td>
-    <td>{% if listing.tde %}{{ '%.2f' % listing.tde }}{% else %}-{% endif  %}</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
 
+{{ macros.pagination_widget(pagination, '.listings', order_by=order_by, direction=direction) }}
+
+  {{ macros.generate_sorted_table(request.path, order_bys, order_by, direction, listings) }}
+
+{{ macros.pagination_widget(pagination, '.listings') }}
 
 
 </div>

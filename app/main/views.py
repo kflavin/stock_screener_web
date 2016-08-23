@@ -31,7 +31,7 @@ def home():
     """
     Welcome screen
     """
-    c = db.session.query(Company).filter_by(symbol="AAPL").all()[0]
+    c = db.session.query(Company).first()
     context = {'symbol': c.symbol}
     return render_template('index.html', company=context)
 
@@ -192,23 +192,59 @@ def get_indicator(symbol, page):
 @login_required
 def listings(page):
     """
-    Show most recent listings.
+    List of all companies we're tracking.
     """
+    #order_bys = ['company.symbol', 'roe', 'fcf', 'pm', 'om', 'peg', 'tde']
+    order_bys = ['Company.symbol', 'roe']
+    order_bys_no_fk = [ i.split(".")[1] if i.find(".") != -1 else i for i in order_bys ]
 
-    sort = request.args.get('sort') if request.args.get('sort') else "roe"
-    reverse = True if request.args.get('reverse') == "True" else False
-    flip = False if reverse else True
+    if request.args.get("direction") == "False":
+        direction = False
+    else:
+        direction = True
 
-    listings, count = get_listings(page, sort, reverse)
+    if request.args.get('order_by') in order_bys:
+        order_by = request.args.get('order_by')
+    else:
+        #order_by = "company.symbol"
+        order_by = "roe"
 
-    pagination = Pagination(page, PER_PAGE, count)
-    return render_template('listings.html', 
+    which_way = "asc" if direction == True else "desc"
+
+    entities = []
+    for order_by in order_bys:
+        if order_by.find(".") != -1:
+            entities.append(eval(order_by))
+        else:
+            entities.append(eval("Indicators."+order_by))
+
+
+    order = getattr(getattr(Indicators, order_by), which_way)()
+
+    # get the most recent collection date
+    date = db.session.query(Indicators.date).order_by(order).distinct().limit(2).all()[-1].date
+    #date = db.session.query(Indicators.date).order_by(desc(Indicators.date)).distinct().limit(2).all()[-1].date
+    #db.session.query(Indicators).join(Company).filter(Indicators.date == date).order_by(Company.symbol).all()
+
+    #pagination = Indicators.query.order_by(order).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
+    #pagination = db.session.query(Indicators).join(Company).filter(Indicators.date == date).order_by(Company.symbol).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
+
+    print order_bys
+    print order_bys_no_fk
+    print entities
+
+
+
+    pagination = Indicators.query.join(Company).filter(Indicators.date == date).order_by(Company.symbol).with_entities(*entities).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
+    listings = pagination.items
+
+    return render_template('listings.html',
                            pagination=pagination,
-                           listings=listings,
-                           count=count,
-                           sort=sort,
-                           reverse=reverse,
-                           flip=flip)
+                           listings = listings,
+                           order_by = order_by,
+                           direction = direction,
+                           order_bys = order_bys_no_fk
+                           )
 
 @main.route('/logout')
 @login_required
