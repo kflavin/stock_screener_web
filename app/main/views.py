@@ -193,17 +193,32 @@ def get_indicator(symbol, page):
 def listings(page):
     """
     List of all companies we're tracking.
+
+    order_bys: fields to order by.  assumes Indicator model, unless prefixed with the model name
+    order_by: attribute value passed from client (no model)
+    order_bys_no_fk: order_bys with no model prefixed.  this is passed to the template.
     """
     #order_bys = ['company.symbol', 'roe', 'fcf', 'pm', 'om', 'peg', 'tde']
     order_bys = ['Company.symbol', 'roe']
     order_bys_no_fk = [ i.split(".")[1] if i.find(".") != -1 else i for i in order_bys ]
 
+    # configure models (for determing column model) and entities (for retrieving columns)
+    entities = []
+    models = []
+    for o in order_bys:
+        if o.find(".") != -1:
+            entities.append(eval(o))
+            models.append(o.split(".")[0])
+        else:
+            entities.append(eval("Indicators."+o))
+
+    # Get values from client
     if request.args.get("direction") == "False":
         direction = False
     else:
         direction = True
 
-    if request.args.get('order_by') in order_bys:
+    if request.args.get('order_by') in order_bys_no_fk:
         order_by = request.args.get('order_by')
     else:
         #order_by = "company.symbol"
@@ -211,15 +226,13 @@ def listings(page):
 
     which_way = "asc" if direction == True else "desc"
 
-    entities = []
-    for order_by in order_bys:
-        if order_by.find(".") != -1:
-            entities.append(eval(order_by))
+    # Set the order based on the order_by that has been passed in.
+    for model in models:
+        if model+"."+order_by in order_bys:
+            order = getattr(getattr(eval(model), order_by), which_way)()
         else:
-            entities.append(eval("Indicators."+order_by))
+            order = getattr(getattr(Indicators, order_by), which_way)()
 
-
-    order = getattr(getattr(Indicators, order_by), which_way)()
 
     # get the most recent collection date
     date = db.session.query(Indicators.date).order_by(order).distinct().limit(2).all()[-1].date
@@ -229,13 +242,11 @@ def listings(page):
     #pagination = Indicators.query.order_by(order).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
     #pagination = db.session.query(Indicators).join(Company).filter(Indicators.date == date).order_by(Company.symbol).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
 
-    print order_bys
-    print order_bys_no_fk
-    print entities
+    print "Ordering by", order
+    print "order_by:", order_by
+    print "entities: ", entities
 
-
-
-    pagination = Indicators.query.join(Company).filter(Indicators.date == date).order_by(Company.symbol).with_entities(*entities).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
+    pagination = Indicators.query.join(Company).filter(Indicators.date == date).order_by(order).with_entities(*entities).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
     listings = pagination.items
 
     return render_template('listings.html',

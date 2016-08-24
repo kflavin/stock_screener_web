@@ -64,7 +64,7 @@ class Company(db.Model):
                 db.session.rollback()
 
     def __repr__(self):
-        return "<Symbol: {symbol}, Name: {company}>".format(symbol=self.symbol, company=self.name)
+        return "<{cls}|Symbol: {symbol}, Name: {company}>".format(cls=self.__class__, symbol=self.symbol, company=self.name)
 
 
 class Indicators(db.Model):
@@ -97,5 +97,5 @@ class Indicators(db.Model):
                     db.session.rollback()
 
     def __repr__(self):
-        return "<Symbol: {symbol}, Date: {date}>".format(symbol=self.company.symbol, date=self.date)
+        return "<{cls}|Symbol: {symbol}, Date: {date}>".format(cls=self.__class__, symbol=self.company.symbol, date=self.date)
 
