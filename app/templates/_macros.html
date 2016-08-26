@@ -32,8 +32,8 @@
 <table class="table">
 <thead>
     <tr>
-      {% for obs in order_bys %}
-      <th><a href="{{ path }}?order_by={{obs}}&direction={% if order_by == obs %}{{ not direction }}{% else %}{{ True }}{% endif %}">{{obs|capitalize}}</a></th>
+      {% for k,v in order_bys.iteritems() %}
+      <th><a href="{{ path }}?order_by={{k}}&direction={% if order_by == k %}{{ not direction }}{% else %}{{ True }}{% endif %}">{{v|capitalize}}</a></th>
       {% endfor %}
     </tr>
 </thead>

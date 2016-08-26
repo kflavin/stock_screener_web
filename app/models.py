@@ -75,6 +75,14 @@ class Indicators(db.Model):
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 
     @staticmethod
+    def get_attributes():
+        attributes = {'Company.symbol': "Ticker",
+                      'roe': "ROE (%)",
+                      'fcf': "Free Cash Flow",
+                      }
+        return attributes
+
+    @staticmethod
     def generate_fake(count=10):
         import forgery_py
         from random import random, seed

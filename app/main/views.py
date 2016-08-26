@@ -198,9 +198,18 @@ def listings(page):
     order_by: attribute value passed from client (no model)
     order_bys_no_fk: order_bys with no model prefixed.  this is passed to the template.
     """
-    #order_bys = ['company.symbol', 'roe', 'fcf', 'pm', 'om', 'peg', 'tde']
-    order_bys = ['Company.symbol', 'roe', 'fcf']
-    order_bys_no_fk = [ i.split(".")[1] if i.find(".") != -1 else i for i in order_bys ]
+    #order_bys = ['Company.symbol', 'roe', 'fcf']
+    attributes = Indicators.get_attributes()
+    order_bys = attributes.keys()
+    #order_bys_no_fk = { k.split(".")[1]: v if i.find(".") != -1 else {k: v} for k,v in attributes.itemitems() }
+    order_bys_no_fk = {}
+    for k,v in attributes.iteritems():
+        if k.find(".") == -1:
+            order_bys_no_fk[k] = v
+        else:
+            order_bys_no_fk[k.split(".")[1]] = v
+
+    print "order_bys_no_fk", order_bys_no_fk
 
     # configure models (for determing column model) and entities (for retrieving columns)
     entities = []
@@ -241,10 +250,6 @@ def listings(page):
 
     #pagination = Indicators.query.order_by(order).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
     #pagination = db.session.query(Indicators).join(Company).filter(Indicators.date == date).order_by(Company.symbol).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
-
-    print "Ordering by", order
-    print "order_by:", order_by
-    print "entities: ", entities
 
     pagination = Indicators.query.join(Company).filter(Indicators.date == date).order_by(order).with_entities(*entities).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
     listings = pagination.items
