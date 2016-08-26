@@ -199,7 +199,7 @@ def listings(page):
     order_bys_no_fk: order_bys with no model prefixed.  this is passed to the template.
     """
     #order_bys = ['company.symbol', 'roe', 'fcf', 'pm', 'om', 'peg', 'tde']
-    order_bys = ['Company.symbol', 'roe']
+    order_bys = ['Company.symbol', 'roe', 'fcf']
     order_bys_no_fk = [ i.split(".")[1] if i.find(".") != -1 else i for i in order_bys ]
 
     # configure models (for determing column model) and entities (for retrieving columns)

@@ -71,6 +71,7 @@ class Indicators(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date)
     roe = db.Column(db.Float)
+    fcf = db.Column(db.Float)
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
 
     @staticmethod
@@ -88,6 +89,7 @@ class Indicators(db.Model):
             for company in companies:
                 i = Indicators(date=date,
                                roe = "{0:.2f}".format(random()*0.5),
+                               fcf = "{0:.2f}".format(random()*0.5),
                                company_id = company.id
                                )
                 db.session.add(i)
