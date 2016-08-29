@@ -32,6 +32,7 @@ def home():
     Welcome screen
     """
     c = db.session.query(Company).first()
+    #date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date
     context = {'symbol': c.symbol}
     return render_template('index.html', company=context)
 
@@ -130,7 +131,7 @@ def company(page):
     """
     List of all companies we're tracking.
     """
-    order_bys = ['symbol', 'name']
+    #order_bys = ['symbol', 'name']
     attributes = Company.get_attributes()
     order_bys = attributes.keys()
     order_bys_no_fk = {}
@@ -252,7 +253,8 @@ def listings(page):
 
 
     # get the most recent collection date
-    date = db.session.query(Indicators.date).order_by(order).distinct().limit(2).all()[-1].date
+    date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date
+    #date = db.session.query(Indicators.date).order_by(order).distinct().limit(2).all()[-1].date
     #date = db.session.query(Indicators.date).order_by(desc(Indicators.date)).distinct().limit(2).all()[-1].date
     #db.session.query(Indicators).join(Company).filter(Indicators.date == date).order_by(Company.symbol).all()
 
@@ -267,8 +269,19 @@ def listings(page):
                            listings = listings,
                            order_by = order_by,
                            direction = direction,
-                           order_bys = order_bys_no_fk
+                           order_bys = order_bys_no_fk,
+                           date = date
                            )
+
+
+@main.app_errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+@main.app_errorhandler(500)
+def page_not_found(e):
+    return render_template('500.html'), 500
+
 
 @main.route('/logout')
 @login_required

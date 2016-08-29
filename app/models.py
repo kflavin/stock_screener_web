@@ -83,7 +83,8 @@ class Indicators(db.Model):
 
     @staticmethod
     def get_attributes():
-        attributes = {'Company.symbol': "Ticker",
+        attributes = {
+                      'Company.symbol': "Ticker",
                       'roe': "ROE (%)",
                       'fcf': "Free Cash Flow",
                       }
