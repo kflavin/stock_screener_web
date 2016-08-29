@@ -131,6 +131,14 @@ def company(page):
     List of all companies we're tracking.
     """
     order_bys = ['symbol', 'name']
+    attributes = Company.get_attributes()
+    order_bys = attributes.keys()
+    order_bys_no_fk = {}
+    for k,v in attributes.iteritems():
+        if k.find(".") == -1:
+            order_bys_no_fk[k] = v
+        else:
+            order_bys_no_fk[k.split(".")[1]] = v
 
     if request.args.get("direction") == "False":
         direction = False
@@ -154,7 +162,7 @@ def company(page):
                            companies = companies,
                            order_by = order_by,
                            direction = direction,
-                           order_bys = order_bys
+                           order_bys = order_bys_no_fk
                            )
 
 

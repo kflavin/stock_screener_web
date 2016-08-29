@@ -47,6 +47,13 @@ class Company(db.Model):
             symbol += choice(ascii_uppercase)
 
         return symbol
+
+    @staticmethod
+    def get_attributes():
+        attributes = {'name': "Name",
+                      'symbol': "Ticket"
+                      }
+        return attributes
             
 
     @staticmethod
