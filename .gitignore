@@ -70,10 +70,6 @@ target/
 # alembic ini
 alembic.ini
 
-# Project specific
-config.py
-
-
 # misc
 environment
 notes
