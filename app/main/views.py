@@ -36,7 +36,10 @@ def home():
     context = {'symbol': c.symbol}
     return render_template('index.html', company=context)
 
+
 PER_PAGE = 50
+
+
 def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=0.15, pm=10.0, om=10.0, tde=100.0):
     """
     """
@@ -124,6 +127,7 @@ def get_listings(page, sort_field, reverse=False, buy=True, date=None, roe=0.15,
 
     return listings, count
 
+
 @main.route('/company/', defaults={'page': 1})
 @main.route('/company/<int:page>')
 @login_required
@@ -190,10 +194,6 @@ def get_indicator(symbol, page):
                            reverse=reverse,
                            flip=flip
                            )
-
-    
-
-
 
 
 @main.route('/listings/', defaults={'page': 1})
@@ -278,6 +278,7 @@ def listings(page):
 def page_not_found(e):
     return render_template('404.html'), 404
 
+
 @main.app_errorhandler(500)
 def page_not_found(e):
     return render_template('500.html'), 500
@@ -288,6 +289,7 @@ def page_not_found(e):
 def logout():
     logout_user()
     return redirect('/')
+
 
 @main.route('/static/<path:path>')
 def send_css(path):

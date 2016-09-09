@@ -10,10 +10,12 @@ roles_users = db.Table('roles_users',
         db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
         db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
 
+
 class Role(db.Model, RoleMixin):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
+
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -29,8 +31,26 @@ class User(db.Model, UserMixin):
     current_login_ip = db.Column(db.String(255))
     login_count = db.Column(db.Integer)
 
+    strategy = db.relationship('Strategy', backref='user', lazy='dynamic')
+
     def __repr__(self):
         return "<Userid: {0}, Email: {1}>".format(self.id, self.email)
+
+
+class Strategy(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), nullable=False)
+    public = db.Column(db.Boolean, default=True)
+    filter = db.relationship('Filters', backref='strategy', lazy='dynamic')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+
+class Filters(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    roe = db.Column(db.Float, default=0.15)
+    fcf = db.Column(db.Float, default=0)
+    strategy_id = db.Column(db.Integer, db.ForeignKey('strategy.id'))
+
 
 class Company(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -45,7 +65,6 @@ class Company(db.Model):
         sym_len = int(choice("34")) + 1
         for i in range(1,sym_len):
             symbol += choice(ascii_uppercase)
-
         return symbol
 
     @staticmethod
