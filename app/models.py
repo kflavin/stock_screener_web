@@ -4,6 +4,8 @@ from app import db
 from random import seed, choice
 from string import ascii_uppercase
 
+from flask.ext.security.utils import encrypt_password
+
 
 # Define models
 roles_users = db.Table('roles_users',
@@ -30,6 +32,17 @@ class User(db.Model, UserMixin):
     last_login_ip = db.Column(db.String(255))
     current_login_ip = db.Column(db.String(255))
     login_count = db.Column(db.Integer)
+
+    def set_password(self, password):
+        self.password = encrypt_password(password)
+
+    #@property
+    #def password(self):
+    #    raise AttributeError('password not a readable attribute')
+
+    #@password.setter
+    #def password(self, password):
+    #    self.password = encrypt_password(password)
 
     strategy = db.relationship('Strategy', backref='user', lazy='dynamic')
 

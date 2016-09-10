@@ -2,6 +2,7 @@
 import os
 import unittest
 import coverage
+import datetime
 
 #from stocks_web.models import User, Role
 #from stocks_web import app, db
@@ -68,7 +69,15 @@ def drop_db():
 @manager.command
 def create_admin():
     """Creates the admin user."""
-    db.session.add(User(email="root", password="password"))
+    admin = db.session.query(User).filter_by(email="root").first()
+    
+    if admin:
+        admin.active = True
+        admin.confirmed_at = datetime.datetime.utcnow()
+        db.session.add(admin)
+    else:
+        db.session.add(User(email="root", password="password", active=True, confirmed_at=datetime.datetime.utcnow()))
+
     db.session.commit()
 
 @manager.command
