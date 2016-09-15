@@ -8,6 +8,7 @@ class Config(object):
     SECURITY_CONFIRMABLE = True
     SECURITY_TRACKABLE = False
 
+
     SECURITY_REGISTERABLE = True
     SECURITY_SEND_REGISTRATION_EMAIL = True
     SECURITY_RECOVERABLE = True
@@ -17,12 +18,13 @@ class Config(object):
     SECURITY_PASSWORD_HASH = os.environ.get('SECURITY_PASSWORD_HASH')
     SECURITY_PASSWORD_SALT = os.environ.get('SECURITY_PASSWORD_SALT')
 
-    MAIL_SERVER = 'smtp.googlemail.com'
+    MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp.googlemail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USE_SSL = False
     MAIL_USERNAME = os.environ.get("MAIL_USER")
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
+    MAIL_SENDER = 'kflavin21@gmail.com'
 
     COMPANIES_PER_PAGE = 25
     INDICATORS_PER_PAGE = 25

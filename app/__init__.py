@@ -4,10 +4,12 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from config import config
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from utils import convert_to_cash
+from flask_mail import Mail
 
 # Setup Flask-Security
 security = Security()
 db = SQLAlchemy()
+mail = Mail()
 
 # Stock Database specific
 #from sqlalchemy import create_engine, desc, asc
@@ -34,6 +36,7 @@ def create_app(config_name):
 
     config[config_name].init_app(app)
     db.init_app(app)
+    mail.init_app(app)
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     security.init_app(app, user_datastore)
 
