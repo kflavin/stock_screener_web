@@ -70,6 +70,7 @@ target/
 alembic.ini
 
 # misc
+.env
 environment
 notes
 *.old
