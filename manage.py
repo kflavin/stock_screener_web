@@ -88,5 +88,11 @@ def make_data():
     Company.generate_fake(3000)
     Indicators.generate_fake(500)
 
+@manager.command
+def deploy():
+    from flask.ext.migrate import upgrade
+    upgrade()
+
+
 if __name__ == '__main__':
     manager.run()

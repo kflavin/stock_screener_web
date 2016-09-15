@@ -28,7 +28,7 @@ class Config(object):
     INDICATORS_PER_PAGE = 25
 
     @staticmethod
-    def init_app(self):
+    def init_app(app):
         pass
 
 class TestingConfig(Config):
@@ -43,7 +43,14 @@ class Production(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'data-prod.sqlite')
 
 class HerokuConfig(Production):
-    DEBUG=True
+
+    @classmethod
+    def init_app(cls, app):
+        import logging
+        from logging import StreamHandler
+        handler = StreamHandler()
+        handler.setLevel(logging.INFO)
+        app.logger.addHandler(handler)
 
 
 config = {'development': DevelopmentConfig,
