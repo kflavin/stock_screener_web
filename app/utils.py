@@ -1,6 +1,8 @@
 from math import ceil
 from flask import request, url_for
 
+from werkzeug.routing import BaseConverter
+
 def convert_to_cash(amount):
     """
     Convert dollar amounts into shorter values.
@@ -50,4 +52,9 @@ def convert_to_cash(amount):
         total *= -1
 
     return "%.2f%s" % (total, suffix,)
+
+class RegexConverter(BaseConverter):
+    def __init__(self, url_map, *args):
+        super(RegexConverter, self).__init__(url_map)
+        self.regex = args[0]
 

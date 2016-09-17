@@ -102,6 +102,14 @@ class Company(db.Model):
             except IntegrityError:
                 db.session.rollback()
 
+    def to_json(self):
+        json_company = {
+            'name': self.name,
+            'symbol': self.symbol,
+            #'indicators': url_for('api.get_indicators', )
+        }
+        return json_company
+
     def __repr__(self):
         return "<{cls}|Symbol: {symbol}, Name: {company}>".format(cls=self.__class__, symbol=self.symbol, company=self.name)
 
