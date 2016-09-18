@@ -33,3 +33,9 @@ def get_company(symbol):
 
     return jsonify(company.to_json())
 
+
+#@api.route('/company/<int:id>', methods=['POST'])
+@api.route('/company/<regex("[A-Z]{2,4}"):symbol>', methods=['POST'])
+def new_company(symbol):
+    #request.args.
+    return jsonify({})

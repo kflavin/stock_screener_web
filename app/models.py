@@ -1,10 +1,13 @@
+import json
+from flask.ext.security.utils import verify_password
 from flask.ext.security import UserMixin, RoleMixin
 from flask.ext.sqlalchemy import SQLAlchemy
-from app import db
 from random import seed, choice
 from string import ascii_uppercase
-
 from flask.ext.security.utils import encrypt_password
+
+from app import db
+from app.utils import DateToJSON
 
 
 # Define models
@@ -43,6 +46,9 @@ class User(db.Model, UserMixin):
     #@password.setter
     #def password(self, password):
     #    self.password = encrypt_password(password)
+
+    def verify_password(self, password):
+        return verify_password(password, self.password)
 
     strategy = db.relationship('Strategy', backref='user', lazy='dynamic')
 
@@ -104,6 +110,7 @@ class Company(db.Model):
 
     def to_json(self):
         json_company = {
+            'id': self.id,
             'name': self.name,
             'symbol': self.symbol,
             #'indicators': url_for('api.get_indicators', )
@@ -135,7 +142,6 @@ class Indicators(db.Model):
         import forgery_py
         from random import random, seed
         from sqlalchemy.exc import IntegrityError
-        from datetime import datetime
 
         seed()
         companies = Company.query.all()
@@ -144,8 +150,8 @@ class Indicators(db.Model):
 
             for company in companies:
                 i = Indicators(date=date,
-                               roe = "{0:.2f}".format(random()*0.5),
-                               fcf = "{0:.2f}".format(random()*0.5),
+                               roe="{0:.2f}".format(random()*0.5),
+                               fcf="{0:.2f}".format(random()*0.5),
                                company_id = company.id
                                )
                 db.session.add(i)
@@ -153,6 +159,15 @@ class Indicators(db.Model):
                     db.session.commit()
                 except IntegrityError:
                     db.session.rollback()
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'date': json.dumps(self.date, cls=DateToJSON),
+            'roe': self.roe,
+            'fcf': self.fcf,
+            'company_id': self.company_id
+        }
 
     def __repr__(self):
         return "<{cls}|Symbol: {symbol}, Date: {date}>".format(cls=self.__class__, symbol=self.company.symbol, date=self.date)

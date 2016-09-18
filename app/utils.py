@@ -1,3 +1,5 @@
+from datetime import date
+from json import JSONEncoder
 from math import ceil
 from flask import request, url_for
 
@@ -53,8 +55,15 @@ def convert_to_cash(amount):
 
     return "%.2f%s" % (total, suffix,)
 
+
 class RegexConverter(BaseConverter):
     def __init__(self, url_map, *args):
         super(RegexConverter, self).__init__(url_map)
         self.regex = args[0]
 
+
+class DateToJSON(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, date):
+            return obj.isoformat()
+        return JSONEncoder.default(self, obj)
