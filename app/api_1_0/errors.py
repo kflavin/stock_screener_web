@@ -15,3 +15,7 @@ def forbidden(message):
     response.status_code = 403
     return response
 
+def conflict(message):
+    response = jsonify({'error': "conflict", "message": message})
+    response.status_code = 409
+    return response

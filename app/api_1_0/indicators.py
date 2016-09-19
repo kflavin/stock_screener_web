@@ -1,10 +1,11 @@
 from datetime import datetime, date
-from flask import jsonify, request
+from flask import jsonify, request, abort
+from sqlalchemy import distinct
 from . import api
-from ..models import Indicators
+from ..models import Indicators, Company
 
 
-@api.route('/indicators/<int:id>')
+@api.route('/indicators/<int:id>/')
 def get_indicators(id):
     mydate = request.args.get('date', None)
 
@@ -17,9 +18,23 @@ def get_indicators(id):
         indicators = Indicators.query.filter_by(company_id=id).filter_by(date=date_obj).first()
     else:
         indicators = Indicators.query.filter_by(company_id=id).order_by(Indicators.date.desc()).first()
-    return jsonify(indicators.to_json())
+
+    if not indicators:
+        abort(404)
+
+    return jsonify({'indicators': indicators.to_json()})
 
 
-@api.route('/indicators/<int:id>', methods=['POST'])
+@api.route('/indicators/<int:id>/dates/')
+def get_indicator_dates(id):
+    company = Company.query.filter_by(id=id).first()
+    dates = company.dates_to_json()
+    if not dates:
+        abort(404)
+
+    return jsonify({'dates': dates})
+
+
+@api.route('/indicators/<int:id>/', methods=['POST'])
 def set_indicators(id):
     pass

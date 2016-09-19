@@ -108,6 +108,18 @@ class Company(db.Model):
             except IntegrityError:
                 db.session.rollback()
 
+    def dates_to_json(self):
+        """
+
+        Returns: a list object that can be converted to json
+
+        """
+        indicators = Indicators.query.join(Company).filter_by(id=self.id).all()
+        for i in indicators:
+            print i.date
+        return [indicator.date.strftime("%Y-%m-%d") for indicator in indicators]
+
+
     def to_json(self):
         json_company = {
             'id': self.id,
@@ -116,6 +128,15 @@ class Company(db.Model):
             #'indicators': url_for('api.get_indicators', )
         }
         return json_company
+
+    @staticmethod
+    def from_json(j):
+        name = j.get('name')
+        symbol = j.get('symbol')
+        if not name or not symbol:
+            raise ValueError('Did not receive required values.')
+
+        return Company(name=name, symbol=symbol)
 
     def __repr__(self):
         return "<{cls}|Symbol: {symbol}, Name: {company}>".format(cls=self.__class__, symbol=self.symbol, company=self.name)
@@ -163,7 +184,8 @@ class Indicators(db.Model):
     def to_json(self):
         return {
             'id': self.id,
-            'date': json.dumps(self.date, cls=DateToJSON),
+            #'date': json.dumps(self.date, cls=DateToJSON),
+            'date': self.date.strftime("%Y-%m-%d"),
             'roe': self.roe,
             'fcf': self.fcf,
             'company_id': self.company_id

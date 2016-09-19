@@ -1,5 +1,8 @@
+from sqlalchemy.exc import IntegrityError
 from flask import request, current_app, url_for, jsonify, abort
+from errors import conflict
 from ..models import Company
+from .. import db
 from . import api
 
 
@@ -25,7 +28,7 @@ def get_companies():
     })
 
 
-@api.route('/company/<regex("[A-Z]{2,4}"):symbol>')
+@api.route('/company/<regex("[A-Za-z]{2,4}"):symbol>')
 def get_company(symbol):
     company = Company.query.filter_by(symbol=symbol).first()
     if not company:
@@ -35,7 +38,18 @@ def get_company(symbol):
 
 
 #@api.route('/company/<int:id>', methods=['POST'])
-@api.route('/company/<regex("[A-Z]{2,4}"):symbol>', methods=['POST'])
-def new_company(symbol):
-    #request.args.
-    return jsonify({})
+#@api.route('/company/<regex("[A-Z]{2,4}"):symbol>/', methods=['POST'])
+@api.route('/company/', methods=['POST'])
+def new_company():
+    company = Company.from_json(request.json)
+    db.session.add(company)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return conflict("Value already exists.")
+    else:
+        return jsonify(company.to_json()), 201, {'Location': url_for('api.get_company',
+                                                                     symbol=company.symbol,
+                                                                     _external=True)
+                                                 }
