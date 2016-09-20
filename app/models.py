@@ -1,10 +1,12 @@
 import json
+import re
 from flask.ext.security.utils import verify_password
 from flask.ext.security import UserMixin, RoleMixin
 from flask.ext.sqlalchemy import SQLAlchemy
 from random import seed, choice
 from string import ascii_uppercase
 from flask.ext.security.utils import encrypt_password
+from flask import current_app
 
 from app import db
 from app.utils import DateToJSON
@@ -93,7 +95,6 @@ class Company(db.Model):
                       }
         return attributes
             
-
     @staticmethod
     def generate_fake(count=100):
         import forgery_py
@@ -119,7 +120,6 @@ class Company(db.Model):
             print i.date
         return [indicator.date.strftime("%Y-%m-%d") for indicator in indicators]
 
-
     def to_json(self):
         json_company = {
             'id': self.id,
@@ -131,12 +131,22 @@ class Company(db.Model):
 
     @staticmethod
     def from_json(j):
-        name = j.get('name')
-        symbol = j.get('symbol')
+        name = Company.validate_name(j.get('name'))
+        symbol = Company.validate_symbol(j.get('symbol'))
         if not name or not symbol:
-            raise ValueError('Did not receive required values.')
+            raise ValueError('Invalid name or symbol')
 
         return Company(name=name, symbol=symbol)
+
+    @staticmethod
+    def validate_symbol(symbol):
+        match = re.match(current_app.config['VALID_COMPANY_SYMBOL'], symbol)
+        return True if match else False
+
+    @staticmethod
+    def validate_name(name):
+        match = re.match(current_app.config['VALID_COMPANY_NAME'], name)
+        return True if match else False
 
     def __repr__(self):
         return "<{cls}|Symbol: {symbol}, Name: {company}>".format(cls=self.__class__, symbol=self.symbol, company=self.name)

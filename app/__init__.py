@@ -11,6 +11,7 @@ security = Security()
 db = SQLAlchemy()
 mail = Mail()
 
+
 def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
@@ -33,7 +34,6 @@ def create_app(config_name):
 
     from .api_1_0 import api as api_1_0_0_blueprint
     app.register_blueprint(api_1_0_0_blueprint, url_prefix='/api/1.0')
-
 
     return app
 

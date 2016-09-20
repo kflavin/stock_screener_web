@@ -67,3 +67,4 @@ class DateToJSON(JSONEncoder):
         if isinstance(obj, date):
             return obj.isoformat()
         return JSONEncoder.default(self, obj)
+
