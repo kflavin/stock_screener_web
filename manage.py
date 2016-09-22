@@ -1,6 +1,11 @@
 import os
-import unittest
-import coverage
+COV = None
+if os.environ.get('FLASK_COVERAGE'):
+    import coverage
+    COV = coverage.coverage(branch=True, include="app/*")
+    COV.start()
+
+
 import datetime
 
 #from stocks_web.models import User, Role
@@ -25,14 +30,30 @@ manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command("db", MigrateCommand)
 
 @manager.command
-def test():
+def test(coverage=False):
     """Runs the unit tests without coverage."""
+    if coverage and not os.environ.get('FLASK_COVERAGE'):
+        import sys
+        os.environ['FLASK_COVERAGE'] = '1'
+        os.execvp(sys.executable, [sys.executable] + sys.argv)
+    import unittest
     tests = unittest.TestLoader().discover('tests')
     result = unittest.TextTestRunner(verbosity=2).run(tests)
-    if result.wasSuccessful():
-        return 0
-    else:
-        return 1
+
+    if COV:
+        COV.stop()
+        COV.save()
+        print('Coverage summary')
+        COV.report()
+        basedir = os.path.abspath(os.path.dirname(__file__))
+        covdir = os.path.join(basedir, 'tmp/coverage')
+        COV.html_report(directory=covdir)
+        COV.erase()
+
+    #if result.wasSuccessful():
+    #    return 0
+    #else:
+    #    return 1
 
 
 @manager.command
