@@ -79,6 +79,11 @@ class Company(db.Model):
     symbol = db.Column(db.String(20), nullable=False, unique=True)
     indicators = db.relationship('Indicators', backref='company', lazy='dynamic')
 
+    # Define attributes here for lookups.
+    attributes = {'name': "Name",
+                  'symbol': "Ticker"
+                  }
+
     @staticmethod
     def generate_symbol():
         seed()
@@ -88,13 +93,21 @@ class Company(db.Model):
             symbol += choice(ascii_uppercase)
         return symbol
 
-    @staticmethod
-    def get_attributes():
-        attributes = {'name': "Name",
-                      'symbol': "Ticket"
-                      }
-        return attributes
-            
+    @classmethod
+    def get_attributes(cls):
+        return cls.attributes.keys()
+
+    @classmethod
+    def get_attributes_no_fk(cls):
+        order_bys = cls.attributes.keys()
+        order_bys_no_fk = {}
+        for k,v in cls.attributes.iteritems():
+            if k.find(".") == -1:
+                order_bys_no_fk[k] = v
+            else:
+                order_bys_no_fk[k.split(".")[1]] = v
+        return order_bys_no_fk
+
     @staticmethod
     def generate_fake(count=100):
         import forgery_py
@@ -158,15 +171,26 @@ class Indicators(db.Model):
     roe = db.Column(db.Float)
     fcf = db.Column(db.Float)
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
+    attributes = {
+        'Company.symbol': "Ticker",
+        'roe': "ROE (%)",
+        'fcf': "Free Cash Flow",
+    }
 
-    @staticmethod
-    def get_attributes():
-        attributes = {
-                      'Company.symbol': "Ticker",
-                      'roe': "ROE (%)",
-                      'fcf': "Free Cash Flow",
-                      }
-        return attributes
+    @classmethod
+    def get_attributes(cls):
+        return cls.attributes.keys()
+
+    @classmethod
+    def get_attributes_no_fk(cls):
+        order_bys = cls.attributes.keys()
+        order_bys_no_fk = {}
+        for k,v in cls.attributes.iteritems():
+            if k.find(".") == -1:
+                order_bys_no_fk[k] = v
+            else:
+                order_bys_no_fk[k.split(".")[1]] = v
+        return order_bys_no_fk
 
     @staticmethod
     def generate_fake(count=10):
@@ -203,4 +227,5 @@ class Indicators(db.Model):
 
     def __repr__(self):
         return "<{cls}|Symbol: {symbol}, Date: {date}>".format(cls=self.__class__, symbol=self.company.symbol, date=self.date)
+
 

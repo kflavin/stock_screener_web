@@ -36,5 +36,5 @@ def get_indicator_dates(id):
 
 
 @api.route('/indicators/<int:id>/', methods=['POST'])
-def set_indicators(id):
+def create_indicators(id):
     pass
