@@ -32,7 +32,7 @@ class Config(object):
     VALID_COMPANY_NAME = "^[a-zA-Z ._-]+$"
     VALID_COMPANY_SYMBOL = "^[A-Z]{0,8}$"
 
-    SSL_DIABLE = True
+    SSL_DISABLE = True
 
     @staticmethod
     def init_app(app):
@@ -55,7 +55,7 @@ class Production(Config):
 
 
 class HerokuConfig(Production):
-    SSL_DIABLE = bool(os.environ.get('SSL_DISABLE'))
+    SSL_DISABLE = bool(os.environ.get('SSL_DISABLE'))
 
     @classmethod
     def init_app(cls, app):
