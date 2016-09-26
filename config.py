@@ -9,7 +9,6 @@ class Config(object):
     SECURITY_CONFIRMABLE = True
     SECURITY_TRACKABLE = False
 
-
     SECURITY_REGISTERABLE = True
     SECURITY_SEND_REGISTRATION_EMAIL = True
     SECURITY_RECOVERABLE = True
@@ -33,6 +32,8 @@ class Config(object):
     VALID_COMPANY_NAME = "^[a-zA-Z ._-]+$"
     VALID_COMPANY_SYMBOL = "^[A-Z]{0,8}$"
 
+    SSL_DIABLE = True
+
     @staticmethod
     def init_app(app):
         pass
@@ -54,6 +55,7 @@ class Production(Config):
 
 
 class HerokuConfig(Production):
+    SSL_DIABLE = bool(os.environ.get('SSL_DISABLE'))
 
     @classmethod
     def init_app(cls, app):
@@ -62,6 +64,9 @@ class HerokuConfig(Production):
         handler = StreamHandler()
         handler.setLevel(logging.INFO)
         app.logger.addHandler(handler)
+
+        from werkzeug.contrib.fixers import ProxyFix
+        app.wsgi_app = ProxyFix(app.wsgi_app)
 
 
 config = {'development': DevelopmentConfig,

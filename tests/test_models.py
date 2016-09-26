@@ -30,8 +30,37 @@ class TestCompany(unittest.TestCase):
         self.assertTrue(Company.validate_name("Good Company"))
         self.assertFalse(Company.validate_name("Bad Company**!"))
 
-    def test_from_json(self):
+    def test_company_from_json(self):
         c = Company.from_json({'name': 'ABC Company', 'symbol': 'ABC'})
         self.assertTrue(isinstance(c, Company))
         with self.assertRaises(ValueError):
             c = Company.from_json({'name': '', 'symbol': ''})
+
+
+class TestIndicatorsBlankDB(unittest.TestCase):
+    def setUp(self):
+        self.app = create_app('testing')
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        self.app_context.pop()
+
+    def test_indicators_from_json(self):
+        # Create new company
+        symbol = "ZZZZZ"
+        name = "Fake Name"
+        d = {'symbol': symbol, "roe": 0.25, "fcf": 100.0, "name": name}
+        Indicators.from_json(d)
+        c = Company.query.filter_by(symbol=symbol)
+        self.assertIsNotNone(c)
+        # use existing company
+        d = {"roe": 0.25, "fcf": 100.0}
+        Indicators.from_json(d)
+
+
+
+

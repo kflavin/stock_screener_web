@@ -3,6 +3,7 @@ from flask import jsonify, request, abort
 from sqlalchemy import distinct
 from . import api
 from ..models import Indicators, Company
+from .. import db
 
 
 @api.route('/indicators/<int:id>/')
@@ -37,4 +38,6 @@ def get_indicator_dates(id):
 
 @api.route('/indicators/<int:id>/', methods=['POST'])
 def create_indicators(id):
-    pass
+    indicators = Indicators.from_json(request.json)
+    db.session.add(indicators)
+    db.session.commit()

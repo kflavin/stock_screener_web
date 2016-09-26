@@ -6,7 +6,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from random import seed, choice
 from string import ascii_uppercase
 from flask.ext.security.utils import encrypt_password
-from flask import current_app
+from flask import current_app, abort
 
 from app import db
 from app.utils import DateToJSON
@@ -214,6 +214,42 @@ class Indicators(db.Model):
                     db.session.commit()
                 except IntegrityError:
                     db.session.rollback()
+
+    @staticmethod
+    def from_json(json_indicators):
+        """
+
+        Args:
+            json_indicators:
+
+            If company does not exist, must provide a name and symbol to create it.
+
+        Returns:
+
+        """
+        symbol = json_indicators.get('symbol')
+
+        indicators = Indicators()
+
+        # Get company if it exists, otherwise create it
+        if not Company.query.filter_by(symbol=symbol).first():
+            name = json_indicators.get('name')
+            if not name:
+                return None
+            company = Company(symbol=symbol, name=name)
+            db.session.add(company)
+            db.session.commit()
+        else:
+            company = Company.query.filter_by(symbol=symbol).first()
+
+        # Go through each key and assign it, unless it's "name" or "symbol"
+        for key in json_indicators.keys():
+            if key.find(".") == -1 and key != 'name' and key != 'symbol':
+                setattr(indicators, key, json_indicators.get(key))
+
+        indicators.company = company
+
+        return indicators
 
     def to_json(self):
         return {

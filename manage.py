@@ -29,6 +29,7 @@ def make_shell_context():
 manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command("db", MigrateCommand)
 
+
 @manager.command
 def test(coverage=False):
     """Runs the unit tests without coverage."""
@@ -100,6 +101,7 @@ def create_admin():
 
     db.session.commit()
 
+
 @manager.command
 def make_data():
     """
@@ -107,6 +109,7 @@ def make_data():
     """
     Company.generate_fake(3000)
     Indicators.generate_fake(500)
+
 
 @manager.command
 def deploy():
