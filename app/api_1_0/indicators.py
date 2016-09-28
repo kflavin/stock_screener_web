@@ -1,6 +1,7 @@
 from datetime import datetime, date
-from flask import jsonify, request, abort
+from flask import jsonify, request, abort, url_for
 from sqlalchemy import distinct
+from .errors import bad_request, conflict
 from . import api
 from ..models import Indicators, Company
 from .. import db
@@ -36,8 +37,22 @@ def get_indicator_dates(id):
     return jsonify({'dates': dates})
 
 
-@api.route('/indicators/<int:id>/', methods=['POST'])
-def create_indicators(id):
+@api.route('/indicators/', methods=['POST'])
+def create_indicators():
     indicators = Indicators.from_json(request.json)
+
+    count = Indicators.query.filter_by(date=date.today()).join(Company).filter_by(symbol=indicators.company.symbol).count()
+    if count > 1:
+        return conflict("Already have an indicator for today for {}".format(indicators.company.symbol))
+
     db.session.add(indicators)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        return bad_request("Could not create indicator")
+    else:
+        return jsonify(indicators.to_json()), 201, {'Location': url_for('api.get_indicators', 
+                                                                        id=indicators.id, 
+                                                                        _external=True)
+                                                    }

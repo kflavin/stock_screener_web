@@ -1,4 +1,5 @@
 import json
+from datetime import date
 import re
 from flask.ext.security.utils import verify_password
 from flask.ext.security import UserMixin, RoleMixin
@@ -167,9 +168,9 @@ class Company(db.Model):
 
 class Indicators(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date)
-    roe = db.Column(db.Float)
-    fcf = db.Column(db.Float)
+    date = db.Column(db.Date, default=date.today)
+    roe = db.Column(db.Float, default=0.0)
+    fcf = db.Column(db.Float, default=0.0)
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
     attributes = {
         'Company.symbol': "Ticker",
@@ -220,11 +221,12 @@ class Indicators(db.Model):
         """
 
         Args:
-            json_indicators:
+            json_indicators: name, symbol, **attributes
 
             If company does not exist, must provide a name and symbol to create it.
 
         Returns:
+            An Indicator object
 
         """
         symbol = json_indicators.get('symbol')
