@@ -33,7 +33,11 @@ def home():
     """
     c = db.session.query(Company).first()
     #date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date
-    context = {'symbol': c.symbol}
+    if c:
+        context = {'symbol': c.symbol}
+    else:
+        context = {'symbol': "No listings"}
+
     return render_template('index.html', company=context)
 
 
@@ -236,7 +240,18 @@ def listings(page):
 
 
     # get the most recent collection date
-    date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date
+    try:
+        date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date
+    except IndexError:
+        return render_template('listings.html',
+                               pagination=None,
+                               listings = None,
+                               order_by = order_by,
+                               direction = direction,
+                               order_bys = order_bys_no_fk,
+                               date = datetime.today()
+                               )
+        
     #date = db.session.query(Indicators.date).order_by(order).distinct().limit(2).all()[-1].date
     #date = db.session.query(Indicators.date).order_by(desc(Indicators.date)).distinct().limit(2).all()[-1].date
     #db.session.query(Indicators).join(Company).filter(Indicators.date == date).order_by(Company.symbol).all()
@@ -253,7 +268,7 @@ def listings(page):
                            order_by = order_by,
                            direction = direction,
                            order_bys = order_bys_no_fk,
-                           date = date
+                           date = datetime.today()
                            )
 
 

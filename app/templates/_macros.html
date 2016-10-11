@@ -5,21 +5,23 @@
             &laquo;
         </a>
     </li>
-    {% for p in pagination.iter_pages() %}
-        {% if p %}
-            {% if p == pagination.page %}
-            <li class="active">
-                <a href="{{ url_for(endpoint, page = p, **kwargs) }}{{ fragment }}">{{ p }}</a>
-            </li>
-            {% else %}
-            <li>
-                <a href="{{ url_for(endpoint, page = p, **kwargs) }}{{ fragment }}">{{ p }}</a>
-            </li>
-            {% endif %}
-        {% else %}
-        <li class="disabled"><a href="#">&hellip;</a></li>
-        {% endif %}
-    {% endfor %}
+    {% if pagination %}
+      {% for p in pagination.iter_pages() %}
+          {% if p %}
+              {% if p == pagination.page %}
+              <li class="active">
+                  <a href="{{ url_for(endpoint, page = p, **kwargs) }}{{ fragment }}">{{ p }}</a>
+              </li>
+              {% else %}
+              <li>
+                  <a href="{{ url_for(endpoint, page = p, **kwargs) }}{{ fragment }}">{{ p }}</a>
+              </li>
+              {% endif %}
+          {% else %}
+          <li class="disabled"><a href="#">&hellip;</a></li>
+          {% endif %}
+      {% endfor %}
+    {% endif %}
     <li{% if not pagination.has_next %} class="disabled"{% endif %}>
         <a href="{% if pagination.has_next %}{{ url_for(endpoint, page=pagination.next_num, **kwargs) }}{{ fragment }}{% else %}#{% endif %}">
             &raquo;
@@ -38,13 +40,19 @@
     </tr>
 </thead>
 <tbody>
-{% for obj in objs %}
-<tr>
-    {% for obs in order_bys %}
-      <td>{{ obj[obs] }}</td>
-    {% endfor %}
-</tr>
-{% endfor %}
+{% if objs %}
+  {% for obj in objs %}
+  <tr>
+      {% for obs in order_bys %}
+        <td>{{ obj[obs] }}</td>
+      {% endfor %}
+  </tr>
+  {% endfor %}
+{% else %}
+  <tr>
+        <td>No Listings</td>
+  </tr>
+{% endif %}
 </tbody>
 </table>
 {% endmacro %}

@@ -246,7 +246,7 @@ class Indicators(db.Model):
 
         # Go through each key and assign it, unless it's "name" or "symbol"
         for key in json_indicators.keys():
-            if key.find(".") == -1 and key != 'name' and key != 'symbol':
+            if key.find(".") == -1 and key != 'name' and key != 'symbol' and key != "company_id" and key != "id":
                 setattr(indicators, key, json_indicators.get(key))
 
         indicators.company = company
