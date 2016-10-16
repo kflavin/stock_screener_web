@@ -51,6 +51,7 @@ def get_ratio_data():
         print("{} Fetching {}  :".format(time.strftime("%H:%M:%S"), symbol))
         session = dryscrape.Session()
         session.set_header('User-Agent', ua.random)
+        session.set_timeout(30)
         try:
             session.visit("http://finance.yahoo.com/quote/{}/key-statistics?p={}".format(symbol, symbol))
         except socket.error as e:
