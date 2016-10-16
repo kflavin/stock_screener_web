@@ -1,6 +1,7 @@
 import json
 from datetime import date
 import re
+import requests
 from flask.ext.security.utils import verify_password
 from flask.ext.security import UserMixin, RoleMixin
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -93,6 +94,30 @@ class Company(db.Model):
         for i in range(1,sym_len):
             symbol += choice(ascii_uppercase)
         return symbol
+
+    @staticmethod
+    def get_name_from_symbol(symbol):
+        """
+        Use EDGAR online database to find the company name.
+        """
+        if not Company.validate_symbol(symbol):
+            return None
+
+        r = requests.get("http://edgaronline.api.mashery.com/v2/companies?primarysymbols={}&appkey={}".format(symbol, current_app.config['EDGAR_APP_KEY']))
+
+        try:
+            values = r.json()['result']['rows'][0]['values']
+        except (KeyError, IndexError) as e:
+            return None
+
+        companyname = None
+        for value in values:
+            if value.get('field') == "companyname":
+                companyname = value.get('value')
+                break
+
+        return companyname
+
 
     @classmethod
     def get_attributes(cls):
@@ -231,13 +256,17 @@ class Indicators(db.Model):
         """
         symbol = json_indicators.get('symbol')
 
+        if not symbol:
+            return None
+
         indicators = Indicators()
 
         # Get company if it exists, otherwise create it
         if not Company.query.filter_by(symbol=symbol).first():
-            name = json_indicators.get('name')
+            name = json_indicators.get('name') or Company.get_name_from_symbol(symbol)
             if not name:
                 return None
+
             company = Company(symbol=symbol, name=name)
             db.session.add(company)
             db.session.commit()

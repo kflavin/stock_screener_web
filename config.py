@@ -19,18 +19,20 @@ class Config(object):
     SECURITY_PASSWORD_SALT = os.environ.get('SECURITY_PASSWORD_SALT')
 
     MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp.googlemail.com'
-    MAIL_PORT = 587
+    MAIL_PORT = os.environ.get('MAIL_PORT') or 587
     MAIL_USE_TLS = True
     MAIL_USE_SSL = False
     MAIL_USERNAME = os.environ.get("MAIL_USER")
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
-    MAIL_SENDER = 'kflavin21@gmail.com'
+    MAIL_SENDER = os.environ.get('MAIL_SENDER')
 
     COMPANIES_PER_PAGE = 25
     INDICATORS_PER_PAGE = 25
 
     VALID_COMPANY_NAME = "^[a-zA-Z ._-]+$"
     VALID_COMPANY_SYMBOL = "^[A-Z]{0,8}$"
+
+    EDGAR_APP_KEY = os.environ.get('EDGAR_APP_KEY')
 
     SSL_DISABLE = True
 

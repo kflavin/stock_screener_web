@@ -1,4 +1,6 @@
-
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import UnmappedInstanceError
+from app import db
 
 def get_ratio_data():
     import socket
@@ -56,7 +58,10 @@ def get_ratio_data():
             continue
         except webkit_server.EndOfStreamError as e:
             print("Failed to get {}, {}, breaking".format(symbol, e))
-            break
+            continue
+        except webkit_server.InvalidResponseError as e:
+            print("Failed to get {}, {}, breaking".format(symbol, e))
+            continue
 
         response = session.body()
         soup = BeautifulSoup(response, "lxml")
@@ -75,8 +80,10 @@ def get_ratio_data():
                     #print(element.text)
                     d[indicator] = element.text
 
-        print "Your JSON", d
-
+        try:
+            db.session.add(Indicators.from_json(d))
+        except (IntegrityError, UnmappedInstanceError) as e:
+            db.session.rollback()
 
         wait = randint(1, 10)
         print("Waiting {}".format(wait))

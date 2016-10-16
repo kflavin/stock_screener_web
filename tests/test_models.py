@@ -1,4 +1,5 @@
 import unittest
+from mock import Mock, patch, MagicMock
 from flask import current_app
 from app import create_app, db
 from app.models import Company, Indicators
@@ -35,6 +36,26 @@ class TestCompany(unittest.TestCase):
         self.assertTrue(isinstance(c, Company))
         with self.assertRaises(ValueError):
             c = Company.from_json({'name': '', 'symbol': ''})
+
+    def test_get_name_from_symbol(self):
+        # valid company name
+        with patch("requests.get") as my_mock:
+            m2 = MagicMock()
+            m2.json.return_value = {'result': {'rows': [{'values': [{'field': 'companyname', 'value': 'Microsoft'}]}]}}
+            my_mock.return_value = m2
+            self.assertEqual(Company.get_name_from_symbol("MSFT"), "Microsoft")
+
+        ## invalid symbol
+        with patch("requests.get") as my_mock:
+            m2 = MagicMock()
+            m2.json.return_value = {'result': {'rows': [{'values': [{'field': 'companyname', 'value': 'Microsoft'}]}]}}
+            my_mock.return_value = m2
+            self.assertEqual(Company.get_name_from_symbol("ZZZZ123"), None)
+
+        ## throw exception
+        with patch("requests.get") as my_mock:
+            my_mock.r.json.side_effect = KeyError
+            self.assertEqual(Company.get_name_from_symbol("MSFT"), None)
 
 
 class TestIndicatorsBlankDB(unittest.TestCase):
