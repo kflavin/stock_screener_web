@@ -37,7 +37,8 @@ def get_ratio_data():
     ua = UserAgent()
 
 
-    with open("10.csv", "r") as f:
+    #with open("10.csv", "r") as f:
+    with open("sp500-2.csv", "r") as f:
         data = f.read()
 
     symbols = []
@@ -49,19 +50,24 @@ def get_ratio_data():
     print("Iterate through symbols")
     for symbol in symbols:
         print("{} Fetching {}  :".format(time.strftime("%H:%M:%S"), symbol))
-        session = dryscrape.Session()
+        try:
+            session = dryscrape.Session()
+        except socket.error as e:
+            print("Failed to configure session {}".format(e))
+            continue
+
         session.set_header('User-Agent', ua.random)
         session.set_timeout(30)
         try:
             session.visit("http://finance.yahoo.com/quote/{}/key-statistics?p={}".format(symbol, symbol))
         except socket.error as e:
-            print("Failed to get {}, {}".format(symbol, e))
+            print("Failed to get {}, {} (1)".format(symbol, e))
             continue
         except webkit_server.EndOfStreamError as e:
-            print("Failed to get {}, {}, breaking".format(symbol, e))
+            print("Failed to get {}, {}, breaking (2)".format(symbol, e))
             continue
         except webkit_server.InvalidResponseError as e:
-            print("Failed to get {}, {}, breaking".format(symbol, e))
+            print("Failed to get {}, {}, breaking (3)".format(symbol, e))
             continue
 
         response = session.body()
