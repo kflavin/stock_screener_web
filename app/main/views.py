@@ -241,7 +241,8 @@ def listings(page):
 
     # get the most recent collection date
     try:
-        date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date
+        #date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date # second to last day
+        date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[0].date   # last day
     except IndexError:
         return render_template('listings.html',
                                pagination=None,
@@ -261,7 +262,6 @@ def listings(page):
 
     pagination = Indicators.query.join(Company).filter(Indicators.date == date).distinct(*entities).order_by(order).with_entities(*entities).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
     listings = pagination.items
-    print listings
 
     return render_template('listings.html',
                            pagination=pagination,
@@ -269,7 +269,8 @@ def listings(page):
                            order_by = order_by,
                            direction = direction,
                            order_bys = order_bys_no_fk,
-                           date = datetime.today()
+                           date = datetime.today(),
+                           count = pagination.total
                            )
 
 

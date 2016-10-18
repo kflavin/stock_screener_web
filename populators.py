@@ -15,7 +15,7 @@ def get_ratio_data():
     from app.models import Company, Indicators
     from app.utils import cash_to_float, depercentize
 
-    session = dryscrape.Session()
+    #session = dryscrape.Session()
     #element = "data-reactid"
     #value = re.compile(".*RETURN_ON_EQUITY\.1$")
 
@@ -48,27 +48,35 @@ def get_ratio_data():
             symbols.append(i.split(",")[0])
 
     print("Iterate through symbols")
+    session = dryscrape.Session()
+    session.set_header('User-Agent', ua.random)
+    session.set_timeout(5)
     for symbol in symbols:
         print("{} Fetching {}  :".format(time.strftime("%H:%M:%S"), symbol))
-        try:
-            session = dryscrape.Session()
-        except socket.error as e:
-            print("Failed to configure session {}".format(e))
-            continue
+        #try:
+        #    session = dryscrape.Session()
+        #except socket.error as e:
+        #    print("Failed to configure session {}".format(e))
+        #    continue
 
-        session.set_header('User-Agent', ua.random)
-        session.set_timeout(30)
+        #session.set_header('User-Agent', ua.random)
+        #session.set_timeout(30)
         try:
             session.visit("http://finance.yahoo.com/quote/{}/key-statistics?p={}".format(symbol, symbol))
-        except socket.error as e:
-            print("Failed to get {}, {} (1)".format(symbol, e))
-            continue
-        except webkit_server.EndOfStreamError as e:
-            print("Failed to get {}, {}, breaking (2)".format(symbol, e))
-            continue
-        except webkit_server.InvalidResponseError as e:
-            print("Failed to get {}, {}, breaking (3)".format(symbol, e))
-            continue
+        except Exception as e:
+            print e
+            session = dryscrape.Session()
+            #session.set_header('User-Agent', ua.random)
+            session.set_timeout(5)
+        #except socket.error as e:
+        #    print("Failed to get {}, {} (1)".format(symbol, e))
+        #    continue
+        #except webkit_server.EndOfStreamError as e:
+        #    print("Failed to get {}, {}, breaking (2)".format(symbol, e))
+        #    continue
+        #except webkit_server.InvalidResponseError as e:
+        #    print("Failed to get {}, {}, breaking (3)".format(symbol, e))
+        #    continue
 
         response = session.body()
         soup = BeautifulSoup(response, "lxml")
@@ -92,8 +100,11 @@ def get_ratio_data():
         except (IntegrityError, UnmappedInstanceError) as e:
             db.session.rollback()
 
-        wait = randint(1, 10)
+        print "indicators", d
+
+        wait = randint(1, 3)
         print("Waiting {}".format(wait))
+        session.reset()
         time.sleep(wait)
 
 
