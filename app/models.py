@@ -2,6 +2,7 @@ import json
 from datetime import date
 import re
 import requests
+from sqlalchemy import UniqueConstraint
 from flask.ext.security.utils import verify_password
 from flask.ext.security import UserMixin, RoleMixin
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -9,6 +10,7 @@ from random import seed, choice
 from string import ascii_uppercase
 from flask.ext.security.utils import encrypt_password
 from flask import current_app, abort
+from app.external.companies import get_name_from_symbol
 
 from app import db
 from app.utils import DateToJSON
@@ -95,30 +97,6 @@ class Company(db.Model):
             symbol += choice(ascii_uppercase)
         return symbol
 
-    @staticmethod
-    def get_name_from_symbol(symbol):
-        """
-        Use EDGAR online database to find the company name.
-        """
-        if not Company.validate_symbol(symbol):
-            return None
-
-        r = requests.get("http://edgaronline.api.mashery.com/v2/companies?primarysymbols={}&appkey={}".format(symbol, current_app.config['EDGAR_APP_KEY']))
-
-        try:
-            values = r.json()['result']['rows'][0]['values']
-        except (KeyError, IndexError) as e:
-            return None
-
-        companyname = None
-        for value in values:
-            if value.get('field') == "companyname":
-                companyname = value.get('value')
-                break
-
-        return companyname
-
-
     @classmethod
     def get_attributes(cls):
         return cls.attributes.keys()
@@ -202,6 +180,7 @@ class Indicators(db.Model):
         'roe': "ROE (%)",
         'fcf': "Free Cash Flow",
     }
+    UniqueConstraint(date, company_id, name="one_per_company_per_day")
 
     @classmethod
     def get_attributes(cls):
@@ -263,7 +242,7 @@ class Indicators(db.Model):
 
         # Get company if it exists, otherwise create it
         if not Company.query.filter_by(symbol=symbol).first():
-            name = json_indicators.get('name') or Company.get_name_from_symbol(symbol)
+            name = json_indicators.get('name') or get_name_from_symbol(symbol)
             if not name:
                 return None
 
@@ -295,4 +274,15 @@ class Indicators(db.Model):
     def __repr__(self):
         return "<{cls}|Symbol: {symbol}, Date: {date}>".format(cls=self.__class__, symbol=self.company.symbol, date=self.date)
 
+
+#class Sector(db.Model):
+#    id = db.Column(db.Integer, primary_key=True)
+#    name = db.Column(db.String(50), unique=True, nullable=False)
+#    siccode = db.Column(db.Integer, unique=True, nullable=False)
+#
+#    def __repr__(self):
+#        return "<{cls}|Sector: {name}, SIC code: {siccode}>".format(cls=self.__class__, name=name, siccode=siccode)
+#
+#
+#class Industry(db.Model):
 

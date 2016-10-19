@@ -64,10 +64,22 @@ def get_ratio_data():
         try:
             session.visit("http://finance.yahoo.com/quote/{}/key-statistics?p={}".format(symbol, symbol))
         except Exception as e:
-            print e
+            print e, "try once more......"
+            session.reset()
+            time.sleep(5)
             session = dryscrape.Session()
             #session.set_header('User-Agent', ua.random)
-            session.set_timeout(5)
+            try:
+                session.set_timeout(5)
+                session.visit("http://finance.yahoo.com/quote/{}/key-statistics?p={}".format(symbol, symbol))
+            except Exception as e:
+                print e, "done trying..."
+                session.reset()
+                time.sleep(2)
+                session = dryscrape.Session()
+                continue
+
+
         #except socket.error as e:
         #    print("Failed to get {}, {} (1)".format(symbol, e))
         #    continue
@@ -97,7 +109,9 @@ def get_ratio_data():
 
         try:
             db.session.add(Indicators.from_json(d))
+            db.session.commit()
         except (IntegrityError, UnmappedInstanceError) as e:
+            print "Caught", e
             db.session.rollback()
 
         print "indicators", d
