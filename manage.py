@@ -13,7 +13,7 @@ import datetime
 from app.models import User, Role, Company, Indicators
 from app import create_app, db
 
-from populators import get_ratio_data
+from populators2 import get_ratio_data
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 

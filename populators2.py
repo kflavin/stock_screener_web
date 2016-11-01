@@ -1,4 +1,7 @@
 from selenium.webdriver import PhantomJS
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from app import db
@@ -24,16 +27,9 @@ class MyWebDriver(PhantomJS):
 
 
 def get_ratio_data():
-    import socket
     import re
     import time
-    import dryscrape
-    import webkit_server
-    from random import randint
-    from fake_useragent import UserAgent
     from bs4 import BeautifulSoup
-    from selenium.webdriver import PhantomJS
-
 
     from app.models import Company, Indicators
     from app.utils import cash_to_float, depercentize
@@ -53,11 +49,6 @@ def get_ratio_data():
                   }
 
 
-    ua = UserAgent()
-
-
-    #with open("10.csv", "r") as f:
-    #with open("sp500-2.csv", "r") as f:
     with open("10_stocks", "r") as f:
         data = f.read()
 
@@ -68,62 +59,28 @@ def get_ratio_data():
             symbols.append(i.split(",")[0])
 
     print("Iterate through symbols")
-    ## dryscrape
-    #session = dryscrape.Session()
-    #session.set_header('User-Agent', ua.random)
-    #session.set_timeout(5)
 
     for symbol in symbols:
         print("{} Fetching {}  :".format(time.strftime("%H:%M:%S"), symbol))
 
-        import pdb; pdb.set_trace()
         #driver = MyWebDriver()
         driver = PhantomJS()
         driver.set_window_size(1120, 550)
         driver.get("http://finance.yahoo.com/quote/{}/key-statistics?p={}".format(symbol, symbol))
+        print driver.title
+        #WebDriverWait(driver, 10).until(EC.title_contains("AAPL Key Statistics | Apple Inc. Stock - Yahoo Finance"))
+        #element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "td[reactid]")))
+        #element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//td[@data-reactid[ends-with(., 'RETURN_ON_EQUITY.1')]]")))
 
-        ##try:
-        ##    session = dryscrape.Session()
-        ##except socket.error as e:
-        ##    print("Failed to configure session {}".format(e))
-        ##    continue
+        # these two seem to work...
+        element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[substring(@data-reactid, string-length(@data-reactid) - string-length('RETURN_ON_EQUITY.1') +1) = 'RETURN_ON_EQUITY.1']")))
+        #element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[contains(@data-reactid,'RETURN_ON_EQUITY.1')]")))
 
-        ##session.set_header('User-Agent', ua.random)
-        ##session.set_timeout(30)
-        #try:
-        #    #session.visit("http://finance.yahoo.com/quote/{}/key-statistics?p={}".format(symbol, symbol))
-        #except Exception as e:
-        #    print e, "try once more......"
-        #    session.reset()
-        #    time.sleep(5)
-        #    session = dryscrape.Session()
-        #    #session.set_header('User-Agent', ua.random)
-        #    try:
-        #        session.set_timeout(5)
-        #        session.visit("http://finance.yahoo.com/quote/{}/key-statistics?p={}".format(symbol, symbol))
-        #    except Exception as e:
-        #        print e, "done trying..."
-        #        session.reset()
-        #        time.sleep(2)
-        #        session = dryscrape.Session()
-        #        continue
+#"//input[@id[ends-with(.,'register')]]"
+        #time.sleep(5)
 
-
-        #except socket.error as e:
-        #    print("Failed to get {}, {} (1)".format(symbol, e))
-        #    continue
-        #except webkit_server.EndOfStreamError as e:
-        #    print("Failed to get {}, {}, breaking (2)".format(symbol, e))
-        #    continue
-        #except webkit_server.InvalidResponseError as e:
-        #    print("Failed to get {}, {}, breaking (3)".format(symbol, e))
-        #    continue
-
-        #response = session.body()
-        #soup = BeautifulSoup(response, "lxml")
-
-        with open("{}.out".format(symbol), "w") as f:
-            f.write(driver.page_source.encode('utf-8'))
+        #with open("{}.out".format(symbol), "w") as f:
+        #    f.write(driver.page_source.encode('utf-8'))
 
         soup = BeautifulSoup(driver.page_source, "lxml")
 
@@ -150,10 +107,7 @@ def get_ratio_data():
             db.session.rollback()
 
         print "indicators", d
+        #time.sleep(3)
 
-        #wait = randint(1, 3)
-        #print("Waiting {}".format(wait))
-        #session.reset()
-        #time.sleep(wait)
-
-
+if __name__ == '__main__':
+    get_ratio_data()
