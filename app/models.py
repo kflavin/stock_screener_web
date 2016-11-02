@@ -172,8 +172,8 @@ class Company(db.Model):
 class Indicators(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, default=date.today)
-    roe = db.Column(db.Float, default=0.0)
-    fcf = db.Column(db.Float, default=0.0)
+    roe = db.Column(db.Float, nullable=True)
+    fcf = db.Column(db.Float, nullable=True)
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
     attributes = {
         'Company.symbol': "Ticker",

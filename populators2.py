@@ -2,6 +2,7 @@ from selenium.webdriver import PhantomJS
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from app import db
@@ -49,7 +50,8 @@ def get_ratio_data():
                   }
 
 
-    with open("10_stocks", "r") as f:
+    #with open("10_stocks", "r") as f:
+    with open("sp500-2.csv", "r") as f:
         data = f.read()
 
     symbols = []
@@ -67,16 +69,21 @@ def get_ratio_data():
         driver = PhantomJS()
         driver.set_window_size(1120, 550)
         driver.get("http://finance.yahoo.com/quote/{}/key-statistics?p={}".format(symbol, symbol))
-        print driver.title
-        #WebDriverWait(driver, 10).until(EC.title_contains("AAPL Key Statistics | Apple Inc. Stock - Yahoo Finance"))
-        #element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "td[reactid]")))
-        #element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//td[@data-reactid[ends-with(., 'RETURN_ON_EQUITY.1')]]")))
+        try:
+            #WebDriverWait(driver, 10).until(EC.title_contains("AAPL Key Statistics | Apple Inc. Stock - Yahoo Finance"))
+            #element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "td[reactid]")))
+            #element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//td[@data-reactid[ends-with(., 'RETURN_ON_EQUITY.1')]]")))
 
-        # these two seem to work...
-        element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[substring(@data-reactid, string-length(@data-reactid) - string-length('RETURN_ON_EQUITY.1') +1) = 'RETURN_ON_EQUITY.1']")))
-        #element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[contains(@data-reactid,'RETURN_ON_EQUITY.1')]")))
+            # these two seem to work...
+            element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[substring(@data-reactid, string-length(@data-reactid) - string-length('RETURN_ON_EQUITY.1') +1) = 'RETURN_ON_EQUITY.1']")))
+            #element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[contains(@data-reactid,'RETURN_ON_EQUITY.1')]")))
 
-#"//input[@id[ends-with(.,'register')]]"
+            #"//input[@id[ends-with(.,'register')]]"
+        except TimeoutException as e:
+            print  "Caught", e
+            print driver.title
+            continue
+
         #time.sleep(5)
 
         #with open("{}.out".format(symbol), "w") as f:

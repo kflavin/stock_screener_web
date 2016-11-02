@@ -36,6 +36,14 @@ def create_app(config_name):
     app.jinja_env.globals.update(url_for_other_page=url_for_other_page)
     app.jinja_env.globals['url_for_other_page'] = url_for_other_page
 
+    # Custom filters
+    from app.utils import round_float
+    app.jinja_env.filters['round_float'] = round_float
+
+    # Custom test
+    #from app.utils import is_float
+    #app.jinja_env.tests['float'] = is_float
+
     from .api_1_0 import api as api_1_0_0_blueprint
     app.register_blueprint(api_1_0_0_blueprint, url_prefix='/api/1.0')
 

@@ -1,3 +1,7 @@
+{##########################
+Print out table pagination
+###########################}
+
 {% macro pagination_widget(pagination, endpoint, fragment='') %}
 <ul class="pagination">
     <li{% if not pagination.has_prev %} class="disabled"{% endif %}>
@@ -30,6 +34,9 @@
 </ul>
 {% endmacro %}
 
+{##########################
+Print out sorted table
+###########################}
 {% macro generate_sorted_table(path, order_bys, order_by, direction, objs) %}
 <table class="table">
 <thead>
@@ -44,7 +51,13 @@
   {% for obj in objs %}
   <tr>
       {% for obs in order_bys %}
-        <td>{{ obj[obs] }}</td>
+        {% if obs == "fcf" %}
+          <td>{{ convert_to_cash(obj[obs])  }}</td>
+        {% elif obs == "roe" %}
+          <td>{{ obj[obs] | round_float }}</td>
+        {% else %}
+          <td>{{ obj[obs] }}</td>
+        {% endif %}
       {% endfor %}
   </tr>
   {% endfor %}

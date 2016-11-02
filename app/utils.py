@@ -11,14 +11,24 @@ def depercentize(percentage):
     turn a percentage into a float
     """
     if percentage:
+        clean_perc = percentage.replace(",", "")
         try:
-            return round(float(percentage), 2)
+            return round(float(clean_perc), 2)
         except ValueError as e:
-            if percentage.endswith("%"):
-                return round(float(percentage[0:-1]), 2)
+            if clean_perc.endswith("%"):
+                return round(float(clean_perc[0:-1]), 2)
 
-    return 0.0
+    return None
 
+def round_float(value, precision=2):
+    """
+    If value is a float, round it
+    """
+    if value:
+        try:
+            return "{:.{}f}".format(round(float(value), precision), precision)
+        except ValueError as e:
+            return None
 
 
 def cash_to_float(amount):
@@ -46,7 +56,7 @@ def cash_to_float(amount):
                 #return "{:.2f}".format(float(amount[0:-1]) * (10**suffixes[suffix]))
                 return round(float(amount[0:-1]) * (10**suffixes[suffix]), 2)
 
-    return 0.0
+    return None
 
     
 
