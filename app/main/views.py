@@ -168,6 +168,17 @@ def company(page):
                            order_bys = order_bys_no_fk
                            )
 
+@main.route('/company/<string:symbol>/')
+def company_detail(symbol):
+    """
+    Return company details
+    """
+    attributes = Indicators.get_attributes_no_fk()
+    company = Company.query.filter(Company.symbol == symbol).first()
+    indicators = Indicators.query.filter(Indicators.company_id == company.id).all()
+    return render_template('company_detail.html', company = company, indicators=indicators, attributes=attributes)
+
+
 
 @main.route('/indicator/<string:symbol>/', defaults={'page': 1})
 @main.route('/indicator/<string:symbol>/<int:page>')

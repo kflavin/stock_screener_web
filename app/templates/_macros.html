@@ -55,6 +55,8 @@ Print out sorted table
           <td>{{ convert_to_cash(obj[obs])  }}</td>
         {% elif obs == "roe" %}
           <td>{{ obj[obs] | round_float }}</td>
+        {% elif obs == "symbol" %}
+        <td><a href="{{ url_for("main.company_detail", symbol=obj[obs])}}">{{ obj[obs] }}</a></td>
         {% else %}
           <td>{{ obj[obs] }}</td>
         {% endif %}

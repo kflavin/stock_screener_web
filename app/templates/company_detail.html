@@ -1,0 +1,45 @@
+{% extends "main.html" %}
+{% import "_macros.html" as macros %}
+{% block content %}
+ 
+<br>
+<div class="row">
+<div>
+  <h1>{{company.name}}</h1>
+<p>Ticker Symbol: <b>{{ company.symbol }}</b></p>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Date</th>
+      {% for attribute in attributes %}
+        {% if attribute != 'symbol' %}
+          <th>{{ attributes[attribute] }}</th>
+        {% endif %}
+      {% endfor %}
+    </tr>
+  </thead>
+
+  <tbody>
+      {% for indicator in indicators %}
+      <tr>
+        <td>{{ indicator.date }}</td>
+        {% for attribute in attributes %}
+          {% if attribute != 'symbol' %}
+          <td>{{ indicator[attribute] }} </td>
+          {% endif %}
+        {% endfor %}
+      </tr>
+      {% endfor %}
+
+  </tbody>
+</table>
+
+
+
+
+
+</div>
+</div>
+{% include '_footer.html' %}
+{% endblock %}
