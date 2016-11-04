@@ -13,6 +13,8 @@ import datetime
 from app.models import User, Role, Company, Indicators
 from app import create_app, db
 
+from populators2 import get_ratio_data
+
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 
 from flask.ext.script import Manager, Shell
@@ -109,6 +111,13 @@ def make_data():
     """
     Company.generate_fake(3000)
     Indicators.generate_fake(500)
+
+@manager.command
+def get_ratios():
+    """
+    Pull financial ratios
+    """
+    get_ratio_data()
 
 
 @manager.command

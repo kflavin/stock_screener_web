@@ -5,6 +5,61 @@ from flask import request, url_for
 
 from werkzeug.routing import BaseConverter
 
+
+def depercentize(percentage):
+    """
+    turn a percentage into a float
+    """
+    if percentage:
+        clean_perc = percentage.replace(",", "")
+        try:
+            return round(float(clean_perc), 2)
+        except ValueError as e:
+            if clean_perc.endswith("%"):
+                return round(float(clean_perc[0:-1]), 2)
+
+    return None
+
+def round_float(value, precision=2):
+    """
+    If value is a float, round it
+    """
+    if value:
+        try:
+            return "{:.{}f}".format(round(float(value), precision), precision)
+        except ValueError as e:
+            return None
+
+
+def cash_to_float(amount):
+    """
+    Takes a "user-friendly" cash value, like 100M, and tries to convert it to a float.
+    """
+
+    suffixes = {
+                'k': 3,
+                'm': 6,
+                'b': 9,
+                't': 12,
+                'p': 15,
+                }
+
+    if amount:
+        try:
+            quotient = float(amount)
+            #return "{:.2f}".format(quotient)     # already a float!
+            return round(quotient, 2)
+        except ValueError as e:
+            suffix = amount[-1].lower()
+
+            if suffixes.has_key(suffix):
+                #return "{:.2f}".format(float(amount[0:-1]) * (10**suffixes[suffix]))
+                return round(float(amount[0:-1]) * (10**suffixes[suffix]), 2)
+
+    return None
+
+    
+
 def convert_to_cash(amount):
     """
     Convert dollar amounts into shorter values.

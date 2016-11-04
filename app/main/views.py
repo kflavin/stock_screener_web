@@ -7,6 +7,7 @@ from flask_login import logout_user
 #from app import session, Indicators, Company, desc, asc
 #from app import desc, asc
 from sqlalchemy import create_engine, desc, asc
+from sqlalchemy.sql.expression import nullslast
 from app.main.pages import Pagination
 from . import main
 from .. import db
@@ -241,7 +242,8 @@ def listings(page):
 
     # get the most recent collection date
     try:
-        date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date
+        #date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date # second to last day
+        date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[0].date   # last day
     except IndexError:
         return render_template('listings.html',
                                pagination=None,
@@ -259,7 +261,7 @@ def listings(page):
     #pagination = Indicators.query.order_by(order).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
     #pagination = db.session.query(Indicators).join(Company).filter(Indicators.date == date).order_by(Company.symbol).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
 
-    pagination = Indicators.query.join(Company).filter(Indicators.date == date).order_by(order).with_entities(*entities).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
+    pagination = Indicators.query.join(Company).filter(Indicators.date == date).distinct(*entities).order_by(nullslast(order)).with_entities(*entities).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
     listings = pagination.items
 
     return render_template('listings.html',
@@ -268,7 +270,8 @@ def listings(page):
                            order_by = order_by,
                            direction = direction,
                            order_bys = order_bys_no_fk,
-                           date = datetime.today()
+                           date = datetime.today(),
+                           count = pagination.total
                            )
 
 

@@ -1,4 +1,5 @@
 import unittest
+from mock import Mock, patch, MagicMock
 from flask import current_app
 from app import create_app, db
 from app.models import Company, Indicators

@@ -1,6 +1,8 @@
 import json
 from datetime import date
 import re
+import requests
+from sqlalchemy import UniqueConstraint
 from flask.ext.security.utils import verify_password
 from flask.ext.security import UserMixin, RoleMixin
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -8,6 +10,7 @@ from random import seed, choice
 from string import ascii_uppercase
 from flask.ext.security.utils import encrypt_password
 from flask import current_app, abort
+from app.external.companies import get_name_from_symbol
 
 from app import db
 from app.utils import DateToJSON
@@ -169,14 +172,15 @@ class Company(db.Model):
 class Indicators(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, default=date.today)
-    roe = db.Column(db.Float, default=0.0)
-    fcf = db.Column(db.Float, default=0.0)
+    roe = db.Column(db.Float, nullable=True)
+    fcf = db.Column(db.Float, nullable=True)
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
     attributes = {
         'Company.symbol': "Ticker",
         'roe': "ROE (%)",
         'fcf': "Free Cash Flow",
     }
+    UniqueConstraint(date, company_id, name="one_per_company_per_day")
 
     @classmethod
     def get_attributes(cls):
@@ -231,13 +235,17 @@ class Indicators(db.Model):
         """
         symbol = json_indicators.get('symbol')
 
+        if not symbol:
+            return None
+
         indicators = Indicators()
 
         # Get company if it exists, otherwise create it
         if not Company.query.filter_by(symbol=symbol).first():
-            name = json_indicators.get('name')
+            name = json_indicators.get('name') or get_name_from_symbol(symbol)
             if not name:
                 return None
+
             company = Company(symbol=symbol, name=name)
             db.session.add(company)
             db.session.commit()
@@ -266,4 +274,15 @@ class Indicators(db.Model):
     def __repr__(self):
         return "<{cls}|Symbol: {symbol}, Date: {date}>".format(cls=self.__class__, symbol=self.company.symbol, date=self.date)
 
+
+#class Sector(db.Model):
+#    id = db.Column(db.Integer, primary_key=True)
+#    name = db.Column(db.String(50), unique=True, nullable=False)
+#    siccode = db.Column(db.Integer, unique=True, nullable=False)
+#
+#    def __repr__(self):
+#        return "<{cls}|Sector: {name}, SIC code: {siccode}>".format(cls=self.__class__, name=name, siccode=siccode)
+#
+#
+#class Industry(db.Model):
 
