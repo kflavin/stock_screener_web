@@ -7,6 +7,7 @@ from flask_login import logout_user
 #from app import session, Indicators, Company, desc, asc
 #from app import desc, asc
 from sqlalchemy import create_engine, desc, asc
+from sqlalchemy.sql.expression import nullslast
 from app.main.pages import Pagination
 from . import main
 from .. import db
@@ -260,7 +261,7 @@ def listings(page):
     #pagination = Indicators.query.order_by(order).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
     #pagination = db.session.query(Indicators).join(Company).filter(Indicators.date == date).order_by(Company.symbol).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
 
-    pagination = Indicators.query.join(Company).filter(Indicators.date == date).distinct(*entities).order_by(order).with_entities(*entities).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
+    pagination = Indicators.query.join(Company).filter(Indicators.date == date).distinct(*entities).order_by(nullslast(order)).with_entities(*entities).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
     listings = pagination.items
 
     return render_template('listings.html',
