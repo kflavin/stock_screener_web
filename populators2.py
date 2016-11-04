@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from urllib2 import URLError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from app import db
@@ -66,7 +67,15 @@ def get_ratio_data():
         print("{} Fetching {}  :".format(time.strftime("%H:%M:%S"), symbol))
 
         #driver = MyWebDriver()
-        driver = PhantomJS()
+        retry_current = 0
+        retry_limit = 5
+        while retry_current < retry_limit:
+            try:
+                driver = PhantomJS()
+            except URLError:
+                time.sleep(retry_current**2)
+            retry_current += 1
+
         driver.set_window_size(1120, 550)
         driver.get("http://finance.yahoo.com/quote/{}/key-statistics?p={}".format(symbol, symbol))
         try:
