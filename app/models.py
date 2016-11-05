@@ -81,6 +81,7 @@ class Company(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True)
     symbol = db.Column(db.String(20), nullable=False, unique=True)
+    active = db.Column(db.Boolean, default=True)
     indicators = db.relationship('Indicators', backref='company', lazy='dynamic')
 
     # Define attributes here for lookups.
@@ -148,12 +149,18 @@ class Company(db.Model):
 
     @staticmethod
     def from_json(j):
-        name = Company.validate_name(j.get('name'))
-        symbol = Company.validate_symbol(j.get('symbol'))
-        if not name or not symbol:
-            raise ValueError('Invalid name or symbol')
+        name = j.get('name')
+        symbol = j.get('symbol')
 
-        return Company(name=name, symbol=symbol)
+        if not Company.validate_name(name):
+            raise ValueError('Invalid name')
+
+        if not Company.validate_symbol(symbol):
+            raise ValueError('Invalid symbol')
+
+        active = True if j.get('active') else False
+
+        return Company(name=name, symbol=symbol, active=active)
 
     @staticmethod
     def validate_symbol(symbol):

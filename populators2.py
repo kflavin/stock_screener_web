@@ -51,15 +51,8 @@ def get_ratio_data():
                   }
 
 
-    #with open("10_stocks", "r") as f:
-    with open("sp500-2.csv", "r") as f:
-        data = f.read()
-
-    symbols = []
-    for i in data.split("\n"):
-        if i:
-
-            symbols.append(i.split(",")[0])
+    companies = Company.query.with_entities(Company.symbol).all()
+    symbols = [company[0] for company in companies]
 
     print("Iterate through symbols")
 

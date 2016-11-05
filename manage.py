@@ -14,6 +14,7 @@ from app.models import User, Role, Company, Indicators
 from app import create_app, db
 
 from populators2 import get_ratio_data
+from populate_companies import get_company_details
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 
@@ -33,7 +34,7 @@ manager.add_command("db", MigrateCommand)
 
 
 @manager.command
-def test(coverage=False, pattern="test"):
+def test(coverage=False, pattern="test", quiet=False):
     """Runs the unit tests without coverage."""
     if coverage and not os.environ.get('FLASK_COVERAGE'):
         import sys
@@ -45,7 +46,7 @@ def test(coverage=False, pattern="test"):
     loader.testMethodPrefix = pattern
 
     tests = loader.discover('tests')
-    result = unittest.TextTestRunner(verbosity=2).run(tests)
+    result = unittest.TextTestRunner(verbosity=2, buffer=quiet).run(tests)
 
     if COV:
         COV.stop()
@@ -122,6 +123,13 @@ def get_ratios():
     Pull financial ratios
     """
     get_ratio_data()
+
+@manager.command
+def get_companies(throttle=True):
+    """
+    Pull company data
+    """
+    get_company_details(throttle=throttle)
 
 
 @manager.command

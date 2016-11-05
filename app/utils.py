@@ -10,8 +10,12 @@ def depercentize(percentage):
     """
     turn a percentage into a float
     """
-    if percentage:
+    try:
         clean_perc = percentage.replace(",", "")
+    except AttributeError as e:
+        return None
+
+    if percentage:
         try:
             return round(float(clean_perc), 2)
         except ValueError as e:
@@ -27,7 +31,7 @@ def round_float(value, precision=2):
     if value:
         try:
             return "{:.{}f}".format(round(float(value), precision), precision)
-        except ValueError as e:
+        except (ValueError, AttributeError) as e:
             return None
 
 

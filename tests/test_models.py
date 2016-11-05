@@ -37,6 +37,9 @@ class TestCompany(unittest.TestCase):
         with self.assertRaises(ValueError):
             c = Company.from_json({'name': '', 'symbol': ''})
 
+        c = Company.from_json({'name': 'DEF Company', 'symbol': 'DEF', 'active': False})
+        self.assertTrue(isinstance(c, Company))
+
 
 class TestIndicatorsBlankDB(unittest.TestCase):
     def setUp(self):

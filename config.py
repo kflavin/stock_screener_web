@@ -29,7 +29,7 @@ class Config(object):
     COMPANIES_PER_PAGE = 25
     INDICATORS_PER_PAGE = 25
 
-    VALID_COMPANY_NAME = "^[a-zA-Z ._-]+$"
+    VALID_COMPANY_NAME = "^[0-9a-zA-Z ._'!&$%-]+$"
     VALID_COMPANY_SYMBOL = "^[A-Z]{0,8}$"
 
     EDGAR_APP_KEY = os.environ.get('EDGAR_APP_KEY')
