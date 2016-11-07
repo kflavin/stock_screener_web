@@ -1,3 +1,4 @@
+import requests
 
 
 def get_name_from_symbol(symbol):
@@ -6,7 +7,6 @@ def get_name_from_symbol(symbol):
     """
     from flask import current_app
     import dryscrape
-    import requests
     from app.models import Company
 
     if not Company.validate_symbol(symbol):
@@ -26,3 +26,11 @@ def get_name_from_symbol(symbol):
             break
 
     return companyname
+
+
+def get_symbol_lists(index='NYSE', page="A"):
+    """
+    index: NYSE or NASDAQ
+    """
+    return requests.get("http://eoddata.com/stocklist/{}/{}.htm".format(index, page))
+

@@ -9,6 +9,7 @@ from flask_login import logout_user
 from sqlalchemy import create_engine, desc, asc
 from sqlalchemy.sql.expression import nullslast
 from app.main.pages import Pagination
+from app.main.forms import FilterForm
 from . import main
 from .. import db
 from ..models import Indicators, Company
@@ -160,12 +161,15 @@ def company(page):
     pagination = Company.query.order_by(order).paginate(page, current_app.config['COMPANIES_PER_PAGE'], error_out=False)
     companies = pagination.items
 
+    total = Company.query.count()
+
     return render_template('company.html',
                            pagination=pagination,
                            companies = companies,
                            order_by = order_by,
                            direction = direction,
-                           order_bys = order_bys_no_fk
+                           order_bys = order_bys_no_fk,
+                           total=total
                            )
 
 @main.route('/company/<string:symbol>/')
@@ -205,8 +209,8 @@ def get_indicator(symbol, page):
                            )
 
 
-@main.route('/listings/', defaults={'page': 1})
-@main.route('/listings/<int:page>')
+@main.route('/listings/', defaults={'page': 1}, methods=['GET', 'POST'])
+@main.route('/listings/<int:page>', methods=['GET', 'POST'])
 @login_required
 def listings(page):
     """
@@ -228,6 +232,9 @@ def listings(page):
             models.append(o.split(".")[0])
         else:
             entities.append(eval("Indicators."+o))
+
+    form = FilterForm()
+    filter_by = form.filter.data if form.validate_on_submit() else None
 
     # Get values from client
     if request.args.get("direction") == "False":
@@ -262,7 +269,9 @@ def listings(page):
                                order_by = order_by,
                                direction = direction,
                                order_bys = order_bys_no_fk,
-                               date = datetime.today()
+                               date = datetime.today(),
+                               count = 0,
+                               form = form
                                )
         
     #date = db.session.query(Indicators.date).order_by(order).distinct().limit(2).all()[-1].date
@@ -272,7 +281,19 @@ def listings(page):
     #pagination = Indicators.query.order_by(order).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
     #pagination = db.session.query(Indicators).join(Company).filter(Indicators.date == date).order_by(Company.symbol).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
 
-    pagination = Indicators.query.join(Company).filter(Indicators.date == date).distinct(*entities).order_by(nullslast(order)).with_entities(*entities).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
+    # Build our query
+    query = Indicators.query.join(Company)
+    if filter_by:
+        #query = query.filter((Indicators.date == date) & ( Company.symbol.startswith("{}".format(filter_by)) | Company.name.startswith("{}".format(filter_by)) )  )
+        query = query.filter((Indicators.date == date) & ( Company.symbol.startswith("{}".format(filter_by)))  )
+    else:
+        query = query.filter(Indicators.date == date)
+
+    query = query.distinct(*entities)
+    query = query.order_by(nullslast(order))
+    query = query.with_entities(*entities)
+
+    pagination = query.paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
     listings = pagination.items
 
     return render_template('listings.html',
@@ -282,7 +303,8 @@ def listings(page):
                            direction = direction,
                            order_bys = order_bys_no_fk,
                            date = datetime.today(),
-                           count = pagination.total
+                           count = pagination.total,
+                           form = form
                            )
 
 

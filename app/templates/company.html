@@ -6,7 +6,7 @@
 <div class="row">
 <div>
 <h1>Companies</h1>
-<p>Retrieved <b>{{ count }}</b> listings.</p>
+<p>Retrieved <b>{{ companies|length }}</b> of <b>{{ total }}</b> listings.</p>
 
 {{ macros.pagination_widget(pagination, '.company', order_by=order_by, direction=direction) }}
 

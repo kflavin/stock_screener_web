@@ -125,11 +125,11 @@ def get_ratios():
     get_ratio_data()
 
 @manager.command
-def get_companies(throttle=True):
+def get_companies(throttle=True, index="NYSE"):
     """
     Pull company data
     """
-    get_company_details(throttle=throttle)
+    get_company_details(throttle=throttle, index=index)
 
 
 @manager.command

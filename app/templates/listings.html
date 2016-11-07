@@ -8,6 +8,12 @@
 <h1>Current Listings</h1>
 <p>Retrieved <b>{{ count }}</b> listings for {{date.strftime("%b %e, %Y")}}.</p>
 
+<form method="POST">
+    {{form.csrf_token()}}
+    {{form.filter()}}
+    {{form.submit()}}
+</form>
+
 {{ macros.pagination_widget(pagination, '.listings', order_by=order_by, direction=direction) }}
 
   {{ macros.generate_sorted_table(request.path, order_bys, order_by, direction, listings) }}

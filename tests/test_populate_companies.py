@@ -3,7 +3,7 @@ from mock import patch
 from app import create_app, db
 from app.models import Company
 #import populate_companies
-from populate_companies import get_company_data
+from populate_companies import get_company_details
 
 
 class TestPopulateCompanies(unittest.TestCase):
@@ -18,7 +18,7 @@ class TestPopulateCompanies(unittest.TestCase):
         db.drop_all()
         self.app_context.pop()
 
-    def test_get_company_data(self):
-        get_company_data(count=2)
+    def test_get_company_details(self):
+        get_company_details(count=2)
         self.assertEqual(2, Company.query.count())
 

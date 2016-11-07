@@ -1,6 +1,6 @@
 import unittest
 from mock import Mock, patch, MagicMock
-from app.external.companies import get_name_from_symbol
+from app.external.companies import get_name_from_symbol, get_symbol_lists
 
 
 class TestCompanyExternal(unittest.TestCase):
@@ -29,3 +29,9 @@ class TestCompanyExternal(unittest.TestCase):
         with patch("requests.get") as my_mock:
             my_mock.r.json.side_effect = KeyError
             self.assertEqual(get_name_from_symbol("MSFT"), None)
+
+    def test_get_symbol_lists(self):
+        r = get_symbol_lists()
+        self.assertEqual(r.status_code, 200)
+        r = get_symbol_lists(index="NASDAQ")
+        self.assertEqual(r.status_code, 200)

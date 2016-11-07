@@ -158,7 +158,7 @@ class Company(db.Model):
         if not Company.validate_symbol(symbol):
             raise ValueError('Invalid symbol')
 
-        active = True if j.get('active') else False
+        active = j.get('active') if j.get('active') else True
 
         return Company(name=name, symbol=symbol, active=active)
 

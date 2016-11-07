@@ -5,7 +5,8 @@
 <br>
 <div class="row">
 <div>
-  <h1>{{company.name}}</h1>
+<h1>{{company.name}}</h1>
+<p><b>{% if company.active %} Active {% else %} Inactive {% endif %}</b></p>
 <p>Ticker Symbol: <b>{{ company.symbol }}</b></p>
 
 <table class="table">

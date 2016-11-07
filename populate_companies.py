@@ -1,9 +1,13 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import UnmappedInstanceError
+from app.external.companies import get_symbol_lists
 
-def get_company_details(throttle=True, count=0):
+def get_company_details(throttle=True, count=0, index="NYSE"):
     """
+    throttle: true = 1 second wait between requests
     Count < 1 implies get all
+    index: NYSE or NASDAQ
+
     """
     import re
     import time
@@ -23,7 +27,7 @@ def get_company_details(throttle=True, count=0):
 
     break_out = False
     for c in string.uppercase:
-        r = requests.get("http://eoddata.com/stocklist/NASDAQ/{}.htm".format(c))
+        r = get_symbol_lists(index, c)
         soup = BeautifulSoup(r.text, 'lxml')
         table = soup.find_all("table", class_="quotes")[0]
         trs = table.find_all("tr")
