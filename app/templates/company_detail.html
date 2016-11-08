@@ -26,7 +26,11 @@
       <tr>
         <td>{{ indicator.date }}</td>
         {% for attribute in attributes %}
-          {% if attribute != 'symbol' %}
+          {% if attribute == 'roe' %}
+          <td>{{ indicator[attribute] | round_float }} </td>
+          {% elif attribute == 'fcf' %}
+          <td>{{ convert_to_cash(indicator[attribute]) }} </td>
+          {% elif attribute != 'symbol' %}
           <td>{{ indicator[attribute] }} </td>
           {% endif %}
         {% endfor %}

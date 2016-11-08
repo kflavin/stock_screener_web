@@ -1,6 +1,6 @@
 from math import ceil
 from flask import Flask, render_template, redirect, \
-       send_from_directory, request, current_app
+       send_from_directory, request, current_app, url_for
 from flask.ext.security import login_required
 from flask_login import logout_user
 #from app import app, db
@@ -208,7 +208,6 @@ def get_indicator(symbol, page):
                            flip=flip
                            )
 
-
 @main.route('/listings/', defaults={'page': 1}, methods=['GET', 'POST'])
 @main.route('/listings/<int:page>', methods=['GET', 'POST'])
 @login_required
@@ -233,8 +232,46 @@ def listings(page):
         else:
             entities.append(eval("Indicators."+o))
 
+    # Search filter, redirect if it exists
     form = FilterForm()
-    filter_by = form.filter.data if form.validate_on_submit() else None
+    #filter_by = form.filter.data if form.validate_on_submit() else None
+
+    if form.is_submitted():
+        if form.validate():
+            direction = request.args.get('direction')
+            order_by = request.args.get('order_by')
+            query_state = {}
+            if direction:
+                query_state['direction'] = direction
+            if order_by:
+                query_state['order_by'] = order_by
+
+            return redirect(url_for('main.listings', page=page, filter_by=form.filter.data, **query_state))
+        else:
+            filter_by = ""
+    else:
+        if Company.validate_symbol(request.args.get('filter_by', '').upper()):
+            filter_by = request.args.get('filter_by')
+        else:
+            filter_by = ''
+
+    print "your filter by is", filter_by
+
+    #if form.validate_on_submit():
+    #    direction = request.args.get('direction')
+    #    order_by = request.args.get('order_by')
+    #    query_state = {}
+    #    if direction:
+    #        query_state['direction'] = direction
+    #    if order_by:
+    #        query_state['order_by'] = order_by
+
+    #    return redirect(url_for('main.listings', page=page, filter_by=form.filter.data, **query_state))
+
+    #if Company.validate_symbol(request.args.get('filter_by', '').upper()):
+    #    filter_by = request.args.get('filter_by')
+    #else:
+    #    filter_by = ''
 
     # Get values from client
     if request.args.get("direction") == "False":
@@ -271,7 +308,8 @@ def listings(page):
                                order_bys = order_bys_no_fk,
                                date = datetime.today(),
                                count = 0,
-                               form = form
+                               form = form,
+                               filter_by=filter_by
                                )
         
     #date = db.session.query(Indicators.date).order_by(order).distinct().limit(2).all()[-1].date
@@ -285,7 +323,7 @@ def listings(page):
     query = Indicators.query.join(Company)
     if filter_by:
         #query = query.filter((Indicators.date == date) & ( Company.symbol.startswith("{}".format(filter_by)) | Company.name.startswith("{}".format(filter_by)) )  )
-        query = query.filter((Indicators.date == date) & ( Company.symbol.startswith("{}".format(filter_by)))  )
+        query = query.filter((Indicators.date == date) & ( Company.symbol.ilike("{}".format(filter_by)))  )
     else:
         query = query.filter(Indicators.date == date)
 
@@ -304,7 +342,8 @@ def listings(page):
                            order_bys = order_bys_no_fk,
                            date = datetime.today(),
                            count = pagination.total,
-                           form = form
+                           form = form,
+                           filter_by=filter_by
                            )
 
 

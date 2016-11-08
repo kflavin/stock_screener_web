@@ -10,7 +10,11 @@
 
 <form method="POST">
     {{form.csrf_token()}}
-    {{form.filter()}}
+    {% if filter_by %}
+        {{form.filter(value=filter_by)}}
+    {% else %}
+        {{form.filter()}}
+    {% endif %}
     {{form.submit()}}
 </form>
 
