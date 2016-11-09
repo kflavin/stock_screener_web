@@ -15,9 +15,14 @@ def get_company_details(throttle=True, count=0, index="NYSE"):
     import string
     from bs4 import BeautifulSoup
 
-    from app.models import Company, Indicators
+    from app.models import Company, Indicators, Index
     from app.utils import cash_to_float, depercentize
     from app import db
+
+    # Add the index if it doesn't exist
+    if not Index.query.filter(Index.name == index).first():
+        db.session.add(Index(name=index))
+        db.session.commit()
 
     curr = 0
     if count > 0:
@@ -35,10 +40,10 @@ def get_company_details(throttle=True, count=0, index="NYSE"):
         for tr in trs:
             symbol = tr.td.a.text
             name = tr.td.next_sibling.text
-            print "Add", symbol, name
+            print curr, "Add", symbol, name
             if symbol and name:
                 try:
-                    db.session.add(Company.from_json({'name': name, 'symbol': symbol}))
+                    db.session.add(Company.from_json({'name': name, 'symbol': symbol, 'index': index}))
                     db.session.commit()
                 except (IntegrityError, UnmappedInstanceError) as e:
                     print "Caught", e

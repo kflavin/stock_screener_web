@@ -42,7 +42,7 @@ Print out sorted table
 <thead>
     <tr>
       {% for k,v in order_bys.iteritems() %}
-      <th><a href="{{ path }}?order_by={{k}}&direction={% if order_by == k %}{{ not direction }}{% else %}{{ True }}{% endif %}">{{v|capitalize}}</a></th>
+      <th><a href="{{ path }}?order_by={{k}}&direction={% if order_by == k %}{{ not direction }}{% else %}{{ True }}{% endif %}">{{v}}</a></th>
       {% endfor %}
     </tr>
 </thead>

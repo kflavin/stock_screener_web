@@ -77,6 +77,22 @@ class Filters(db.Model):
     strategy_id = db.Column(db.Integer, db.ForeignKey('strategy.id'))
 
 
+IndexMembership = db.Table('index_membership',
+       db.Column('index_id', db.Integer, db.ForeignKey('index.id')),
+       db.Column('company_id', db.Integer, db.ForeignKey('company.id'))
+)
+
+
+class Index(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    companies = db.relationship('Company',
+                                secondary=IndexMembership,
+                                backref=db.backref('indeces', lazy='dynamic'),
+                                lazy='dynamic'
+                                )
+
+
 class Company(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True)
@@ -151,6 +167,7 @@ class Company(db.Model):
     def from_json(j):
         name = j.get('name')
         symbol = j.get('symbol')
+        index = j.get('index')
 
         if not Company.validate_name(name):
             raise ValueError('Invalid name')
@@ -158,9 +175,18 @@ class Company(db.Model):
         if not Company.validate_symbol(symbol):
             raise ValueError('Invalid symbol')
 
+        # Use company validation for the index name too
+        if not Company.validate_name(index):
+            raise ValueError('Invalid symbol')
+        else:
+            clean_index = Index.query.filter(Index.name == index).first()
+
         active = j.get('active') if j.get('active') else True
 
-        return Company(name=name, symbol=symbol, active=active)
+        c = Company(name=name, symbol=symbol, active=active)
+        c.indeces.append(clean_index)
+
+        return c
 
     @staticmethod
     def validate_symbol(symbol):
@@ -181,11 +207,13 @@ class Indicators(db.Model):
     date = db.Column(db.Date, default=date.today)
     roe = db.Column(db.Float, nullable=True)
     fcf = db.Column(db.Float, nullable=True)
+    ev2ebitda = db.Column(db.Float, nullable=True)
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'))
     attributes = {
         'Company.symbol': "Ticker",
         'roe': "ROE (%)",
         'fcf': "Free Cash Flow",
+        'ev2ebitda': "EV/EBITDA",
     }
     UniqueConstraint(date, company_id, name="one_per_company_per_day")
 
@@ -219,13 +247,13 @@ class Indicators(db.Model):
                 i = Indicators(date=date,
                                roe="{0:.2f}".format(random()*0.5),
                                fcf="{0:.2f}".format(random()*0.5),
+                               ev2ebitda="{0:.2f}".format(random()*0.5),
                                company_id = company.id
                                )
                 db.session.add(i)
                 try:
                     db.session.commit()
-                except IntegrityError:
-                    db.session.rollback()
+                except IntegrityError: db.session.rollback()
 
     @staticmethod
     def from_json(json_indicators):
@@ -275,6 +303,7 @@ class Indicators(db.Model):
             'date': self.date.strftime("%Y-%m-%d"),
             'roe': self.roe,
             'fcf': self.fcf,
+            'ev2ebitda': self.ev2ebitda,
             'company_id': self.company_id
         }
 

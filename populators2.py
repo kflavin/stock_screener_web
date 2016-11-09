@@ -48,6 +48,10 @@ def get_ratio_data():
                           'value': re.compile(".*LEVERED_FREE_CASH_FLOW\.1$"),
                           'transform': cash_to_float,
                           },
+                  'ev2ebitda': {
+                          'attribute': 'data-reactid',
+                          'value': re.compile(".*ENTERPRISE_VALUE_TO_EBITDA\.1$"),
+                          },
                   }
 
 

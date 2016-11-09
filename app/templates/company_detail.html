@@ -6,8 +6,11 @@
 <div class="row">
 <div>
 <h1>{{company.name}}</h1>
-<p><b>{% if company.active %} Active {% else %} Inactive {% endif %}</b></p>
-<p>Ticker Symbol: <b>{{ company.symbol }}</b></p>
+<p>
+Ticker: <b>{{ company.symbol }}</b><br />
+Status: <b>{% if company.active %} Active {% else %} Inactive {% endif %}</b><br />
+Indeces: <b> {% for ind in company.indeces %}{{ ind.name }} {% endfor %}</b>
+</p>
 
 <table class="table">
   <thead>
