@@ -176,13 +176,10 @@ class Company(db.Model):
             raise ValueError('Invalid symbol')
 
         # Use company validation for the index name too
-        if index:
-            if not Company.validate_name(index):
-                clean_index = None
-            else:
-                clean_index = Index.query.filter(Index.name == index).first()
-        else:
+        if not Company.validate_name(index):
             clean_index = None
+        else:
+            clean_index = Index.query.filter(Index.name == index).first()
 
         active = j.get('active') if j.get('active') else True
 
@@ -193,11 +190,17 @@ class Company(db.Model):
 
     @staticmethod
     def validate_symbol(symbol):
+        if not symbol:
+            return False
+
         match = re.match(current_app.config['VALID_COMPANY_SYMBOL'], symbol)
         return True if match else False
 
     @staticmethod
     def validate_name(name):
+        if not name:
+            return False
+
         match = re.match(current_app.config['VALID_COMPANY_NAME'], name)
         return True if match else False
 
