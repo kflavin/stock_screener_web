@@ -32,7 +32,7 @@ class TestCompany(unittest.TestCase):
         self.assertFalse(Company.validate_name("Bad Company**!"))
 
     def test_company_from_json(self):
-        c = Company.from_json({'name': 'ABC Company', 'symbol': 'ABC'})
+        c = Company.from_json({'name': 'ABC Company', 'symbol': 'ABC', 'index': "NYSE"})
         self.assertTrue(isinstance(c, Company))
         with self.assertRaises(ValueError):
             c = Company.from_json({'name': '', 'symbol': ''})

@@ -176,10 +176,13 @@ class Company(db.Model):
             raise ValueError('Invalid symbol')
 
         # Use company validation for the index name too
-        if not Company.validate_name(index):
-            raise ValueError('Invalid symbol')
+        if index:
+            if not Company.validate_name(index):
+                clean_index = None
+            else:
+                clean_index = Index.query.filter(Index.name == index).first()
         else:
-            clean_index = Index.query.filter(Index.name == index).first()
+            clean_index = None
 
         active = j.get('active') if j.get('active') else True
 
