@@ -75,7 +75,12 @@ environment
 notes
 *.old
 *.backup
+*.csv
 todo
 unittest
+ext/**
+node_modules/
 
 tmp/
+
+
