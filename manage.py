@@ -34,7 +34,7 @@ manager.add_command("db", MigrateCommand)
 
 
 @manager.command
-def test(coverage=False, pattern="test", quiet=False):
+def test(coverage=False, pattern="test", quiet=True):
     """Runs the unit tests without coverage."""
     if coverage and not os.environ.get('FLASK_COVERAGE'):
         import sys
