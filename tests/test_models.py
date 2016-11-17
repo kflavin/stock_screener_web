@@ -1,4 +1,6 @@
 import unittest
+
+from datetime import date
 from mock import Mock, patch, MagicMock
 from flask import current_app
 from app import create_app, db
@@ -41,12 +43,14 @@ class TestCompany(unittest.TestCase):
         self.assertTrue(isinstance(c, Company))
 
 
-class TestIndicatorsBlankDB(unittest.TestCase):
+class TestIndicators(unittest.TestCase):
     def setUp(self):
         self.app = create_app('testing')
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()
+        Company.generate_fake(10)
+        Indicators.generate_fake(4)
 
     def tearDown(self):
         db.session.remove()
@@ -64,6 +68,19 @@ class TestIndicatorsBlankDB(unittest.TestCase):
         # use existing company
         d = {"roe": 0.25, "fcf": 100.0}
         Indicators.from_json(d)
+
+    def test_equal_values(self):
+        # same indicators should return equal
+        i1 = Company.query.first().indicators.first()
+        i2 = Company.query.first().indicators.first()
+        self.assertTrue(Indicators.equal_values(i1, i2))
+
+        # Indicators with different values (excluding date) are not equal
+        i1 = Indicators(date=date.today(), roe=1.1, fcf=2.2, ev2ebitda=3.3)
+        i1.company = Company.query.first()
+        i2 = Indicators(date=date.today(), roe=2.2, fcf=1.1, ev2ebitda=4.4)
+        i2.company = Company.query.first()
+        self.assertFalse(Indicators.equal_values(i1, i2))
 
 
 

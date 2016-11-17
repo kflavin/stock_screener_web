@@ -12,6 +12,8 @@ class TestPopulateIndicators(unittest.TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()
+        get_company_details(count=2)
+        get_ratio_data()
 
     def tearDown(self):
         db.session.remove()
@@ -19,8 +21,4 @@ class TestPopulateIndicators(unittest.TestCase):
         self.app_context.pop()
 
     def test_get_company_details(self):
-        get_company_details(count=2)
-        get_ratio_data()
         self.assertEqual(Company.query.count(), Company.query.join(Indicators).count())
-
-

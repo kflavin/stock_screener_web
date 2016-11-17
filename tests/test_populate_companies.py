@@ -12,6 +12,7 @@ class TestPopulateCompanies(unittest.TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()
+        get_company_details(count=2)
 
     def tearDown(self):
         db.session.remove()
@@ -19,6 +20,5 @@ class TestPopulateCompanies(unittest.TestCase):
         self.app_context.pop()
 
     def test_get_company_details(self):
-        get_company_details(count=2)
         self.assertEqual(2, Company.query.count())
 
