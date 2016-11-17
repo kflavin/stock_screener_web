@@ -6,6 +6,13 @@ from flask import request, url_for
 from werkzeug.routing import BaseConverter
 
 
+def float_or_none(value):
+    try:
+        return float(value)
+    except (ValueError, TypeError) as e:
+        return None
+
+
 def depercentize(percentage):
     """
     turn a percentage into a float
@@ -26,7 +33,7 @@ def depercentize(percentage):
 
 def round_float(value, precision=2):
     """
-    If value is a float, round it
+    If value is a float, round it.  For presentation.
     """
     if value:
         try:
