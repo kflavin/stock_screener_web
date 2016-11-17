@@ -13,7 +13,7 @@
     {% if filter_by %}
         {{form.filter(value=filter_by)}}
     {% else %}
-        {{form.filter()}}
+        {{form.filter(placeholder="Ticker Symbol")}}
     {% endif %}
     {{form.submit()}}
 </form>

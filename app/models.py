@@ -2,7 +2,7 @@ import json
 from datetime import date
 import re
 import requests
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, desc
 from flask.ext.security.utils import verify_password
 from flask.ext.security import UserMixin, RoleMixin
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -13,7 +13,7 @@ from flask import current_app, abort
 from app.external.companies import get_name_from_symbol
 
 from app import db
-from app.utils import DateToJSON
+from app.utils import DateToJSON, float_or_none
 
 
 # Define models
@@ -130,7 +130,7 @@ class Company(db.Model):
         return order_bys_no_fk
 
     @staticmethod
-    def generate_fake(count=100):
+    def generate_fake(count=20):
         import forgery_py
         from sqlalchemy.exc import IntegrityError
         for i in range(count):
@@ -188,6 +188,7 @@ class Company(db.Model):
 
         return c
 
+
     @staticmethod
     def validate_symbol(symbol):
         if not symbol:
@@ -224,11 +225,21 @@ class Indicators(db.Model):
     UniqueConstraint(date, company_id, name="one_per_company_per_day")
 
     @classmethod
-    def get_attributes(cls):
-        return cls.attributes.keys()
+    def get_attributes(cls, with_symbol=True):
+        """
+        Return all attributes of the class
+        """
+        if with_symbol:
+            return cls.attributes.keys()
+        else:
+                return [i for i in Indicators.get_attributes() if i != 'Company.symbol']
 
     @classmethod
     def get_attributes_no_fk(cls):
+        """
+        Get all attributes, excluding the foreign keys prefix (ie: company.symbol).
+
+        """
         order_bys = cls.attributes.keys()
         order_bys_no_fk = {}
         for k,v in cls.attributes.iteritems():
@@ -260,6 +271,33 @@ class Indicators(db.Model):
                 try:
                     db.session.commit()
                 except IntegrityError: db.session.rollback()
+
+    def is_duplicate_of_last(self):
+        """
+        Check if an indicator is a duplicate of the last collected value
+        """
+        last_date = self.last_indicator_date_by_company(1)
+        if not last_date:
+            return False
+
+        print "looking for date", last_date
+        i = Indicators.query.filter((Indicators.date == last_date) &
+                                    (Indicators.company_id == self.company.id)).first()
+
+        return Indicators.equal_values(self, i)
+
+    @staticmethod
+    def equal_values(i1, i2):
+        """
+        Check if an indicator has equal values, other than the date.
+        """
+        attribs = Indicators.get_attributes_no_fk()
+        for k, v in attribs.iteritems():
+            if k != "symbol":
+                if getattr(i1, k) != getattr(i2, k):
+                    return False
+
+        return True
 
     @staticmethod
     def from_json(json_indicators):
@@ -296,11 +334,35 @@ class Indicators(db.Model):
         # Go through each key and assign it, unless it's "name" or "symbol"
         for key in json_indicators.keys():
             if key.find(".") == -1 and key != 'name' and key != 'symbol' and key != "company_id" and key != "id":
-                setattr(indicators, key, json_indicators.get(key))
+                setattr(indicators, key, float_or_none(json_indicators.get(key)))
 
         indicators.company = company
 
         return indicators
+
+    @staticmethod
+    def last_indicator_date():
+        try:
+            return db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[0].date
+        except IndexError:
+            return None
+
+    def last_indicator_date_by_company(self, index=0, limit=2):
+        """
+
+        Args:
+            index: date to return (0 is the last date, 1 second to last, etc.  must be less than limit
+            limit: maximum number of records to return
+
+        Returns:
+            An indicator if it exists
+
+        """
+        try:
+            #return db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[0].date
+            return Indicators.query.join(Company).filter(Company.symbol == self.company.symbol).with_entities(Indicators.date).order_by(desc("date")).limit(limit).all()[index].date
+        except IndexError:
+            return None
 
     def to_json(self):
         return {
@@ -315,6 +377,7 @@ class Indicators(db.Model):
 
     def __repr__(self):
         return "<{cls}|Symbol: {symbol}, Date: {date}>".format(cls=self.__class__, symbol=self.company.symbol, date=self.date)
+
 
 
 #class Sector(db.Model):

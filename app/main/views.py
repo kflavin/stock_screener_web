@@ -7,6 +7,7 @@ from flask_login import logout_user
 #from app import session, Indicators, Company, desc, asc
 #from app import desc, asc
 from sqlalchemy import create_engine, desc, asc
+from sqlalchemy import func
 from sqlalchemy.sql.expression import nullslast
 from app.main.pages import Pagination
 from app.main.forms import FilterForm
@@ -231,6 +232,7 @@ def listings(page):
             models.append(o.split(".")[0])
         else:
             entities.append(eval("Indicators."+o))
+    entities.append(Indicators.date)
 
     # Search filter, redirect if it exists
     form = FilterForm()
@@ -295,41 +297,47 @@ def listings(page):
             order = getattr(getattr(Indicators, order_by), which_way)()
 
 
-    # get the most recent collection date
-    try:
-        #date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date # second to last day
-        date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[0].date   # last day
-    except IndexError:
-        return render_template('listings.html',
-                               pagination=None,
-                               listings = None,
-                               order_by = order_by,
-                               direction = direction,
-                               order_bys = order_bys_no_fk,
-                               date = datetime.today(),
-                               count = 0,
-                               form = form,
-                               filter_by=filter_by
-                               )
-        
-    #date = db.session.query(Indicators.date).order_by(order).distinct().limit(2).all()[-1].date
-    #date = db.session.query(Indicators.date).order_by(desc(Indicators.date)).distinct().limit(2).all()[-1].date
-    #db.session.query(Indicators).join(Company).filter(Indicators.date == date).order_by(Company.symbol).all()
-
-    #pagination = Indicators.query.order_by(order).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
-    #pagination = db.session.query(Indicators).join(Company).filter(Indicators.date == date).order_by(Company.symbol).paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
 
     # Build our query
-    query = Indicators.query.join(Company)
-    if filter_by:
-        #query = query.filter((Indicators.date == date) & ( Company.symbol.startswith("{}".format(filter_by)) | Company.name.startswith("{}".format(filter_by)) )  )
-        query = query.filter((Indicators.date == date) & ( Company.symbol.ilike("{}".format(filter_by)))  )
-    else:
-        query = query.filter(Indicators.date == date)
+    t = db.session.query(Indicators.company_id, func.max(Indicators.date).label('most_recent_date')).group_by(Indicators.company_id).subquery('t')
+    query = Company.query.join(Indicators).\
+        filter((Company.id == Indicators.company_id) &
+               (Company.id == t.c.company_id) &
+               (Indicators.date == t.c.most_recent_date)).\
+        distinct(*entities).\
+        order_by(nullslast(order)).\
+        with_entities(*entities)
 
-    query = query.distinct(*entities)
-    query = query.order_by(nullslast(order))
-    query = query.with_entities(*entities)
+    if filter_by:
+        query = query.filter(Company.symbol.ilike("{}".format(filter_by)))
+
+    # *** OLD WAY OF GETTING INDICATORS, looks up a static (most recent) date, rather than the most recent date by company ***
+    # # get the most recent collection date
+    # try:
+    #     #date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date # second to last day
+    #     date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[0].date   # last day
+    # except IndexError:
+    #     return render_template('listings.html',
+    #                            pagination=None,
+    #                            listings = None,
+    #                            order_by = order_by,
+    #                            direction = direction,
+    #                            order_bys = order_bys_no_fk,
+    #                            date = datetime.today(),
+    #                            count = 0,
+    #                            form = form,
+    #                            filter_by=filter_by
+    #                            )
+    #query = Indicators.query.join(Company)
+    # if filter_by:
+        # query = query.filter((Indicators.date == date) & ( Company.symbol.ilike("{}".format(filter_by)))  )
+        # query = query.filter(Company.symbol.ilike("{}".format(filter_by)))
+    # else:
+    #     query = query.filter(Indicators.date == date)
+    #
+    # query = query.distinct(*entities)
+    # query = query.order_by(nullslast(order))
+    # query = query.with_entities(*entities)
 
     pagination = query.paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
     listings = pagination.items
