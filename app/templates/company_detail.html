@@ -5,8 +5,10 @@
 <br>
 <div class="row">
 <div>
+<p><a href="{{ request.referrer }}">&larr; Back</a></p>
 <h1>{{company.name}}</h1>
 <p>
+Research: <a href="https://www.google.com/finance?q={{company.symbol}}">Google</a> | <a href="http://finance.yahoo.com/quote/{{company.symbol}}?p={{company.symbol}}">Yahoo</a> | <a href="https://www.sec.gov/cgi-bin/browse-edgar?CIK={{company.symbol}}&owner=exclude&action=getcompany">Edgar</a> | <a href="https://whalewisdom.com/stock/{{company.symbol.lower()}}">Whale Wisdom</a><br /><br />
 Ticker: <b>{{ company.symbol }}</b><br />
 Status: <b>{% if company.active %} Active {% else %} Inactive {% endif %}</b><br />
 Indeces: <b> {% for ind in company.indeces %}{{ ind.name }} {% endfor %}</b>
