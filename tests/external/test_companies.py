@@ -42,7 +42,7 @@ class TestCompanyExternal(unittest.TestCase):
         self.assertEqual(get_sector_and_industry('aapl'), {'industry': u'Computer Hardware - NEC', 'sector': u'Technology'})
 
     def test_g_get_sector_and_industry(self):
-        self.assertEqual(get_sector_and_industry('aapl'), {'industry': u'Computer Hardware - NEC', 'sector': u'Technology'})
+        self.assertEqual(g_get_sector_and_industry('aapl'), {'industry': u'Computer Hardware - NEC', 'sector': u'Technology'})
 
     def test_y_get_sector_and_industry(self):
-        self.assertEqual(get_sector_and_industry('aapl'), {'industry': u'Electronic Equipment', 'sector': u'Consumer Goods'})
+        self.assertEqual(y_get_sector_and_industry('aapl'), {'industry': u'Electronic Equipment', 'sector': u'Consumer Goods'})
