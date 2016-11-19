@@ -12,6 +12,7 @@ class TestCompany(unittest.TestCase):
         self.app = create_app('testing')
         self.app_context = self.app.app_context()
         self.app_context.push()
+        print "your db is", db
         db.create_all()
         Company.generate_fake(10)
         Indicators.generate_fake(3)

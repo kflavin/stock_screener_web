@@ -113,8 +113,15 @@ def get_ratio_data():
                     d[indicator] = element.text
 
         try:
-            db.session.add(Indicators.from_json(d))
-            db.session.commit()
+            i = Indicators.from_json(d)
+            if not i.is_duplicate_of_last():
+                db.session.add(i)
+                db.session.commit()
+            else:
+                db.session.delete(i)
+                db.session.delete(i)
+                db.session.commit()
+                print "No change in indicator, so don't save it", i
         except (IntegrityError, UnmappedInstanceError) as e:
             print "Caught", e
             db.session.rollback()

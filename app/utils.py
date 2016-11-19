@@ -5,6 +5,7 @@ from flask import request, url_for
 
 from werkzeug.routing import BaseConverter
 
+from lib.siccodes import codes
 
 def float_or_none(value):
     try:
@@ -134,3 +135,6 @@ class DateToJSON(JSONEncoder):
             return obj.isoformat()
         return JSONEncoder.default(self, obj)
 
+
+def get_industry(sic_code):
+    return codes.get(str(sic_code))

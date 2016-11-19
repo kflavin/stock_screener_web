@@ -5,23 +5,20 @@ if os.environ.get('FLASK_COVERAGE'):
     COV = coverage.coverage(branch=True, include="app/*")
     COV.start()
 
-
 import datetime
 
-#from stocks_web.models import User, Role
-#from stocks_web import app, db
 from app.models import User, Role, Company, Indicators, Index
 from app import create_app, db
 
 from populate_indicators import get_ratio_data
 from populate_companies import get_company_details
+from populate import get_company_sics, get_sectors_and_industries
+from app.external.companies import get_sic_code, get_sector_and_industry
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 
 from flask.ext.script import Manager, Shell
 from flask.ext.migrate import Migrate, MigrateCommand
-
-#app.config.from_object(os.environ['APP_SETTINGS'])
 
 migrate = Migrate(app, db)
 manager = Manager(app)
@@ -130,6 +127,38 @@ def get_companies(throttle=True, index="NYSE", count=-1):
     Pull company data
     """
     get_company_details(throttle=throttle, index=index, count=int(count))
+
+
+@manager.command
+def get_sics(symbol=""):
+    """
+
+    Args:
+        symbol: company ticker symbol
+
+    Returns:
+
+    """
+    if symbol:
+        print get_sic_code(symbol)
+    else:
+        get_company_sics()
+
+@manager.command
+def get_sectors(symbol=""):
+    """
+
+    Args:
+        symbol: company ticker symbol
+
+    Returns:
+
+    """
+    if symbol:
+        print get_sector_and_industry(symbol)
+    else:
+        get_sectors_and_industries()
+
 
 
 @manager.command

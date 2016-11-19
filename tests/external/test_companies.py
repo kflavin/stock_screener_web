@@ -1,6 +1,8 @@
 import unittest
 from mock import Mock, patch, MagicMock
-from app.external.companies import get_name_from_symbol, get_symbol_lists
+from app.external.companies import (get_name_from_symbol, get_symbol_lists,
+                                    get_sector_and_industry, g_get_sector_and_industry, y_get_sector_and_industry
+                                    )
 
 
 class TestCompanyExternal(unittest.TestCase):
@@ -35,3 +37,12 @@ class TestCompanyExternal(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
         r = get_symbol_lists(index="NASDAQ")
         self.assertEqual(r.status_code, 200)
+
+    def test_get_sector_and_industry(self):
+        self.assertEqual(get_sector_and_industry('aapl'), {'industry': u'Computer Hardware - NEC', 'sector': u'Technology'})
+
+    def test_g_get_sector_and_industry(self):
+        self.assertEqual(get_sector_and_industry('aapl'), {'industry': u'Computer Hardware - NEC', 'sector': u'Technology'})
+
+    def test_y_get_sector_and_industry(self):
+        self.assertEqual(get_sector_and_industry('aapl'), {'industry': u'Electronic Equipment', 'sector': u'Consumer Goods'})

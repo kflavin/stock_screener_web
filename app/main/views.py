@@ -17,15 +17,6 @@ from ..models import Indicators, Company
 
 from datetime import datetime
 
-# Create a user to test with
-#@main.before_first_request
-#def create_user():
-#    print "Creating everything......."
-#    db.create_all()
-#    if db.session.query(User).filter_by(email='admin').count() == 0:
-#        user_datastore.create_user(email='admin', password='password', confirmed_at=datetime.now())
-#    db.session.commit()
-
 
 # Views
 @main.route('/')
@@ -220,6 +211,7 @@ def listings(page):
     order_by: attribute value passed from client (no model)
     order_bys_no_fk: order_bys with no model prefixed.  this is passed to the template.
     """
+
     order_bys = Indicators.get_attributes()
     order_bys_no_fk = Indicators.get_attributes_no_fk()
 
@@ -236,7 +228,6 @@ def listings(page):
 
     # Search filter, redirect if it exists
     form = FilterForm()
-    #filter_by = form.filter.data if form.validate_on_submit() else None
 
     if form.is_submitted():
         if form.validate():
@@ -257,23 +248,7 @@ def listings(page):
         else:
             filter_by = ''
 
-    print "your filter by is", filter_by
-
-    #if form.validate_on_submit():
-    #    direction = request.args.get('direction')
-    #    order_by = request.args.get('order_by')
-    #    query_state = {}
-    #    if direction:
-    #        query_state['direction'] = direction
-    #    if order_by:
-    #        query_state['order_by'] = order_by
-
-    #    return redirect(url_for('main.listings', page=page, filter_by=form.filter.data, **query_state))
-
-    #if Company.validate_symbol(request.args.get('filter_by', '').upper()):
-    #    filter_by = request.args.get('filter_by')
-    #else:
-    #    filter_by = ''
+    current_app.logger.debug("Filter set to {}".format(filter_by))
 
     # Get values from client
     if request.args.get("direction") == "False":

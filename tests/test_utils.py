@@ -1,5 +1,6 @@
 import unittest
-from app.utils import cash_to_float, depercentize
+from app.utils import cash_to_float, depercentize, get_industry
+from lib.siccodes import codes
 
 
 class TestUtils(unittest.TestCase):
@@ -24,4 +25,7 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(depercentize(-12.5), None)
         self.assertEqual(depercentize("-12.5"), -12.5)
 
+    def test_get_industry(self):
+        self.assertEqual('Electronic Computers', get_industry(3571))
+        self.assertEqual('Electronic Computers', get_industry('3571'))
 
