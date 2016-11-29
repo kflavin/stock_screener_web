@@ -38,19 +38,37 @@ def get_ratio_data():
 
 
     # Dict item with list: element attribute, attribute value to look for, optional transform function
+    # indicators = {'roe': {
+    #                       'attribute': 'data-reactid',
+    #                       'value': re.compile(".*RETURN_ON_EQUITY\.1$"),
+    #                       'transform': depercentize,
+    #                       },
+    #               'fcf': {
+    #                       'attribute': 'data-reactid',
+    #                       'value': re.compile(".*LEVERED_FREE_CASH_FLOW\.1$"),
+    #                       'transform': cash_to_float,
+    #                       },
+    #               'ev2ebitda': {
+    #                       'attribute': 'data-reactid',
+    #                       'value': re.compile(".*ENTERPRISE_VALUE_TO_EBITDA\.1$"),
+    #                       },
+    #               }
     indicators = {'roe': {
-                          'attribute': 'data-reactid',
-                          'value': re.compile(".*RETURN_ON_EQUITY\.1$"),
+                          'tag': 'span',
+                          'attribute': 'class',
+                          'value': re.compile("^Return on Equity$"),
                           'transform': depercentize,
                           },
                   'fcf': {
-                          'attribute': 'data-reactid',
-                          'value': re.compile(".*LEVERED_FREE_CASH_FLOW\.1$"),
+                          'tag': 'span',
+                          'attribute': 'class',
+                          'value': re.compile("^Levered Free Cash Flow$"),
                           'transform': cash_to_float,
                           },
                   'ev2ebitda': {
-                          'attribute': 'data-reactid',
-                          'value': re.compile(".*ENTERPRISE_VALUE_TO_EBITDA\.1$"),
+                          'tag': 'span',
+                          'attribute': 'class',
+                          'value': re.compile("^Enterprise Value/EBITDA$"),
                           },
                   }
 
@@ -81,36 +99,34 @@ def get_ratio_data():
             #element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//td[@data-reactid[ends-with(., 'RETURN_ON_EQUITY.1')]]")))
 
             # these two seem to work...
-            element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[substring(@data-reactid, string-length(@data-reactid) - string-length('RETURN_ON_EQUITY.1') +1) = 'RETURN_ON_EQUITY.1']")))
             #element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[contains(@data-reactid,'RETURN_ON_EQUITY.1')]")))
+            #element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//*[substring(@data-reactid, string-length(@data-reactid) - string-length('RETURN_ON_EQUITY.1') +1) = 'RETURN_ON_EQUITY.1']")))
+            element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//span[text()='Return on Equity']")))
+            # time.sleep(5)
 
             #"//input[@id[ends-with(.,'register')]]"
         except TimeoutException as e:
-            print  "Caught", e
+            print "Caught", e
             print driver.title
+            print "continuing..."
             continue
-
-        #time.sleep(5)
-
-        #with open("{}.out".format(symbol), "w") as f:
-        #    f.write(driver.page_source.encode('utf-8'))
 
         soup = BeautifulSoup(driver.page_source, "lxml")
 
         d = {'symbol': symbol}
         for indicator in indicators.keys():
             curr_ind = indicators[indicator]
-            s = soup.find_all(attrs={curr_ind['attribute']: curr_ind['value']})
+            s = soup.find_all(curr_ind['tag'], text=curr_ind['value'])[0].find_next('td', attrs={'class': 'Fz(s) Fw(500) Ta(end)'}).text
             print indicator, s
 
-            for element in s:
-                if curr_ind.has_key('transform'):
-                    f = curr_ind['transform']
-                    #print(f(element.text))
-                    d[indicator] = f(element.text)
-                else:
-                    #print(element.text)
-                    d[indicator] = element.text
+            # for element in s:
+            if curr_ind.has_key('transform'):
+                f = curr_ind['transform']
+                #print(f(element.text))
+                d[indicator] = f(s)
+            else:
+                #print(element.text)
+                d[indicator] = s
 
         try:
             i = Indicators.from_json(d)

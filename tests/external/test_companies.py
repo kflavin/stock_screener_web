@@ -44,5 +44,6 @@ class TestCompanyExternal(unittest.TestCase):
     def test_g_get_sector_and_industry(self):
         self.assertEqual(g_get_sector_and_industry('aapl'), {'industry': u'Computer Hardware - NEC', 'sector': u'Technology'})
 
-    def test_y_get_sector_and_industry(self):
-        self.assertEqual(y_get_sector_and_industry('aapl'), {'industry': u'Electronic Equipment', 'sector': u'Consumer Goods'})
+    # Skipping usage of this for now
+    # def test_y_get_sector_and_industry(self):
+    #     self.assertEqual(y_get_sector_and_industry('aapl'), {'industry': u'Electronic Equipment', 'sector': u'Consumer Goods'})

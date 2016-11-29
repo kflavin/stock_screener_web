@@ -1,6 +1,6 @@
 from sqlalchemy.exc import IntegrityError
 from flask import request, current_app, url_for, jsonify, abort
-from errors import conflict
+from errors import conflict, bad_request
 from ..models import Company
 from .. import db
 from . import api
@@ -41,7 +41,11 @@ def get_company(symbol):
 #@api.route('/company/<regex("[A-Z]{2,4}"):symbol>/', methods=['POST'])
 @api.route('/company/', methods=['POST'])
 def new_company():
-    company = Company.from_json(request.json)
+    try:
+        company = Company.from_json(request.json)
+    except ValueError:
+        return bad_request("Invalid data.  Check symbol and company name.")
+
     db.session.add(company)
     try:
         db.session.commit()
