@@ -64,13 +64,12 @@ def bulk_add_company():
     # print request.json.get('companies')
 
     count = 0
-    for company in request.json.get('companies'):
-        print "Adding", company
+    for c in request.json.get('companies'):
         try:
-            company = Company.from_json(company)
+            company = Company.from_json(c)
         except ValueError, e:
             # return bad_request("Invalid data.  Check symbol and company name.")
-            print e
+            print "Could not add", c, e
         else:
             db.session.add(company)
             try:
