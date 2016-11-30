@@ -2,7 +2,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from app.external.companies import get_symbol_lists
 
-def get_company_details(throttle=True, count=0, index="NYSE"):
+def get_company_details(throttle=True, count=0, exchange="NYSE"):
     """
     throttle: true = 1 second wait between requests
     Count < 1 implies get all
@@ -15,13 +15,13 @@ def get_company_details(throttle=True, count=0, index="NYSE"):
     import string
     from bs4 import BeautifulSoup
 
-    from app.models import Company, Indicators, Index
+    from app.models import Company, Indicators, Exchange
     from app.utils import cash_to_float, depercentize
     from app import db
 
     # Add the index if it doesn't exist
-    if not Index.query.filter(Index.name == index).first():
-        db.session.add(Index(name=index))
+    if not Exchange.query.filter(Exchange.name == exchange).first():
+        db.session.add(Exchange(name=exchange))
         db.session.commit()
 
     curr = 0
@@ -32,7 +32,7 @@ def get_company_details(throttle=True, count=0, index="NYSE"):
 
     break_out = False
     for c in string.uppercase:
-        r = get_symbol_lists(index, c)
+        r = get_symbol_lists(exchange, c)
         soup = BeautifulSoup(r.text, 'lxml')
         table = soup.find_all("table", class_="quotes")[0]
         trs = table.find_all("tr")
@@ -43,7 +43,7 @@ def get_company_details(throttle=True, count=0, index="NYSE"):
             print curr, "Add", symbol, name
             if symbol and name:
                 try:
-                    db.session.add(Company.from_json({'name': name, 'symbol': symbol, 'index': index}))
+                    db.session.add(Company.from_json({'name': name, 'symbol': symbol, 'index': exchange}))
                     db.session.commit()
                 except (IntegrityError, UnmappedInstanceError) as e:
                     print "Caught", e

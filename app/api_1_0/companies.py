@@ -40,7 +40,7 @@ def get_company(symbol):
 #@api.route('/company/<int:id>', methods=['POST'])
 #@api.route('/company/<regex("[A-Z]{2,4}"):symbol>/', methods=['POST'])
 @api.route('/company/', methods=['POST'])
-def new_company():
+def add_company():
     try:
         company = Company.from_json(request.json)
     except ValueError:
@@ -57,3 +57,26 @@ def new_company():
                                                                      symbol=company.symbol,
                                                                      _external=True)
                                                  }
+
+
+@api.route('/company/bulk/', methods=['POST'])
+def bulk_add_company():
+    # print request.json.get('companies')
+
+    count = 0
+    for company in request.json.get('companies'):
+        print "Adding", company
+        try:
+            company = Company.from_json(company)
+        except ValueError, e:
+            # return bad_request("Invalid data.  Check symbol and company name.")
+            print e
+        else:
+            db.session.add(company)
+            try:
+                db.session.commit()
+                count += 1
+            except IntegrityError:
+                db.session.rollback()
+
+    return jsonify({'count': count}), 201

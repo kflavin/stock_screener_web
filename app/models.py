@@ -77,20 +77,35 @@ class Filters(db.Model):
     strategy_id = db.Column(db.Integer, db.ForeignKey('strategy.id'))
 
 
-IndexMembership = db.Table('index_membership',
-       db.Column('index_id', db.Integer, db.ForeignKey('index.id')),
+ExchangeMembership = db.Table('exchange_membership',
+       db.Column('exchange_id', db.Integer, db.ForeignKey('exchange.id')),
        db.Column('company_id', db.Integer, db.ForeignKey('company.id'))
 )
 
 
-class Index(db.Model):
+class Exchange(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True)
     companies = db.relationship('Company',
-                                secondary=IndexMembership,
-                                backref=db.backref('indeces', lazy='dynamic'),
+                                secondary=ExchangeMembership,
+                                backref=db.backref('exchanges', lazy='dynamic'),
                                 lazy='dynamic'
                                 )
+
+    @staticmethod
+    def add_exchange(name):
+        if name == "NYSE" or name == "NASDAQ":
+            exchange = Exchange(name=name)
+            return exchange
+        else:
+            return None
+
+    @staticmethod
+    def get_exchange(name):
+        exchange = Exchange.query.filter(Exchange.name == name).first()
+        if not exchange:
+            exchange = Exchange.add_exchange(name)
+        return exchange
 
 
 class Company(db.Model):
@@ -170,7 +185,7 @@ class Company(db.Model):
     def from_json(j):
         name = j.get('name')
         symbol = j.get('symbol')
-        index = j.get('index')
+        exchange = j.get('index')
 
         if not Company.validate_name(name):
             raise ValueError('Invalid name')
@@ -179,15 +194,13 @@ class Company(db.Model):
             raise ValueError('Invalid symbol')
 
         # Use company validation for the index name too
-        if not Company.validate_name(index):
-            clean_index = None
-        else:
-            clean_index = Index.query.filter(Index.name == index).first()
+        clean_exchange = Exchange.get_exchange(exchange)
 
         active = j.get('active') if j.get('active') else True
 
         c = Company(name=name, symbol=symbol, active=active)
-        c.indeces.append(clean_index)
+        if clean_exchange:
+            c.exchanges.append(clean_exchange)
 
         return c
 

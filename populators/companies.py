@@ -1,7 +1,4 @@
 import os
-
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm.exc import UnmappedInstanceError
 from populators.external.companies import get_symbol_lists
 from requests.auth import HTTPBasicAuth
 
@@ -13,27 +10,18 @@ def get_company_details(throttle=True, count=0, index="NYSE"):
     index: NYSE or NASDAQ
 
     """
-
-    import re
     import time
     import requests
     import string
     from bs4 import BeautifulSoup
 
-    from app.models import Company, Indicators, Index
-    from app.utils import cash_to_float, depercentize
-    from app import db
-
-    # # Add the index if it doesn't exist
-    # if not Index.query.filter(Index.name == index).first():
-    #     db.session.add(Index(name=index))
-    #     db.session.commit()
-
     curr = 0
-    if count > 0:
-        print "Attempting to pull", count, "companies"
-    else:
-        print "Pull all companies"
+
+    user = os.environ.get('CLI_USER')
+    password = os.environ.get('CLI_PASSWORD')
+    host = os.environ.get('CLI_HOST')
+    auth = HTTPBasicAuth(user, password)
+
 
     break_out = False
     for c in string.uppercase:
@@ -42,37 +30,31 @@ def get_company_details(throttle=True, count=0, index="NYSE"):
         table = soup.find_all("table", class_="quotes")[0]
         trs = table.find_all("tr")
         trs.pop(0)  # remove header row
+        batch = []
         for tr in trs:
             symbol = tr.td.a.text
             name = tr.td.next_sibling.text
             print curr, "Add", symbol, name
             if symbol and name:
                 data = {'name': name, 'symbol': symbol, 'index': index}
-                print "Adding", data
-                r = requests.post("http://{}/api/1.0/company/".format(os.environ.get('CLI_HOST')), json=data, auth=HTTPBasicAuth(os.environ.get('CLI_USER'), os.environ.get('CLI_PASSWORD')))
-                if r.status_code == 409:
-                    print "Duplicate value for", symbol
-                elif r.status_code != 200:
-                    print r.status_code
-                    print r.text
-                    print "Error: ", r.json()
-
-                # try:
-                #     db.session.add(Company.from_json({'name': name, 'symbol': symbol, 'index': index}))
-                #     db.session.commit()
-                # except (IntegrityError, UnmappedInstanceError) as e:
-                #     print "Caught", e
-                #     db.session.rollback()
-                # except ValueError as e:
-                #     print "Invalid company name or symbol"
-                #     print e
-                #     db.session.rollback()
+                batch.append(data)
+                # r = requests.post("http://{}/api/1.0/company/".format(host), json=data, auth=auth)
+                # if r.status_code == 409:
+                #     print "Duplicate value for", symbol
+                # elif r.status_code != 201:
+                #     print r.status_code
+                #     # print r.text
+                #     print "Error: ", r.json()
 
             curr += 1
             if count > 0:
                 if curr >= count:
                     break_out = True
                     break
+
+        r = requests.post("http://{}/api/1.0/company/bulk/".format(host), json={'companies': batch}, auth=auth)
+        print r
+        print "code", r.status_code
 
         if throttle:
             time.sleep(1)

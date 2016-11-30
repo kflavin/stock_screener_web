@@ -9,9 +9,12 @@ def start(debug):
 
 
 @click.command()
-def companies(throttle=True, count=0, index="NYSE"):
-    click.echo('companies')
-    get_company_details(throttle, count, index)
+@click.option('--no-throttle', default=True, is_flag=True, help='Throttle connection')
+@click.option('--count', default=0, help='Number of companies to retrieve')
+@click.option('--exchange', default="NYSE", help='Exchange NYSE|NASDAQ')
+def companies(no_throttle, count, exchange):
+    click.echo('Retrieving Companies, settings: {} {} {}'.format(no_throttle, count, exchange))
+    get_company_details(no_throttle, count, exchange)
 
 
 @click.command()

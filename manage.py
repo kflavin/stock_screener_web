@@ -7,7 +7,7 @@ if os.environ.get('FLASK_COVERAGE'):
 
 import datetime
 
-from app.models import User, Role, Company, Indicators, Index
+from app.models import User, Role, Company, Indicators, Exchange
 from app import create_app, db
 
 from populate_indicators import get_ratio_data
@@ -25,7 +25,7 @@ manager = Manager(app)
 
 # configure shell and migration commands
 def make_shell_context():
-    return dict(app=app, db=db, User=User, Role=Role, Company=Company, Indicators=Indicators, Index=Index)
+    return dict(app=app, db=db, User=User, Role=Role, Company=Company, Indicators=Indicators, Exchange=Exchange)
 manager.add_command("shell", Shell(make_context=make_shell_context))
 manager.add_command("db", MigrateCommand)
 
@@ -126,7 +126,7 @@ def get_companies(throttle=True, index="NYSE", count=-1):
     """
     Pull company data
     """
-    get_company_details(throttle=throttle, index=index, count=int(count))
+    get_company_details(throttle=throttle, exchange=index, count=int(count))
 
 
 @manager.command
