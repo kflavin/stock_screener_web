@@ -35,13 +35,24 @@ class TestCompany(unittest.TestCase):
         self.assertFalse(Company.validate_name("Bad Company**!"))
 
     def test_company_from_json(self):
-        c = Company.from_json({'name': 'ABC Company', 'symbol': 'ABC', 'index': "NYSE"})
+        c = Company.from_json({'name': 'ABC Company', 'symbol': 'ABC', 'exchange': "NYSE"})
         self.assertTrue(isinstance(c, Company))
         with self.assertRaises(ValueError):
             c = Company.from_json({'name': '', 'symbol': ''})
 
         c = Company.from_json({'name': 'DEF Company', 'symbol': 'DEF', 'active': False})
         self.assertTrue(isinstance(c, Company))
+
+    def test_update_company(self):
+        company = Company.query.first()
+        symbol = company.symbol
+
+        d = {'name': 'New Company', 'symbol': symbol, 'sector': "BOGUSSECTOR", 'industry': "BOGUSINDUSTRY"}
+        Company.update(d)
+        company = Company.query.filter(Company.symbol == symbol).first()
+        self.assertEqual(company.name, "New Company")
+        self.assertEqual(company.sector, "BOGUSSECTOR")
+        self.assertEqual(company.industry, "BOGUSINDUSTRY")
 
 
 class TestIndicators(unittest.TestCase):

@@ -94,14 +94,14 @@ def drop_db():
 @manager.command
 def create_admin():
     """Creates the admin user."""
-    admin = db.session.query(User).filter_by(email="root").first()
+    admin = db.session.query(User).filter_by(email="root2").first()
     
     if admin:
         admin.active = True
         admin.confirmed_at = datetime.datetime.utcnow()
         db.session.add(admin)
     else:
-        db.session.add(User(email="root", password="password", active=True, confirmed_at=datetime.datetime.utcnow()))
+        db.session.add(User(email="root2", password="password", active=True, confirmed_at=datetime.datetime.utcnow()))
 
     db.session.commit()
 

@@ -43,7 +43,7 @@ def get_company_details(throttle=True, count=0, exchange="NYSE"):
             print curr, "Add", symbol, name
             if symbol and name:
                 try:
-                    db.session.add(Company.from_json({'name': name, 'symbol': symbol, 'index': exchange}))
+                    db.session.add(Company.from_json({'name': name, 'symbol': symbol, 'exchange': exchange}))
                     db.session.commit()
                 except (IntegrityError, UnmappedInstanceError) as e:
                     print "Caught", e

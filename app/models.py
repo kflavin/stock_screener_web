@@ -10,6 +10,9 @@ from random import seed, choice
 from string import ascii_uppercase
 from flask.ext.security.utils import encrypt_password
 from flask import current_app, abort
+from sqlalchemy.sql.expression import bindparam
+from sqlalchemy import inspect
+
 from app.external.companies import get_name_from_symbol
 
 from app import db
@@ -118,6 +121,9 @@ class Company(db.Model):
     active = db.Column(db.Boolean, default=True)
     indicators = db.relationship('Indicators', backref='company', lazy='dynamic')
 
+    # "Special" attributes that we ignore
+    ignore_attrs = ['id', 'indicators']
+
     # Define attributes here for lookups.
     attributes = {'name': "Name",
                   'symbol': "Ticker"
@@ -161,6 +167,31 @@ class Company(db.Model):
             except IntegrityError:
                 db.session.rollback()
 
+    @staticmethod
+    def update(j):
+        passed_keys = j.keys()
+        symbol = j.get('symbol')
+        if not symbol:
+            return False
+
+        bind_params = {}
+        realized_params = {}
+        mapper = inspect(Company)
+        for col in mapper.attrs.keys():
+            if col not in Company.ignore_attrs and col in passed_keys:
+                bind_params[col] = bindparam(col)
+                realized_params[col] = j.get(col)
+
+        if not Company.validate_company_values(realized_params):
+            return False
+
+        company_table = mapper.mapped_table
+        stmt = company_table.update().where(company_table.c.symbol == symbol).values(**bind_params)
+        db.session.execute(stmt, realized_params)
+        db.session.commit()
+        return Company.query.filter(Company.symbol == symbol).first()
+
+
     def dates_to_json(self):
         """
 
@@ -185,7 +216,7 @@ class Company(db.Model):
     def from_json(j):
         name = j.get('name')
         symbol = j.get('symbol')
-        exchange = j.get('index')
+        exchange = j.get('exchange')
 
         if not Company.validate_name(name):
             raise ValueError('Invalid name')
@@ -203,6 +234,31 @@ class Company(db.Model):
             c.exchanges.append(clean_exchange)
 
         return c
+
+    @staticmethod
+    def validate_company_values(values):
+        """
+
+        Args:
+            d: dictionary of Company attributes
+
+        Returns:
+            True if valid, false if not
+
+        """
+        d = values.copy()
+        symbol = d.get('symbol')
+        if symbol:
+            d.pop('symbol')
+            if not Company.validate_symbol(symbol):
+                return False
+
+        for key in d.keys():
+            value = d.get(key)
+            if not Company.validate_name(value):
+                return False
+
+        return True
 
 
     @staticmethod

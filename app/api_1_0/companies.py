@@ -8,9 +8,15 @@ from . import api
 
 @api.route('/company/')
 def get_companies():
+
+    try:
+        count = int(request.args.get('count'))
+    except (ValueError, TypeError):
+        count = current_app.config['COMPANIES_PER_PAGE']
+
     page = request.args.get('page', 1, type=int)
     pagination = Company.query.order_by(Company.name.asc()).paginate(page,
-                                                                     per_page=current_app.config['COMPANIES_PER_PAGE'],
+                                                                     per_page=count,
                                                                      error_out=False)
     companies = pagination.items
     prev = None
@@ -24,17 +30,35 @@ def get_companies():
         'companies': [company.to_json() for company in companies],
         'prev': prev,
         'next': next,
-        'count': pagination.total
+        'total': pagination.total,
+        'pages': pagination.pages,
+        'per_page': pagination.per_page
     })
 
 
-@api.route('/company/<regex("[A-Za-z]{2,4}"):symbol>')
+@api.route('/company/<regex("[A-Za-z]{2,4}"):symbol>', methods=['GET', 'POST'])
 def get_company(symbol):
     company = Company.query.filter_by(symbol=symbol).first()
     if not company:
         abort(404)
 
-    return jsonify(company.to_json())
+    if request.method == "GET":
+        return jsonify(company.to_json())
+    elif request.method == "POST":
+        d = request.json
+        if d:
+            d['symbol'] = symbol
+
+            c = Company.update(d)
+            if c:
+                return jsonify(c.to_json())
+            else:
+                return bad_request("Could not update {}".format(symbol))
+        else:
+            return bad_request("No data sent for {}".format(symbol))
+
+    else:
+        return bad_request("Invalid request.")
 
 
 #@api.route('/company/<int:id>', methods=['POST'])
@@ -79,3 +103,4 @@ def bulk_add_company():
                 db.session.rollback()
 
     return jsonify({'count': count}), 201
+

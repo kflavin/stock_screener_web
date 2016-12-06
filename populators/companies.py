@@ -3,11 +3,11 @@ from populators.external.companies import get_symbol_lists
 from requests.auth import HTTPBasicAuth
 
 
-def get_company_details(throttle=True, count=0, index="NYSE"):
+def get_company_details(throttle=True, count=0, exchange="NYSE"):
     """
     throttle: true = 1 second wait between requests
     Count < 1 implies get all
-    index: NYSE or NASDAQ
+    exchange: NYSE or NASDAQ
 
     """
     import time
@@ -22,10 +22,9 @@ def get_company_details(throttle=True, count=0, index="NYSE"):
     host = os.environ.get('CLI_HOST')
     auth = HTTPBasicAuth(user, password)
 
-
     break_out = False
     for c in string.uppercase:
-        r = get_symbol_lists(index, c)
+        r = get_symbol_lists(exchange, c)
         soup = BeautifulSoup(r.text, 'lxml')
         table = soup.find_all("table", class_="quotes")[0]
         trs = table.find_all("tr")
@@ -36,7 +35,7 @@ def get_company_details(throttle=True, count=0, index="NYSE"):
             name = tr.td.next_sibling.text
             print curr, "Add", symbol, name
             if symbol and name:
-                data = {'name': name, 'symbol': symbol, 'index': index}
+                data = {'name': name, 'symbol': symbol, 'exchange': exchange}
                 batch.append(data)
                 # r = requests.post("http://{}/api/1.0/company/".format(host), json=data, auth=auth)
                 # if r.status_code == 409:
@@ -53,8 +52,7 @@ def get_company_details(throttle=True, count=0, index="NYSE"):
                     break
 
         r = requests.post("http://{}/api/1.0/company/bulk/".format(host), json={'companies': batch}, auth=auth)
-        print r
-        print "code", r.status_code
+        print "code", r.status_code, "count:", r.json().get('count')
 
         if throttle:
             time.sleep(1)

@@ -14,7 +14,7 @@
   Industry: <b>{{company.industry }}</b><br />
   SIC: <b>{{ get_industry(company.sic_code) }}</b><br />
   Status: <b>{% if company.active %} Active {% else %} Inactive {% endif %}</b><br />
-  Indeces: <b> {% for ind in company.indeces %}{{ ind.name }} {% endfor %}</b>
+  Exchange: <b> {% for exchange in company.exchanges %}{{ exchange.name }} {% endfor %}</b>
 </p>
 
 <table class="table">

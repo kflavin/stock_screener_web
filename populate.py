@@ -1,4 +1,7 @@
 import logging
+
+from sqlalchemy.exc import IntegrityError
+
 from app.external.companies import get_sic_code, get_sector_and_industry
 from app import db
 from app.models import Company, Indicators

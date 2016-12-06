@@ -1,5 +1,7 @@
 import click
 from populators.companies import get_company_details
+from populators.external.sectors import get_sector_and_industry
+from populators.sectors import get_sectors_and_industries
 
 
 @click.group()
@@ -23,8 +25,15 @@ def indicators():
 
 
 @click.command()
-def sectors():
+@click.option('--symbol', default=None, help='Symbol for single company')
+@click.option('--count', default=None, help='Per page number to retrieve')
+def sectors(symbol, count):
     click.echo('sectors')
+    if symbol:
+        click.echo("get company {}".format(symbol))
+        print get_sector_and_industry(symbol)
+    else:
+        get_sectors_and_industries(count)
 
 
 start.add_command(companies)
