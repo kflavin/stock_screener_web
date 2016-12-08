@@ -10,6 +10,7 @@ from random import seed, choice
 from string import ascii_uppercase
 from flask.ext.security.utils import encrypt_password
 from flask import current_app, abort
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.expression import bindparam
 from sqlalchemy import inspect
 
@@ -294,6 +295,7 @@ class Indicators(db.Model):
         'fcf': "Free Cash Flow",
         'ev2ebitda': "EV/EBITDA",
     }
+    ignore_attrs = ['id', 'company_id']
     UniqueConstraint(date, company_id, name="one_per_company_per_day")
 
     @classmethod
@@ -352,21 +354,34 @@ class Indicators(db.Model):
         if not last_date:
             return False
 
-        print "looking for date", last_date
         i = Indicators.query.filter((Indicators.date == last_date) &
                                     (Indicators.company_id == self.company.id)).first()
 
-        return Indicators.equal_values(self, i)
+        # return Indicators.equal_values(self, i)
+        return self == i
 
-    @staticmethod
-    def equal_values(i1, i2):
+    # @staticmethod
+    # def equal_values(i1, i2):
+    #     """
+    #     Check if an indicator has equal values, other than the date.
+    #     """
+    #     print "compare", i1, i2
+    #     attribs = Indicators.get_attributes_no_fk()
+    #     for k, v in attribs.iteritems():
+    #         if k != "symbol" and k != "ev2ebitda" and k != "id":
+    #             if getattr(i1, k) != getattr(i2, k):
+    #                 return False
+    #
+    #     return True
+
+    def __eq__(self, other):
         """
         Check if an indicator has equal values, other than the date.
         """
         attribs = Indicators.get_attributes_no_fk()
         for k, v in attribs.iteritems():
-            if k != "symbol":
-                if getattr(i1, k) != getattr(i2, k):
+            if k != "symbol" and k != "ev2ebitda":
+                if getattr(self, k) != getattr(other, k):
                     return False
 
         return True
@@ -403,10 +418,18 @@ class Indicators(db.Model):
         else:
             company = Company.query.filter_by(symbol=symbol).first()
 
-        # Go through each key and assign it, unless it's "name" or "symbol"
+        # Go through each key and assign it, with some exceptions
         for key in json_indicators.keys():
-            if key.find(".") == -1 and key != 'name' and key != 'symbol' and key != "company_id" and key != "id":
-                setattr(indicators, key, float_or_none(json_indicators.get(key)))
+            if key.find(".") == -1 and \
+                            key != 'name' and \
+                            key != 'symbol' and \
+                            key != "company_id" and \
+                            key != "id":
+                value = float_or_none(json_indicators.get(key))
+                if value:
+                    setattr(indicators, key, float_or_none(json_indicators.get(key)))
+                else:
+                    setattr(indicators, key, json_indicators.get(key))
 
         indicators.company = company
 
@@ -427,14 +450,26 @@ class Indicators(db.Model):
             limit: maximum number of records to return
 
         Returns:
-            An indicator if it exists
+            A date, if it exists
 
         """
         try:
-            #return db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[0].date
-            return Indicators.query.join(Company).filter(Company.symbol == self.company.symbol).with_entities(Indicators.date).order_by(desc("date")).limit(limit).all()[index].date
-        except IndexError:
+            val = Indicators.query.join(Company).filter(Company.symbol == self.company.symbol).with_entities(Indicators.date).order_by(desc("date")).limit(limit).all()[index].date
+            return val
+        except AttributeError:
+            # indicator has no associated company?
+            current_app.logger.debug("No company associated with Indicator?")
             return None
+        except IndexError:
+            current_app.logger.debug("Index error looking up Indicator")
+            return None
+        except IntegrityError as e:
+            current_app.logger.debug("Integrity Error {}".format(e))
+            print "roll it back!"
+            db.session.rollback()
+            return False
+
+        return None
 
     def to_json(self):
         return {

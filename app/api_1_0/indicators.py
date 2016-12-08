@@ -1,13 +1,15 @@
 from datetime import datetime, date
 from flask import jsonify, request, abort, url_for
 from sqlalchemy import distinct
+from sqlalchemy.exc import IntegrityError
+
 from .errors import bad_request, conflict
 from . import api
 from ..models import Indicators, Company
 from .. import db
 
 
-@api.route('/indicators/<int:id>/')
+@api.route('/indicators/<int:id>')
 def get_indicators(id):
     mydate = request.args.get('date', None)
 
@@ -27,7 +29,7 @@ def get_indicators(id):
     return jsonify({'indicators': indicators.to_json()})
 
 
-@api.route('/indicators/<int:id>/dates/')
+@api.route('/indicators/<int:id>/dates')
 def get_indicator_dates(id):
     company = Company.query.filter_by(id=id).first()
     dates = company.dates_to_json()
@@ -37,22 +39,20 @@ def get_indicator_dates(id):
     return jsonify({'dates': dates})
 
 
-@api.route('/indicators/', methods=['POST'])
+@api.route('/indicators', methods=['POST'])
 def create_indicators():
-    indicators = Indicators.from_json(request.json)
+    indicator = Indicators.from_json(request.json)
 
-    count = Indicators.query.filter_by(date=date.today()).join(Company).filter_by(symbol=indicators.company.symbol).count()
-    if count > 1:
-        return conflict("Already have an indicator for today for {}".format(indicators.company.symbol))
-
-    db.session.add(indicators)
-    try:
-        db.session.commit()
-    except IntegrityError:
-        db.session.rollback()
-        return bad_request("Could not create indicator")
+    if not indicator.is_duplicate_of_last():
+        try:
+            db.session.add(indicator)
+            db.session.commit()
+        except IntegrityError:
+            return conflict("Could not create indicator, likely a duplicate date.")
+        else:
+            return jsonify(indicator.to_json()), 201, {'Location': url_for('api.get_indicators', id=indicator.id,_external=True) }
     else:
-        return jsonify(indicators.to_json()), 201, {'Location': url_for('api.get_indicators', 
-                                                                        id=indicators.id, 
-                                                                        _external=True)
-                                                    }
+        db.session.delete(indicator)
+        db.session.commit()
+
+    return conflict("Identical indicator exists")

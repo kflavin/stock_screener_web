@@ -2,6 +2,7 @@ import click
 from populators.companies import get_company_details
 from populators.external.sectors import get_sector_and_industry
 from populators.sectors import get_sectors_and_industries
+from populators.indicators import get_ratio_data
 
 
 @click.group()
@@ -20,8 +21,10 @@ def companies(no_throttle, count, exchange):
 
 
 @click.command()
-def indicators():
+@click.option('--count', default=None, help='Per page number to retrieve')
+def indicators(count):
     click.echo('indicators')
+    get_ratio_data(count)
 
 
 @click.command()
@@ -31,6 +34,7 @@ def sectors(symbol, count):
     click.echo('sectors')
     if symbol:
         click.echo("get company {}".format(symbol))
+        # If we have a single symbol, just make the external call directly, rather than through our populator
         print get_sector_and_industry(symbol)
     else:
         get_sectors_and_industries(count)
