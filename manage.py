@@ -10,10 +10,10 @@ import datetime
 from app.models import User, Role, Company, Indicators, Exchange
 from app import create_app, db
 
-from populate_indicators import get_ratio_data
-from populate_companies import get_company_details
-from populate import get_company_sics, get_sectors_and_industries
-from app.external.companies import get_sic_code, get_sector_and_industry
+# from populate_indicators import get_ratio_data
+# from populate_companies import get_company_details
+# from populate import get_company_sics, get_sectors_and_industries
+# from app.external.companies import get_sic_code, get_sector_and_industry
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 
@@ -114,50 +114,50 @@ def make_data():
     Company.generate_fake(3000)
     Indicators.generate_fake(500)
 
-@manager.command
-def get_ratios():
-    """
-    Pull financial ratios
-    """
-    get_ratio_data()
+# @manager.command
+# def get_ratios():
+#     """
+#     Pull financial ratios
+#     """
+#     get_ratio_data()
+#
+# @manager.command
+# def get_companies(throttle=True, index="NYSE", count=-1):
+#     """
+#     Pull company data
+#     """
+#     get_company_details(throttle=throttle, exchange=index, count=int(count))
 
-@manager.command
-def get_companies(throttle=True, index="NYSE", count=-1):
-    """
-    Pull company data
-    """
-    get_company_details(throttle=throttle, exchange=index, count=int(count))
 
+# @manager.command
+# def get_sics(symbol=""):
+#     """
+#
+#     Args:
+#         symbol: company ticker symbol
+#
+#     Returns:
+#
+#     """
+#     if symbol:
+#         print get_sic_code(symbol)
+#     else:
+#         get_company_sics()
 
-@manager.command
-def get_sics(symbol=""):
-    """
-
-    Args:
-        symbol: company ticker symbol
-
-    Returns:
-
-    """
-    if symbol:
-        print get_sic_code(symbol)
-    else:
-        get_company_sics()
-
-@manager.command
-def get_sectors(symbol=""):
-    """
-
-    Args:
-        symbol: company ticker symbol
-
-    Returns:
-
-    """
-    if symbol:
-        print get_sector_and_industry(symbol)
-    else:
-        get_sectors_and_industries()
+# @manager.command
+# def get_sectors(symbol=""):
+#     """
+#
+#     Args:
+#         symbol: company ticker symbol
+#
+#     Returns:
+#
+#     """
+#     if symbol:
+#         print get_sector_and_industry(symbol)
+#     else:
+#         get_sectors_and_industries()
 
 
 

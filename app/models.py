@@ -14,7 +14,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.expression import bindparam
 from sqlalchemy import inspect
 
-from app.external.companies import get_name_from_symbol
+# from app.external.companies import get_name_from_symbol
 
 from app import db
 from app.utils import DateToJSON, float_or_none
