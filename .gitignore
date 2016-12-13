@@ -65,9 +65,6 @@ target/
 # zip
 *.zip
 
-# alembic ini
-alembic.ini
-
 # misc
 .env
 environment
