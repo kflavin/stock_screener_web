@@ -3,7 +3,7 @@ from populators.external.companies import get_symbol_lists
 from requests.auth import HTTPBasicAuth
 
 
-def get_company_details(throttle=True, count=0, exchange="NYSE"):
+def get_company_details(throttle=True, count=0, exchange="NYSE", host="http://127.0.0.1:5000", user="user", password="password"):
     """
     throttle: true = 1 second wait between requests
     Count < 1 implies get all
@@ -17,9 +17,6 @@ def get_company_details(throttle=True, count=0, exchange="NYSE"):
 
     curr = 0
 
-    user = os.environ.get('CLI_USER')
-    password = os.environ.get('CLI_PASSWORD')
-    host = os.environ.get('CLI_HOST')
     auth = HTTPBasicAuth(user, password)
 
     break_out = False
@@ -50,8 +47,8 @@ def get_company_details(throttle=True, count=0, exchange="NYSE"):
                 if curr >= count:
                     break_out = True
                     break
-
-        r = requests.post("http://{}/api/1.0/company/bulk/".format(host), json={'companies': batch}, auth=auth)
+        print "get", c
+        r = requests.post("{}/api/1.0/company/bulk/".format(host), json={'companies': batch}, auth=auth)
         print "code", r.status_code, "count:", r.json().get('count')
 
         if throttle:
@@ -59,6 +56,7 @@ def get_company_details(throttle=True, count=0, exchange="NYSE"):
 
         if break_out:
             break
+
 
 
 if __name__ == '__main__':

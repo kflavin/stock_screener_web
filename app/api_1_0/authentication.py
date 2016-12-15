@@ -1,7 +1,7 @@
 from flask import g
 from flask.ext.httpauth import HTTPBasicAuth
 from ..models import User
-from .errors import unauthorized
+from .errors import unauthorized, InvalidUsage
 from . import api
 
 auth = HTTPBasicAuth()
@@ -14,6 +14,9 @@ def verify_password(email, password):
 
     user = User.query.filter(User.email.ilike(email)).first()
     g.current_user = user
+
+    if not user:
+        raise InvalidUsage("Invalid credentials", status_code=401)
 
     return user.verify_password(password)
 

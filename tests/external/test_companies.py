@@ -1,6 +1,6 @@
 import unittest
 from mock import Mock, patch, MagicMock
-from app.external.companies import (get_name_from_symbol, get_symbol_lists,
+from populators.external.companies import (get_name_from_symbol, get_symbol_lists,
                                     get_sector_and_industry, g_get_sector_and_industry, y_get_sector_and_industry
                                     )
 

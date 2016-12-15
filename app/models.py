@@ -344,7 +344,8 @@ class Indicators(db.Model):
                 db.session.add(i)
                 try:
                     db.session.commit()
-                except IntegrityError: db.session.rollback()
+                except IntegrityError:
+                    db.session.rollback()
 
     def is_duplicate_of_last(self):
         """

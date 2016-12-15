@@ -1,24 +1,13 @@
 import unittest
-from mock import patch
-from app import create_app, db
-from app.models import Company, Indicators
-from populate_companies import get_company_details
-from populate_indicators import get_ratio_data
+import os
+from base import BaseTest
+from app.models import Company, Indicators, User
 
 
-class TestPopulateIndicators(unittest.TestCase):
-    def setUp(self):
-        self.app = create_app('testing')
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        db.create_all()
-        get_company_details(count=2)
-        get_ratio_data()
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.app_context.pop()
-
+class TestPopulateIndicators(BaseTest):
     def test_get_company_details(self):
-        self.assertEqual(Company.query.count(), Company.query.join(Indicators).count())
+        self.assertEqual(Company.query.count(), Company.query.join(Indicators).count(), "Indicator count should match Companies")
+
+
+if __name__ == '__main__':
+    unittest.main()

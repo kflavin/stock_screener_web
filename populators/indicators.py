@@ -31,7 +31,7 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 #         self.__dict__ = self.__class__().__dict__
 
 
-def get_ratio_data(count=None):
+def get_ratio_data(count=None, host="http://127.0.0.1:5000", user="user", password="password"):
     import re
     import time
     import os
@@ -40,9 +40,6 @@ def get_ratio_data(count=None):
     # from app.models import Company, Indicators
     from app.utils import cash_to_float, depercentize
 
-    host = os.environ.get('CLI_HOST')
-    user = os.environ.get('CLI_USER')
-    password = os.environ.get('CLI_PASSWORD')
     auth = HTTPBasicAuth(user, password)
 
     # Dict item with list: element attribute, attribute value to look for, optional transform function
@@ -81,14 +78,17 @@ def get_ratio_data(count=None):
                   }
 
     if count:
-        r = requests.get("http://{}/api/1.0/company/?count={}".format(host, count), auth=auth)
+        r = requests.get("{}/api/1.0/company/?count={}".format(host, count), auth=auth)
     else:
         print "get sector and industry "
-        total = requests.get("http://{}/api/1.0/company/".format(host), auth=auth).json().get('total')
-        r = requests.get("http://{}/api/1.0/company/?count={}".format(host, total), auth=auth)
+        total = requests.get("{}/api/1.0/company/".format(host), auth=auth).json().get('total')
+        r = requests.get("{}/api/1.0/company/?count={}".format(host, total), auth=auth)
 
     companies = r.json().get('companies')
-    symbols = [ company['symbol'] for company in companies ]
+    # if r.status_code != 200:
+    #     return
+
+    symbols = [company['symbol'] for company in companies]
 
     # companies = Company.query.with_entities(Company.symbol).all()
     # symbols = [company[0] for company in companies]
@@ -144,6 +144,8 @@ def get_ratio_data(count=None):
             else:
                 #print(element.text)
                 d[indicator] = s
+
+        print "your indicator", d
 
         # try:
         #     i = Indicators.from_json(d)

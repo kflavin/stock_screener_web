@@ -24,6 +24,7 @@ class TestCompany(unittest.TestCase):
         db.session.add(User(email=email, password=password, active=True, confirmed_at=datetime.datetime.utcnow()))
         db.session.commit()
 
+        # Login is needed to initialize pw
         self.client = self.app.test_client()
         self.login(email, password)
 
