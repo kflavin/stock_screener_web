@@ -45,7 +45,7 @@ def sectors(ctx, symbol, count):
     if symbol:
         click.echo("get company {}".format(symbol))
         # If we have a single symbol, just make the external call directly, rather than through our populator
-        print get_sector_and_industry(symbol, ctx.obj['HOST'], ctx.obj['USER'], ctx.obj['PASSWORD'])
+        print get_sector_and_industry(symbol)
     else:
         get_sectors_and_industries(count, ctx.obj['HOST'], ctx.obj['USER'], ctx.obj['PASSWORD'])
 

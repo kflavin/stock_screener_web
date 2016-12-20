@@ -51,7 +51,10 @@ def get_company(symbol):
 
             c = Company.update(d)
             if c:
-                return jsonify(c.to_json())
+                return jsonify(c.to_json()),201, {'Location': url_for('api.get_company',
+                                                                      symbol=company.symbol,
+                                                                      _external=True)
+                                                  }
             else:
                 return bad_request("Could not update {}".format(symbol))
         else:
