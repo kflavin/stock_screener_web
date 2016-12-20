@@ -41,23 +41,25 @@ Print out sorted table
 <table class="table">
 <thead>
     <tr>
+      <th><a href="{{ path }}?order_by=symbol&direction={% if order_by == "symbol" %}{{ not direction }}{% else %}{{ True }}{% endif %}">Ticker</a></th>
       {% for k,v in order_bys.iteritems() %}
-      <th><a href="{{ path }}?order_by={{k}}&direction={% if order_by == k %}{{ not direction }}{% else %}{{ True }}{% endif %}">{{v}}</a></th>
-      {% endfor %}
+        {% if k != "symbol" %}
+            <th><a href="{{ path }}?order_by={{k}}&direction={% if order_by == k %}{{ not direction }}{% else %}{{ True }}{% endif %}">{{v}}</a></th>
+        {% endif %}
+    {% endfor %}
     </tr>
 </thead>
 <tbody>
 {% if objs %}
   {% for obj in objs %}
   <tr>
+      <td><a href="{{ url_for("main.company_detail", symbol=obj['symbol'])}}">{{ obj['symbol'] }}</a></td>
       {% for obs in order_bys %}
         {% if obs == "fcf" %}
           <td>{{ convert_to_cash(obj[obs])  }}</td>
         {% elif obs == "roe" %}
           <td>{{ obj[obs] | round_float }}</td>
-        {% elif obs == "symbol" %}
-        <td><a href="{{ url_for("main.company_detail", symbol=obj[obs])}}">{{ obj[obs] }}</a></td>
-        {% else %}
+        {% elif obs != "symbol" %}
           <td>{{ obj[obs] }}</td>
         {% endif %}
       {% endfor %}
