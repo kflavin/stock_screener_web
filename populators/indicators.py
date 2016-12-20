@@ -84,7 +84,7 @@ def get_ratio_data(count=None, host="http://127.0.0.1:5000", user="user", passwo
         total = requests.get("{}/api/1.0/company/".format(host), auth=auth).json().get('total')
         r = requests.get("{}/api/1.0/company/?count={}".format(host, total), auth=auth)
 
-    companies = r.json().get('companies')
+    companies = sorted(r.json().get('companies'), key=lambda x: x['symbol'])
     # if r.status_code != 200:
     #     return
 
@@ -146,23 +146,13 @@ def get_ratio_data(count=None, host="http://127.0.0.1:5000", user="user", passwo
                 d[indicator] = s
 
         print "your indicator", d
+        r = requests.post("{}/api/1.0/indicators".format(host), auth=auth, json=d)
 
-        # try:
-        #     i = Indicators.from_json(d)
-        #     if not i.is_duplicate_of_last():
-        #         db.session.add(i)
-        #         db.session.commit()
-        #     else:
-        #         db.session.delete(i)
-        #         db.session.delete(i)
-        #         db.session.commit()
-        #         print "No change in indicator, so don't save it", i
-        # except (IntegrityError, UnmappedInstanceError) as e:
-        #     print "Caught", e
-        #     db.session.rollback()
-        #
-        print "indicators", d
-        #time.sleep(3)
+        if r.status_code == 201:
+            print "success"
+        else:
+            print "Failed with", r.status_code
+
 
 if __name__ == '__main__':
     get_ratio_data()

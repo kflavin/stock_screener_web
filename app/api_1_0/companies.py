@@ -6,7 +6,7 @@ from .. import db
 from . import api
 
 
-@api.route('/company/')
+@api.route('/company/', methods=['GET'])
 def get_companies():
 
     try:
