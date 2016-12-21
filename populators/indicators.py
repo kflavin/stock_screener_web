@@ -6,8 +6,6 @@ from selenium.common.exceptions import TimeoutException
 import requests
 from requests.auth import HTTPBasicAuth
 from urllib2 import URLError
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm.exc import UnmappedInstanceError
 # from app import db
 
 
