@@ -6,8 +6,7 @@ from flask_login import logout_user
 #from app import app, db
 #from app import session, Indicators, Company, desc, asc
 #from app import desc, asc
-from sqlalchemy import create_engine, desc, asc
-from sqlalchemy import func
+from sqlalchemy import create_engine, desc, asc, func
 from sqlalchemy.sql.expression import nullslast
 from app.main.pages import Pagination
 from app.main.forms import FilterForm
@@ -172,6 +171,21 @@ def company_detail(symbol):
     attributes = Indicators.get_attributes_no_fk()
     company = Company.query.filter(Company.symbol == symbol).first()
     indicators = Indicators.query.filter(Indicators.company_id == company.id).all()
+
+    entities = get_entities(with_symbol=False)
+    wrapped_entities = []
+    for entity in entities:
+        print "wrapping", entity
+        wrapped_entities.append(func.avg(entity).label(entity.key))
+        # wrapped_entities.append(func.avg(entity))
+
+    sector_averages = Company.query.with_entities(*wrapped_entities).filter(Company.sector == company.sector).\
+        filter(Company.symbol != symbol).first()
+
+    print "Your sector averages are", sector_averages
+    for e in entities:
+        print e.key, getattr(sector_averages, e.key)
+
     return render_template('company_detail.html', company = company, indicators=indicators, attributes=attributes)
 
 
@@ -328,6 +342,24 @@ def listings(page):
                            form = form,
                            filter_by=filter_by
                            )
+
+
+def get_entities(with_symbol=True, with_date=False):
+    order_bys = Indicators.get_attributes(with_symbol=with_symbol)
+
+    # configure models (for determing column model) and entities (for retrieving columns)
+    entities = []
+    models = []
+    for o in order_bys:
+        if o.find(".") != -1:
+            entities.append(eval(o))
+            models.append(o.split(".")[0])
+        else:
+            entities.append(eval("Indicators." + o))
+    if with_date:
+        entities.append(Indicators.date)
+
+    return entities
 
 
 @main.route('/logout')
