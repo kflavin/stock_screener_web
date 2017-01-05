@@ -73,3 +73,57 @@ Print out sorted table
 </tbody>
 </table>
 {% endmacro %}
+
+
+{##########################
+Print out sector table
+###########################}
+{% macro generate_sector_table(sector_averages) %}
+<table class="table">
+<thead>
+    <tr>
+        {% for k,v in sector_averages.iteritems() %}
+            <th>{{k}}</a></th>
+        {% endfor %}
+    </tr>
+</thead>
+<tbody>
+
+        {% for indicator in indicators %}
+        <tr>
+          <td>{{ indicator.date }}</td>
+          {% for attribute in attributes %}
+            {% if attribute == 'roe' %}
+            <td>{{ indicator[attribute] | round_float }} </td>
+            {% elif attribute == 'fcf' %}
+            <td>{{ convert_to_cash(indicator[attribute]) }} </td>
+            {% elif attribute != 'symbol' %}
+            <td>{{ indicator[attribute] }} </td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        {% endfor %}
+
+
+{% if sector_averages %}
+    <tr>
+        {% for k,v in sector_averages.iteritems() %}
+            {% if k == 'roe' %}
+                <td>{{v | round_float}}</td>
+            {% elif k == 'fcf' %}
+                <td>{{ convert_to_cash(v)}}</td>
+            {% elif k == 'ev2ebitda' %}
+                <td>{{ v | round_float}}</td>
+            {% else %}
+                <td>{{v}}</td>
+            {% endif %}
+        {% endfor %}
+    </tr>
+{% else %}
+  <tr>
+    <td>No Listings</td>
+  </tr>
+{% endif %}
+</tbody>
+</table>
+{% endmacro %}

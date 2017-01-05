@@ -182,11 +182,15 @@ def company_detail(symbol):
     sector_averages = Company.query.with_entities(*wrapped_entities).filter(Company.sector == company.sector).\
         filter(Company.symbol != symbol).first()
 
-    print "Your sector averages are", sector_averages
+    sector_averages_d = {}
     for e in entities:
-        print e.key, getattr(sector_averages, e.key)
+        sector_averages_d[e.key] = getattr(sector_averages, e.key)
 
-    return render_template('company_detail.html', company = company, indicators=indicators, attributes=attributes)
+    return render_template('company_detail.html',
+                           company=company,
+                           indicators=indicators,
+                           attributes=attributes,
+                           sector_averages=sector_averages_d)
 
 
 

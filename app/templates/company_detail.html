@@ -17,40 +17,38 @@
   Exchange: <b> {% for exchange in company.exchanges %}{{ exchange.name }} {% endfor %}</b>
 </p>
 
-<table class="table">
-  <thead>
-    <tr>
-      <th>Date</th>
-      {% for attribute in attributes %}
-        {% if attribute != 'symbol' %}
-          <th>{{ attributes[attribute] }}</th>
-        {% endif %}
-      {% endfor %}
-    </tr>
-  </thead>
+{{ macros.generate_sector_table(sector_averages) }}
 
-  <tbody>
-      {% for indicator in indicators %}
+  <table class="table">
+    <thead>
       <tr>
-        <td>{{ indicator.date }}</td>
+        <th>Date</th>
         {% for attribute in attributes %}
-          {% if attribute == 'roe' %}
-          <td>{{ indicator[attribute] | round_float }} </td>
-          {% elif attribute == 'fcf' %}
-          <td>{{ convert_to_cash(indicator[attribute]) }} </td>
-          {% elif attribute != 'symbol' %}
-          <td>{{ indicator[attribute] }} </td>
+          {% if attribute != 'symbol' %}
+            <th>{{ attributes[attribute] }}</th>
           {% endif %}
         {% endfor %}
       </tr>
-      {% endfor %}
+    </thead>
 
-  </tbody>
-</table>
+    <tbody>
+        {% for indicator in indicators %}
+        <tr>
+          <td>{{ indicator.date }}</td>
+          {% for attribute in attributes %}
+            {% if attribute == 'roe' %}
+            <td>{{ indicator[attribute] | round_float }} </td>
+            {% elif attribute == 'fcf' %}
+            <td>{{ convert_to_cash(indicator[attribute]) }} </td>
+            {% elif attribute != 'symbol' %}
+            <td>{{ indicator[attribute] }} </td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        {% endfor %}
 
-
-
-
+    </tbody>
+  </table>
 
 </div>
 </div>
