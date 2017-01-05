@@ -172,6 +172,7 @@ def company_detail(symbol):
     company = Company.query.filter(Company.symbol == symbol).first()
     indicators = Indicators.query.filter(Indicators.company_id == company.id).all()
 
+    # entities to display for sector averages
     entities = get_entities(with_symbol=False)
     wrapped_entities = []
     for entity in entities:
@@ -179,12 +180,16 @@ def company_detail(symbol):
         wrapped_entities.append(func.avg(entity).label(entity.key))
         # wrapped_entities.append(func.avg(entity))
 
-    sector_averages = Company.query.with_entities(*wrapped_entities).filter(Company.sector == company.sector).\
-        filter(Company.symbol != symbol).first()
+    # prep sectors
+    if company.sector is None:
+        sector_averages_d = None
+    else:
+        sector_averages = Company.query.with_entities(*wrapped_entities).filter(Company.sector == company.sector).\
+            filter(Company.symbol != symbol).first()
 
-    sector_averages_d = {}
-    for e in entities:
-        sector_averages_d[e.key] = getattr(sector_averages, e.key)
+        sector_averages_d = {}
+        for e in entities:
+            sector_averages_d[e.key] = getattr(sector_averages, e.key)
 
     return render_template('company_detail.html',
                            company=company,

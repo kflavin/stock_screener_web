@@ -82,31 +82,19 @@ Print out sector table
 <table class="table">
 <thead>
     <tr>
+        <th>Sector Averages</th>
+        {% if sector_averages %}
         {% for k,v in sector_averages.iteritems() %}
             <th>{{k}}</a></th>
         {% endfor %}
+        {% endif %}
     </tr>
 </thead>
 <tbody>
 
-        {% for indicator in indicators %}
-        <tr>
-          <td>{{ indicator.date }}</td>
-          {% for attribute in attributes %}
-            {% if attribute == 'roe' %}
-            <td>{{ indicator[attribute] | round_float }} </td>
-            {% elif attribute == 'fcf' %}
-            <td>{{ convert_to_cash(indicator[attribute]) }} </td>
-            {% elif attribute != 'symbol' %}
-            <td>{{ indicator[attribute] }} </td>
-            {% endif %}
-          {% endfor %}
-        </tr>
-        {% endfor %}
-
-
 {% if sector_averages %}
     <tr>
+        <td></td>
         {% for k,v in sector_averages.iteritems() %}
             {% if k == 'roe' %}
                 <td>{{v | round_float}}</td>
@@ -120,9 +108,7 @@ Print out sector table
         {% endfor %}
     </tr>
 {% else %}
-  <tr>
     <td>No Listings</td>
-  </tr>
 {% endif %}
 </tbody>
 </table>
