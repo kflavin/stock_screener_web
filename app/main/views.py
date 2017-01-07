@@ -180,12 +180,23 @@ def company_detail(symbol):
         wrapped_entities.append(func.avg(entity).label(entity.key))
         # wrapped_entities.append(func.avg(entity))
 
+
     # prep sectors
     if company.sector is None:
         sector_averages_d = None
     else:
-        sector_averages = Company.query.with_entities(*wrapped_entities).filter(Company.sector == company.sector).\
-            filter(Company.symbol != symbol).first()
+        stmt1 = db.session.query(Indicators.company_id, func.max(Indicators.id).label('max_id')).group_by(
+            Indicators.company_id
+        ).subquery()
+        stmt2 = db.session.query(Company, stmt1.c.max_id).join(stmt1, stmt1.c.company_id == Company.id).filter(
+            Company.sector == company.sector
+        ).subquery()
+        sector_averages = db.session.query(func.avg(*wrapped_entities).join(
+            stmt2, stmt2.c.max_id == Indicators.id
+        ).filter((Indicators.roe != None) & (Indicators.fcf != None) & (Indicators.ev2ebitda != None))).first
+
+        # sector_averages = Company.query.with_entities(*wrapped_entities).filter(Company.sector == company.sector).\
+        #     filter(Company.symbol != symbol).first()
 
         sector_averages_d = {}
         for e in entities:
