@@ -191,9 +191,10 @@ def company_detail(symbol):
         stmt2 = db.session.query(Company, stmt1.c.max_id).join(stmt1, stmt1.c.company_id == Company.id).filter(
             Company.sector == company.sector
         ).subquery()
-        sector_averages = db.session.query(func.avg(*wrapped_entities).join(
-            stmt2, stmt2.c.max_id == Indicators.id
-        ).filter((Indicators.roe != None) & (Indicators.fcf != None) & (Indicators.ev2ebitda != None))).first
+        sector_averages = db.session.query(*wrapped_entities).\
+            join(stmt2, stmt2.c.max_id == Indicators.id).\
+            filter((Indicators.roe != None) & (Indicators.fcf != None) & (Indicators.ev2ebitda != None)).\
+            first()
 
         # sector_averages = Company.query.with_entities(*wrapped_entities).filter(Company.sector == company.sector).\
         #     filter(Company.symbol != symbol).first()
