@@ -213,7 +213,7 @@ def company_detail(symbol):
                            indicators=indicators,
                            attributes=attributes,
                            sector_averages=sector_averages,
-                           industry_averaeges=industry_averages)
+                           industry_averages=industry_averages)
 
 
 
