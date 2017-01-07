@@ -424,15 +424,24 @@ def get_averages(type, search):
             Indicators.company_id
         ).subquery()
         stmt2 = db.session.query(Company, stmt1.c.max_id).join(stmt1, stmt1.c.company_id == Company.id).filter(
-            setattr(Company, type, search)
-        ).subquery()
+            getattr(Company, type) == search
+        )
+        count = stmt2.count()
+        stmt2 = stmt2.subquery()
         averages = db.session.query(*wrapped_entities). \
             join(stmt2, stmt2.c.max_id == Indicators.id). \
             filter((Indicators.roe != None) & (Indicators.fcf != None) & (Indicators.ev2ebitda != None)). \
             first()
 
+        # from sqlalchemy.dialects import postgresql
+        # print str(db.session.query(*wrapped_entities).
+        #     join(stmt2, stmt2.c.max_id == Indicators.id).
+        #     filter((Indicators.roe != None) & (Indicators.fcf != None) & (Indicators.ev2ebitda != None)).statement.compile(dialect=postgresql.dialect()))
+
         for e in entities:
             averages_d[e.key] = getattr(averages, e.key)
+
+        averages_d['count'] = count
 
     return averages_d
 

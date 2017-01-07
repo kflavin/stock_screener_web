@@ -83,7 +83,6 @@ Print out aggregate table
 <thead>
     <tr>
         <th>{{header}} Averages</th>
-        <th>Count</th>
         {% if averages %}
         {% for k,v in averages.iteritems() %}
             <th>{{k}}</a></th>
@@ -93,10 +92,9 @@ Print out aggregate table
 </thead>
 <tbody>
 
-{% if sector_averages %}
+{% if averages %}
     <tr>
         <td></td>
-        <td>{{ averages | length }}</td>
         {% for k,v in averages.iteritems() %}
             {% if k == 'roe' %}
                 <td>{{v | round_float}}</td>
