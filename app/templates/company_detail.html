@@ -17,7 +17,8 @@
   Exchange: <b> {% for exchange in company.exchanges %}{{ exchange.name }} {% endfor %}</b>
 </p>
 
-{{ macros.generate_sector_table(sector_averages) }}
+{{ macros.generate_aggregate_table("Sector", sector_averages) }}
+{{ macros.generate_aggregate_table("Industry", industry_averages) }}
 
   <table class="table">
     <thead>

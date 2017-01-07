@@ -114,11 +114,11 @@ class Exchange(db.Model):
 
 class Company(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True)
+    name = db.Column(db.String(200), unique=True)
     symbol = db.Column(db.String(20), nullable=False, unique=True)
     sic_code = db.Column(db.Integer, nullable=True)
-    sector = db.Column(db.String(50), nullable=True)
-    industry = db.Column(db.String(50), nullable=True)
+    sector = db.Column(db.String(200), nullable=True)
+    industry = db.Column(db.String(200), nullable=True)
     active = db.Column(db.Boolean, default=True)
     indicators = db.relationship('Indicators', backref='company', lazy='dynamic')
 

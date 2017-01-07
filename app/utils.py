@@ -2,10 +2,12 @@ from datetime import date
 from json import JSONEncoder
 from math import ceil
 from flask import request, url_for
+from sqlalchemy import func
 
 from werkzeug.routing import BaseConverter
 
 from lib.siccodes import codes
+
 
 def float_or_none(value):
     try:
@@ -70,7 +72,7 @@ def cash_to_float(amount):
 
     return None
 
-    
+
 
 def convert_to_cash(amount):
     """
@@ -138,3 +140,5 @@ class DateToJSON(JSONEncoder):
 
 def get_industry(sic_code):
     return codes.get(str(sic_code))
+
+

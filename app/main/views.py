@@ -172,42 +172,48 @@ def company_detail(symbol):
     company = Company.query.filter(Company.symbol == symbol).first()
     indicators = Indicators.query.filter(Indicators.company_id == company.id).all()
 
-    # entities to display for sector averages
-    entities = get_entities(with_symbol=False)
-    wrapped_entities = []
-    for entity in entities:
-        print "wrapping", entity
-        wrapped_entities.append(func.avg(entity).label(entity.key))
-        # wrapped_entities.append(func.avg(entity))
+    sector_averages = get_averages("sector", company.sector)
+    industry_averages = get_averages("industry", company.industry)
+    print "sector", sector_averages
+    print "industry", industry_averages
 
-
-    # prep sectors
-    if company.sector is None:
-        sector_averages_d = None
-    else:
-        stmt1 = db.session.query(Indicators.company_id, func.max(Indicators.id).label('max_id')).group_by(
-            Indicators.company_id
-        ).subquery()
-        stmt2 = db.session.query(Company, stmt1.c.max_id).join(stmt1, stmt1.c.company_id == Company.id).filter(
-            Company.sector == company.sector
-        ).subquery()
-        sector_averages = db.session.query(*wrapped_entities).\
-            join(stmt2, stmt2.c.max_id == Indicators.id).\
-            filter((Indicators.roe != None) & (Indicators.fcf != None) & (Indicators.ev2ebitda != None)).\
-            first()
-
-        # sector_averages = Company.query.with_entities(*wrapped_entities).filter(Company.sector == company.sector).\
-        #     filter(Company.symbol != symbol).first()
-
-        sector_averages_d = {}
-        for e in entities:
-            sector_averages_d[e.key] = getattr(sector_averages, e.key)
+    # # entities to display for sector averages
+    # entities = get_entities(with_symbol=False)
+    # wrapped_entities = []
+    # for entity in entities:
+    #     print "wrapping", entity
+    #     wrapped_entities.append(func.avg(entity).label(entity.key))
+    #     # wrapped_entities.append(func.avg(entity))
+    #
+    #
+    # # prep sectors
+    # if company.sector is None:
+    #     sector_averages_d = None
+    # else:
+    #     stmt1 = db.session.query(Indicators.company_id, func.max(Indicators.id).label('max_id')).group_by(
+    #         Indicators.company_id
+    #     ).subquery()
+    #     stmt2 = db.session.query(Company, stmt1.c.max_id).join(stmt1, stmt1.c.company_id == Company.id).filter(
+    #         Company.sector == company.sector
+    #     ).subquery()
+    #     sector_averages = db.session.query(*wrapped_entities).\
+    #         join(stmt2, stmt2.c.max_id == Indicators.id).\
+    #         filter((Indicators.roe != None) & (Indicators.fcf != None) & (Indicators.ev2ebitda != None)).\
+    #         first()
+    #
+    #     # sector_averages = Company.query.with_entities(*wrapped_entities).filter(Company.sector == company.sector).\
+    #     #     filter(Company.symbol != symbol).first()
+    #
+    #     sector_averages_d = {}
+    #     for e in entities:
+    #         sector_averages_d[e.key] = getattr(sector_averages, e.key)
 
     return render_template('company_detail.html',
                            company=company,
                            indicators=indicators,
                            attributes=attributes,
-                           sector_averages=sector_averages_d)
+                           sector_averages=sector_averages,
+                           industry_averaeges=industry_averages)
 
 
 
@@ -394,3 +400,56 @@ def logout():
 def send_css(path):
     print "Your path is", path
     return send_from_directory('static/css', path)
+
+
+def get_averages(type, search):
+    """
+    Return a dictionary with averages for each indicator in the given sector
+    Args:
+        type: sector or industry
+        sector: search string
+
+    Returns: dict of averages with indicator as key
+
+    """
+    # entities to display for averages
+    entities = get_entities(with_symbol=False)
+    wrapped_entities = []
+    for entity in entities:
+        wrapped_entities.append(func.avg(entity).label(entity.key))
+
+    averages_d = {}
+    if search is not None:
+        stmt1 = db.session.query(Indicators.company_id, func.max(Indicators.id).label('max_id')).group_by(
+            Indicators.company_id
+        ).subquery()
+        stmt2 = db.session.query(Company, stmt1.c.max_id).join(stmt1, stmt1.c.company_id == Company.id).filter(
+            setattr(Company, type, search)
+        ).subquery()
+        averages = db.session.query(*wrapped_entities). \
+            join(stmt2, stmt2.c.max_id == Indicators.id). \
+            filter((Indicators.roe != None) & (Indicators.fcf != None) & (Indicators.ev2ebitda != None)). \
+            first()
+
+        for e in entities:
+            averages_d[e.key] = getattr(averages, e.key)
+
+    return averages_d
+
+
+def get_entities(with_symbol=True, with_date=False):
+    order_bys = Indicators.get_attributes(with_symbol=with_symbol)
+
+    # configure models (for determining column model) and entities (for retrieving columns)
+    entities = []
+    models = []
+    for o in order_bys:
+        if o.find(".") != -1:
+            entities.append(eval(o))
+            models.append(o.split(".")[0])
+        else:
+            entities.append(eval("Indicators." + o))
+    if with_date:
+        entities.append(Indicators.date)
+
+    return entities

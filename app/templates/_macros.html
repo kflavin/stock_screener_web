@@ -76,15 +76,16 @@ Print out sorted table
 
 
 {##########################
-Print out sector table
+Print out aggregate table
 ###########################}
-{% macro generate_sector_table(sector_averages) %}
+{% macro generate_aggregate_table(header, averages) %}
 <table class="table">
 <thead>
     <tr>
-        <th>Sector Averages</th>
-        {% if sector_averages %}
-        {% for k,v in sector_averages.iteritems() %}
+        <th>{{header}} Averages</th>
+        <th>Count</th>
+        {% if averages %}
+        {% for k,v in averages.iteritems() %}
             <th>{{k}}</a></th>
         {% endfor %}
         {% endif %}
@@ -95,7 +96,8 @@ Print out sector table
 {% if sector_averages %}
     <tr>
         <td></td>
-        {% for k,v in sector_averages.iteritems() %}
+        <td>{{ averages | length }}</td>
+        {% for k,v in averages.iteritems() %}
             {% if k == 'roe' %}
                 <td>{{v | round_float}}</td>
             {% elif k == 'fcf' %}
