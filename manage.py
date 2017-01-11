@@ -1,3 +1,4 @@
+import json
 import os
 COV = None
 if os.environ.get('FLASK_COVERAGE'):
@@ -159,6 +160,28 @@ def make_data():
 #     else:
 #         get_sectors_and_industries()
 
+@manager.command
+def create_fixtures(model):
+    """
+
+    Args:
+        model: company|indicators
+
+    Returns: None
+    """
+
+    if model != "company":
+        model = "indicators"
+
+    models = {"company": Company, "indicators": Indicators}
+
+    d = {model: []}
+    objs = models[model].query.all()
+    for i in objs:
+        d[model].append(i.to_json())
+
+    with open("app/fixtures/{}.json".format(model), "w") as f:
+        f.write(json.dumps(d))
 
 
 @manager.command

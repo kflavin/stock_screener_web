@@ -43,5 +43,16 @@ class BaseTest(unittest.TestCase):
         self.app_context.pop()
 
 
+def load_fixtures():
+    with open("app/fixtures/company.json") as f:
+        data = f.read()
+
+    Company.load_json(data)
+
+    with open("app/fixtures/indicators.json") as f:
+        data = f.read()
+
+    Indicators.load_json(data)
+
 if __name__ == '__main__':
     unittest.main()

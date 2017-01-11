@@ -16,8 +16,13 @@ def get_sectors_and_industries(count=None, host="http://localhost:5000", user="u
         r = requests.get("{}/api/1.0/company/?count={}".format(host, count), auth=auth)
     else:
         print "get sector and industry "
-        total = requests.get("{}/api/1.0/company/".format(host), auth=auth).json().get('total')
+        try:
+            total = requests.get("{}/api/1.0/company/".format(host), auth=auth).json().get('total')
+        except ValueError:
+            print "Unauthorized access.  Cannot retrieve company data"
+            return
         r = requests.get("{}/api/1.0/company/?count={}".format(host, total), auth=auth)
+
 
     companies = sorted(r.json().get('companies'), key=lambda x: x['symbol'])
 

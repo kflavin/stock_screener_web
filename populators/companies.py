@@ -48,7 +48,11 @@ def get_company_details(throttle=True, count=0, exchange="NYSE", host="http://12
                     break_out = True
                     break
         print "get", c
+
         r = requests.post("{}/api/1.0/company/bulk/".format(host), json={'companies': batch}, auth=auth)
+        if r.status_code == 401:
+            print "Unauthorized access.  Cannot POST."
+            return
         print "code", r.status_code, "count:", r.json().get('count')
 
         if throttle:

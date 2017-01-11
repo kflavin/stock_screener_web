@@ -2,6 +2,7 @@ import json
 from datetime import date
 import re
 import requests
+import sys
 from sqlalchemy import UniqueConstraint, desc
 from flask.ext.security.utils import verify_password
 from flask.ext.security import UserMixin, RoleMixin
@@ -21,6 +22,8 @@ from app.utils import DateToJSON, float_or_none
 
 
 # Define models
+from populators.external.companies import get_name_from_symbol
+
 roles_users = db.Table('roles_users',
         db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
         db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
@@ -127,7 +130,10 @@ class Company(db.Model):
 
     # Define attributes here for lookups.
     attributes = {'name': "Name",
-                  'symbol': "Ticker"
+                  'symbol': "Ticker",
+                  "sic_code": "SIC",
+                  "sector": "Sector",
+                  "industry": "Industry",
                   }
 
     @staticmethod
@@ -205,32 +211,36 @@ class Company(db.Model):
         return [indicator.date.strftime("%Y-%m-%d") for indicator in indicators]
 
     def to_json(self):
-        json_company = {
-            'id': self.id,
-            'name': self.name,
-            'symbol': self.symbol,
-            #'indicators': url_for('api.get_indicators', )
-        }
-        return json_company
+        company = {}
+        for k,v in self.attributes.iteritems():
+            company[k] = getattr(self, k)
+
+        company['id'] = self.id
+
+        return company
 
     @staticmethod
     def from_json(j):
-        name = j.get('name')
-        symbol = j.get('symbol')
+        company = {}
+        for k, v in Company.attributes.iteritems():
+            company[k] = j.get(k)
+
+        # name = j.get('name')
+        # symbol = j.get('symbol')
         exchange = j.get('exchange')
 
-        if not Company.validate_name(name):
+        if not Company.validate_name(company['name']):
             raise ValueError('Invalid name')
 
-        if not Company.validate_symbol(symbol):
+        if not Company.validate_symbol(company['symbol']):
             raise ValueError('Invalid symbol')
 
         # Use company validation for the index name too
         clean_exchange = Exchange.get_exchange(exchange)
 
-        active = j.get('active') if j.get('active') else True
+        company['active'] = j.get('active') if j.get('active') else True
 
-        c = Company(name=name, symbol=symbol, active=active)
+        c = Company(**company)
         if clean_exchange:
             c.exchanges.append(clean_exchange)
 
@@ -277,6 +287,17 @@ class Company(db.Model):
 
         match = re.match(current_app.config['VALID_COMPANY_NAME'], name)
         return True if match else False
+
+    @staticmethod
+    def load_json(data):
+        companies = json.loads(data).get('company')
+        for company in companies:
+            c = Company.from_json(company)
+            db.session.add(c)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
 
     def __repr__(self):
         return "<{cls}|Symbol: {symbol}, Name: {company}>".format(cls=self.__class__, symbol=self.symbol, company=self.name)
@@ -403,6 +424,7 @@ class Indicators(db.Model):
         symbol = json_indicators.get('symbol')
 
         if not symbol:
+            current_app.logger.debug("Indicator's symbol not found.")
             return None
 
         indicators = Indicators()
@@ -411,6 +433,7 @@ class Indicators(db.Model):
         if not Company.query.filter_by(symbol=symbol).first():
             name = json_indicators.get('name') or get_name_from_symbol(symbol)
             if not name:
+                current_app.logger.debug("Company '{}' does not exist.".format(symbol))
                 return None
 
             company = Company(symbol=symbol, name=name)
@@ -473,19 +496,36 @@ class Indicators(db.Model):
         return None
 
     def to_json(self):
-        return {
-            'id': self.id,
-            #'date': json.dumps(self.date, cls=DateToJSON),
-            'date': self.date.strftime("%Y-%m-%d"),
-            'roe': self.roe,
-            'fcf': self.fcf,
-            'ev2ebitda': self.ev2ebitda,
-            'company_id': self.company_id
-        }
+        indicators = {}
+        for k,v in self.get_attributes_no_fk().iteritems():
+            if k == "symbol":
+                indicators[k] = self.company.symbol
+            else:
+                indicators[k] = getattr(self, k)
+
+        indicators['id'] = self.id
+
+        return indicators
+
+    @staticmethod
+    def load_json(data):
+        indicators = json.loads(data).get('indicators')
+        for indicator in indicators:
+            print indicator
+            i = Indicators.from_json(indicator)
+            if i:
+                db.session.add(i)
+            else:
+                continue
+
+            # db.session.add(i)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
 
     def __repr__(self):
         return "<{cls}|Symbol: {symbol}, Date: {date}>".format(cls=self.__class__, symbol=self.company.symbol, date=self.date)
-
 
 
 #class Sector(db.Model):

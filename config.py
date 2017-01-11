@@ -48,6 +48,15 @@ class TestingConfig(Config):
     WTF_CSRF_ENABLED = False
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
+    DEBUG = True
+
+    # @classmethod
+    # def init_app(cls, app):
+    #     import logging
+    #     from logging import StreamHandler
+    #     handler = StreamHandler()
+    #     handler.setLevel(logging.DEBUG)
+    #     app.logger.addHandler(handler)
 
 
 class DevelopmentConfig(Config):
@@ -57,6 +66,7 @@ class DevelopmentConfig(Config):
     @staticmethod
     def init_app(app):
         import loggers
+
 
 class Production(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'data-prod.sqlite')
