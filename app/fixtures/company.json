@@ -1,0 +1,36 @@
+{
+    "company": [
+        {
+            "sector": "Industrials",
+            "industry": "Industrials",
+            "name": "Company A",
+            "id": 1,
+            "symbol": "A",
+            "sic_code": null
+        },
+        {
+            "sector": "Industrials",
+            "industry": "Industrials",
+            "name": "Company B",
+            "id": 2,
+            "symbol": "B",
+            "sic_code": null
+        },
+        {
+            "sector": "Industrials",
+            "industry": "Industrials",
+            "name": "Company C",
+            "id": 3,
+            "symbol": "C",
+            "sic_code": null
+        },
+        {
+            "sector": "Industrials",
+            "name": "Company D",
+            "industry": "Industrials",
+            "id": 4,
+            "symbol": "D",
+            "sic_code": null
+        }
+    ]
+}

@@ -504,6 +504,7 @@ class Indicators(db.Model):
                 indicators[k] = getattr(self, k)
 
         indicators['id'] = self.id
+        indicators['date'] = self.date.isoformat()
 
         return indicators
 
@@ -511,7 +512,6 @@ class Indicators(db.Model):
     def load_json(data):
         indicators = json.loads(data).get('indicators')
         for indicator in indicators:
-            print indicator
             i = Indicators.from_json(indicator)
             if i:
                 db.session.add(i)
