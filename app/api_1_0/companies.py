@@ -8,17 +8,36 @@ from . import api
 
 @api.route('/company/', methods=['GET'])
 def get_companies():
+    """
+    Query parameters:
+        count: return "count" per page
+        empty_only: if true return only companies with an empty industry or sector field.  else return all companies.
+    Returns:
+        json response
+
+    """
 
     try:
         count = int(request.args.get('count'))
     except (ValueError, TypeError):
         count = current_app.config['COMPANIES_PER_PAGE']
 
+    if request.args.get('empty_only') == "True":
+        empty_only = True
+    else:
+        empty_only = False
+
     page = request.args.get('page', 1, type=int)
-    pagination = Company.query.order_by(Company.name.asc()).paginate(page,
-                                                                     per_page=count,
-                                                                     error_out=False)
+
+    if empty_only:
+        pagination = Company.query.filter((Company.sector == None) | (Company.industry == None)).\
+            order_by(Company.name.asc()).paginate(page, per_page=count, error_out=False)
+    else:
+        pagination = Company.query.order_by(Company.name.asc()).\
+            paginate(page, per_page=count, error_out=False)
+
     companies = pagination.items
+
     prev = None
     if pagination.has_prev:
         prev = url_for('api.get_companies', page=page-1, _external=True)
@@ -36,7 +55,7 @@ def get_companies():
     })
 
 
-@api.route('/company/<regex("[A-Za-z]{2,4}"):symbol>', methods=['GET', 'POST'])
+@api.route('/company/<regex("[A-Za-z]{1,4}"):symbol>', methods=['GET', 'POST'])
 def get_company(symbol):
     company = Company.query.filter_by(symbol=symbol).first()
     if not company:
@@ -51,13 +70,15 @@ def get_company(symbol):
 
             c = Company.update(d)
             if c:
-                return jsonify(c.to_json()),201, {'Location': url_for('api.get_company',
-                                                                      symbol=company.symbol,
-                                                                      _external=True)
+                return jsonify(c.to_json()), 201, {'Location': url_for('api.get_company',
+                                                                       symbol=company.symbol,
+                                                                       _external=True)
                                                   }
             else:
+                current_app.logger.debug("Failed to update company")
                 return bad_request("Could not update {}".format(symbol))
         else:
+            current_app.logger.debug("JSON request empty")
             return bad_request("No data sent for {}".format(symbol))
 
     else:

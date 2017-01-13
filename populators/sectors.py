@@ -6,35 +6,41 @@ from requests.auth import HTTPBasicAuth
 from populators.external.companies import get_sector_and_industry
 
 logger = logging.getLogger('populators.sectors')
+# logger = logging.getLogger(__name__)
 
 
-def get_sectors_and_industries(count=None, host="http://localhost:5000", user="user", password="password"):
+def get_sectors_and_industries(count=None,
+                               host="http://localhost:5000",
+                               user="user", password="password",
+                               empty_only=True):
 
+    logger.debug("count: {}, host: {}, user: {}, empty_only: {}".format(count, host, user, empty_only))
     auth = HTTPBasicAuth(user, password)
+    url = "{}/api/1.0/company/".format(host)
 
     if count:
-        r = requests.get("{}/api/1.0/company/?count={}".format(host, count), auth=auth)
+        r = requests.get("{}?count={}&empty_only={}".format(url, count, empty_only), auth=auth)
     else:
-        print "get sector and industry "
         try:
-            total = requests.get("{}/api/1.0/company/".format(host), auth=auth).json().get('total')
+            total = requests.get("{}?empty_only={}".format(url, empty_only), auth=auth).json().get('total')
+            logger.info("Retrieved {} companies".format(total))
         except ValueError:
-            print "Unauthorized access.  Cannot retrieve company data"
+            logger.error("Unauthorized access.  Cannot retrieve company data")
             return
-        r = requests.get("{}/api/1.0/company/?count={}".format(host, total), auth=auth)
-
+        r = requests.get("{}?count={}&empty_only={}".format(url, total, empty_only), auth=auth)
 
     companies = sorted(r.json().get('companies'), key=lambda x: x['symbol'])
 
-    logger.info("Getting data for {} companies".format(len(companies)))
+    logger.debug("Getting data for {} companies".format(len(companies)))
     for company in companies:
         symbol = company.get('symbol')
         sector_and_industry = get_sector_and_industry(symbol)
-        print sector_and_industry, symbol
-        r = requests.post("{}/api/1.0/company/{}".format(host, symbol), json=sector_and_industry, auth=auth)
+        if sector_and_industry:
+            r = requests.post("{}/api/1.0/company/{}".format(host, symbol), json=sector_and_industry, auth=auth)
 
-        if r.status_code == 201:
-            print "success"
-        else:
-            print "Failed with", r.status_code
+            if r.status_code == 201:
+                print "Added", company.get('symbol')
+            else:
+                print "Failed with", r.status_code
+                logger.debug(r.text)
 

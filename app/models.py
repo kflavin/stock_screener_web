@@ -179,6 +179,7 @@ class Company(db.Model):
         passed_keys = j.keys()
         symbol = j.get('symbol')
         if not symbol:
+            current_app.logger.debug("No symbol found in JSON: {}".format(j))
             return False
 
         bind_params = {}
@@ -190,6 +191,7 @@ class Company(db.Model):
                 realized_params[col] = j.get(col)
 
         if not Company.validate_company_values(realized_params):
+            current_app.logger.debug("Failed to validate company values: {}".format(j))
             return False
 
         company_table = mapper.mapped_table
@@ -262,11 +264,13 @@ class Company(db.Model):
         if symbol:
             d.pop('symbol')
             if not Company.validate_symbol(symbol):
+                current_app.logger.debug("Failed to validate symbol: {}".format(values))
                 return False
 
         for key in d.keys():
             value = d.get(key)
             if not Company.validate_name(value):
+                current_app.logger.debug("Failed to validate name: {}".format(values))
                 return False
 
         return True

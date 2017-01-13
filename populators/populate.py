@@ -17,6 +17,16 @@ def cli(ctx, debug, host, user, password):
     ctx.obj['USER'] = user
     ctx.obj['PASSWORD'] = password
 
+    import logging
+    logger = logging.getLogger('populators')
+    handler = logging.StreamHandler()
+    logger.addHandler(handler)
+
+    if debug:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
+
 
 @cli.command()
 @click.option('--no-throttle', default=True, is_flag=True, help='Throttle connection')
@@ -39,15 +49,18 @@ def indicators(ctx, count):
 @cli.command()
 @click.option('--symbol', default=None, help='Symbol for single company')
 @click.option('--count', default=None, help='Per page number to retrieve')
+@click.option('--include-empty', is_flag=True, default=False, help='By default, retrieve only companies with'
+                                                      'empty industry or sector fields.  Specify this to update all.')
 @click.pass_context
-def sectors(ctx, symbol, count):
+def sectors(ctx, symbol, count, include_empty):
     click.echo('sectors')
     if symbol:
         click.echo("get company {}".format(symbol))
         # If we have a single symbol, just make the external call directly, rather than through our populator
         print get_sector_and_industry(symbol)
     else:
-        get_sectors_and_industries(count, ctx.obj['HOST'], ctx.obj['USER'], ctx.obj['PASSWORD'])
+        get_sectors_and_industries(count, ctx.obj['HOST'], ctx.obj['USER'], ctx.obj['PASSWORD'],
+                                   empty_only=not include_empty)
 
 
 cli.add_command(companies)
