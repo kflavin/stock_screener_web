@@ -43,3 +43,4 @@ wheel==0.26.0
 WTForms==2.1
 bs4==0.0.1
 selenium==3.0.1
+dryscrape==1.0

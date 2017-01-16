@@ -80,7 +80,7 @@ def get_sector_and_industry(symbol):
 
 def g_get_sector_and_industry(symbol):
     r = requests.get("https://www.google.com/finance?q={}".format(symbol.lower()))
-    soup = BeautifulSoup(r.text, "lxml")
+    soup = BeautifulSoup(r.text)
     try:
         sector = soup.find("a", attrs={'id': 'sector'}).text
         industry = soup.find("a", attrs={'id': 'sector'}).find_next_sibling('a').text
