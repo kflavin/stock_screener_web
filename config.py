@@ -47,7 +47,9 @@ class Config(object):
 class TestingConfig(Config):
     WTF_CSRF_ENABLED = False
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL')\
+                              or 'postgres://postgres@localhost/test_stocks_web' \
+                              or 'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
     DEBUG = True
 
     # @classmethod
