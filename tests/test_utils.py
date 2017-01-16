@@ -11,6 +11,7 @@ class TestUtils(unittest.TestCase):
         pass
 
     def test_cash_to_float(self):
+        asdf
         self.assertEqual(cash_to_float(1.0), 1.00)
         self.assertEqual(cash_to_float("1.0M"), 1000000.0)
         self.assertEqual(cash_to_float("231.231k"), 231231.0)

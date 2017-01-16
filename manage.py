@@ -56,10 +56,10 @@ def test(coverage=False, pattern="test", quiet=True):
         COV.html_report(directory=covdir)
         COV.erase()
 
-    #if result.wasSuccessful():
-    #    return 0
-    #else:
-    #    return 1
+    if result.wasSuccessful():
+       return 0
+    else:
+       return 1
 
 
 @manager.command
