@@ -257,7 +257,10 @@ def listings(page):
     order_bys = Indicators.get_attributes()
     order_bys_no_fk = Indicators.get_attributes_no_fk()
 
-    # configure models (for determing column model) and entities (for retrieving columns)
+    sector = request.args.get('sector', None)
+    industry = request.args.get('industry', None)
+
+    # configure models (for determining column model) and entities (for retrieving columns)
     entities = []
     models = []
     for o in order_bys:
@@ -327,6 +330,11 @@ def listings(page):
 
     if filter_by:
         query = query.filter(Company.symbol.ilike("{}".format(filter_by)))
+
+    if sector:
+        query = query.filter(Company.sector == sector)
+    elif industry:
+        query = query.filter(Company.industry == industry)
 
     # *** OLD WAY OF GETTING INDICATORS, looks up a static (most recent) date, rather than the most recent date by company ***
     # # get the most recent collection date

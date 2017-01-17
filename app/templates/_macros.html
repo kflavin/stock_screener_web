@@ -65,6 +65,18 @@ Print out sorted table
           <td>{{ convert_to_cash(obj[obs]) }}</td>
         {% elif obs == "roe" %}
           <td>{{ obj[obs] | round_float }}</td>
+        {% elif obs == "sector" %}
+          {% if obj[obs] == None %}
+            <td>{{ obj[obs] }}</td>
+          {% else %}
+            <td><a href="{{ url_for("main.listings", sector=obj['sector'])}}">{{ obj['sector'] }}</a></td>
+          {% endif %}
+        {% elif obs == "industry" %}
+          {% if obj[obs] == None %}
+            <td>{{ obj[obs] }}</td>
+          {% else %}
+            <td><a href="{{ url_for("main.listings", industry=obj['industry'])}}">{{ obj['industry'] }}</a></td>
+          {% endif %}
         {% elif obs != "symbol" and obs != "sic_code"  and obs != "name" %}
           <td>{{ obj[obs] }}</td>
         {% endif %}
