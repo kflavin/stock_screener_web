@@ -42,8 +42,11 @@ Print out sorted table
 <thead>
     <tr>
       <th><a href="{{ path }}?order_by=symbol&direction={% if order_by == "symbol" %}{{ not direction }}{% else %}{{ True }}{% endif %}">Ticker</a></th>
+      {% if 'name' in order_bys.keys() %}
+          <th><a href="{{ path }}?order_by=name&direction={% if order_by == "name" %}{{ not direction }}{% else %}{{ True }}{% endif %}">Name</a></th>
+      {% endif %}
       {% for k,v in order_bys.iteritems() %}
-        {% if k != "symbol" and k != "sic_code" %}
+        {% if k != "symbol" and k != "sic_code" and k != "name" %}
             <th><a href="{{ path }}?order_by={{k}}&direction={% if order_by == k %}{{ not direction }}{% else %}{{ True }}{% endif %}">{{v}}</a></th>
         {% endif %}
     {% endfor %}
@@ -54,12 +57,15 @@ Print out sorted table
   {% for obj in objs %}
   <tr>
       <td><a href="{{ url_for("main.company_detail", symbol=obj['symbol'])}}">{{ obj['symbol'] }}</a></td>
+      {% if 'name' in order_bys.keys() %}
+        <td><a href="{{ url_for("main.company_detail", symbol=obj['name'])}}">{{ obj['name'] }}</a></td>
+      {% endif %}
       {% for obs in order_bys %}
         {% if obs == "fcf" %}
           <td>{{ convert_to_cash(obj[obs]) }}</td>
         {% elif obs == "roe" %}
           <td>{{ obj[obs] | round_float }}</td>
-        {% elif obs != "symbol" and obs != "sic_code" %}
+        {% elif obs != "symbol" and obs != "sic_code"  and obs != "name" %}
           <td>{{ obj[obs] }}</td>
         {% endif %}
       {% endfor %}
