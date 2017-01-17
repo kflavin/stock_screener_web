@@ -20,7 +20,6 @@ def get_name_from_symbol(symbol):
     Use EDGAR online database to find the company name.
     """
     from flask import current_app
-    import dryscrape
     from app.models import Company
 
     if not Company.validate_symbol(symbol):
