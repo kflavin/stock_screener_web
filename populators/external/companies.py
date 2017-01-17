@@ -3,11 +3,6 @@ import re
 import sys
 from bs4 import BeautifulSoup
 import logging
-from selenium.webdriver import PhantomJS
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
 from urllib2 import URLError
 
 logger = logging.getLogger('app.external.companies')
@@ -98,6 +93,11 @@ def y_get_sector_and_industry(symbol):
     Returns: Dict of sector and industry
 
     """
+    from selenium.webdriver import PhantomJS
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.common.exceptions import TimeoutException
 
     classifications = {
         'sector': {
