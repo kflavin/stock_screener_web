@@ -37,17 +37,17 @@ Print out table pagination
 {##########################
 Print out sorted table
 ###########################}
-{% macro generate_sorted_table(path, order_bys, order_by, direction, objs) %}
+{% macro generate_sorted_table(path, order_bys, order_by, direction, objs, sector='', industry='') %}
 <table class="table">
 <thead>
     <tr>
-      <th><a href="{{ path }}?order_by=symbol&direction={% if order_by == "symbol" %}{{ not direction }}{% else %}{{ True }}{% endif %}">Ticker</a></th>
+      <th><a href="{{ path }}?{%if sector%}{{sector}}&{%elif industry%}{{industry}}&{%endif%}order_by=symbol&direction={% if order_by == "symbol" %}{{ not direction }}{% else %}{{ True }}{% endif %}">Ticker</a></th>
       {% if 'name' in order_bys.keys() %}
-          <th><a href="{{ path }}?order_by=name&direction={% if order_by == "name" %}{{ not direction }}{% else %}{{ True }}{% endif %}">Name</a></th>
+          <th><a href="{{ path }}?{%if sector%}{{sector}}&{%elif industry%}{{industry}}&{%endif%}order_by=name&direction={% if order_by == "name" %}{{ not direction }}{% else %}{{ True }}{% endif %}">Name</a></th>
       {% endif %}
       {% for k,v in order_bys.iteritems() %}
         {% if k != "symbol" and k != "sic_code" and k != "name" %}
-            <th><a href="{{ path }}?order_by={{k}}&direction={% if order_by == k %}{{ not direction }}{% else %}{{ True }}{% endif %}">{{v}}</a></th>
+            <th><a href="{{ path }}?{%if sector%}{{sector}}&{%elif industry%}{{industry}}&{%endif%}order_by={{k}}&direction={% if order_by == k %}{{ not direction }}{% else %}{{ True }}{% endif %}">{{v}}</a></th>
         {% endif %}
     {% endfor %}
     </tr>

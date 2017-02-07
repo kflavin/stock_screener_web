@@ -20,7 +20,7 @@
 
 {{ macros.pagination_widget(pagination, '.listings', order_by=order_by, direction=direction) }}
 
-  {{ macros.generate_sorted_table(request.path, order_bys, order_by, direction, listings) }}
+  {{ macros.generate_sorted_table(request.path, order_bys, order_by, direction, listings, sector, industry) }}
 
 {{ macros.pagination_widget(pagination, '.listings') }}
 

@@ -1,4 +1,6 @@
 from math import ceil
+from urllib import urlencode
+
 from flask import Flask, render_template, redirect, \
        send_from_directory, request, current_app, url_for
 from flask.ext.security import login_required
@@ -376,7 +378,9 @@ def listings(page):
                            date = datetime.today(),
                            count = pagination.total,
                            form = form,
-                           filter_by=filter_by
+                           filter_by=filter_by,
+                           sector=urlencode({'sector': sector}) if sector else None,
+                           industry=urlencode({'industry': industry}) if industry else None
                            )
 
 
