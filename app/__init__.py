@@ -1,5 +1,7 @@
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
+from werkzeug.urls import url_quote_plus
+
 from config import config
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from utils import convert_to_cash, get_industry
@@ -35,6 +37,7 @@ def create_app(config_name):
     app.jinja_env.globals.update(convert_to_cash=convert_to_cash)
     app.jinja_env.globals.update(get_industry=get_industry)
     app.jinja_env.globals.update(url_for_other_page=url_for_other_page)
+    app.jinja_env.globals.update(url_quote_plus=url_quote_plus)
     app.jinja_env.globals['url_for_other_page'] = url_for_other_page
 
     # Custom filters

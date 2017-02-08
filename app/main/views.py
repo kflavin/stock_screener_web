@@ -10,6 +10,8 @@ from flask_login import logout_user
 #from app import desc, asc
 from sqlalchemy import create_engine, desc, asc, func
 from sqlalchemy.sql.expression import nullslast
+from werkzeug.urls import url_quote_plus
+
 from app.main.pages import Pagination
 from app.main.forms import FilterForm
 from app.main.statistics import get_averages
@@ -369,6 +371,10 @@ def listings(page):
     pagination = query.paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
     listings = pagination.items
 
+    print "industry", url_quote_plus(industry)
+    print "sector", url_quote_plus(sector)
+
+
     return render_template('listings.html',
                            pagination=pagination,
                            listings = listings,
@@ -379,8 +385,12 @@ def listings(page):
                            count = pagination.total,
                            form = form,
                            filter_by=filter_by,
-                           sector=urlencode({'sector': sector}) if sector else None,
-                           industry=urlencode({'industry': industry}) if industry else None
+                           # sector=urlencode({'sector': sector}).split("=")[1] if sector else None,
+                           # sector=url_quote_plus(sector) if sector else None,
+                           sector=sector,
+                           industry=industry
+                #             industry=urlencode({'industry': industry}).split("=")[1] if industry else None
+                #            industry=url_quote_plus(industry) if industry else None
                            )
 
 

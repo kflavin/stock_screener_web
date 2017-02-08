@@ -10,8 +10,8 @@
 <p>
   Research: <a href="https://www.google.com/finance?q={{company.symbol}}" rel="nofollow">Google</a> | <a href="http://finance.yahoo.com/quote/{{company.symbol}}?p={{company.symbol}}" rel="nofollow">Yahoo</a> | <a href="https://www.sec.gov/cgi-bin/browse-edgar?CIK={{company.symbol}}&owner=exclude&action=getcompany" rel="nofollow">Edgar</a> | <a href="https://whalewisdom.com/stock/{{company.symbol.lower()}}" rel="nofollow">Whale Wisdom</a><br /><br />
   Ticker: <b>{{ company.symbol }}</b><br />
-  Sector: <b>{{ company.sector }}</b><br />
-  Industry: <b>{{company.industry }}</b><br />
+  Sector: <b><a href="{{ url_for('main.listings', sector=company.sector) }}">{{ company.sector }}</a></b><br />
+  Industry: <b><a href="{{url_for('main.listings', industry=company.industry) }}">{{company.industry }}</a></b><br />
   SIC: <b>{{ get_industry(company.sic_code) }}</b><br />
   Status: <b>{% if company.active %} Active {% else %} Inactive {% endif %}</b><br />
   Exchange: <b> {% for exchange in company.exchanges %}{{ exchange.name }} {% endfor %}</b>
@@ -19,7 +19,6 @@
 
 {{ macros.generate_aggregate_table("Sector", sector_averages) }}
 {{ macros.generate_aggregate_table("Industry", industry_averages) }}
-
 
   <table class="table">
     <thead>

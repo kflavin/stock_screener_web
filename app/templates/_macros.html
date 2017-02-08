@@ -41,13 +41,13 @@ Print out sorted table
 <table class="table">
 <thead>
     <tr>
-      <th><a href="{{ path }}?{%if sector%}{{sector}}&{%elif industry%}{{industry}}&{%endif%}order_by=symbol&direction={% if order_by == "symbol" %}{{ not direction }}{% else %}{{ True }}{% endif %}">Ticker</a></th>
+      <th><a href="{{ path }}?{%if sector%}sector={{url_quote_plus(sector)}}&{%elif industry%}industry={{url_quote_plus(industry)}}&{%endif%}order_by=symbol&direction={% if order_by == "symbol" %}{{ not direction }}{% else %}{{ True }}{% endif %}">Ticker</a></th>
       {% if 'name' in order_bys.keys() %}
-          <th><a href="{{ path }}?{%if sector%}{{sector}}&{%elif industry%}{{industry}}&{%endif%}order_by=name&direction={% if order_by == "name" %}{{ not direction }}{% else %}{{ True }}{% endif %}">Name</a></th>
+          <th><a href="{{ path }}?{%if sector%}sector={{url_quote_plus(sector)}}&{%elif industry%}industry={{url_quote_plus(industry)}}&{%endif%}order_by=name&direction={% if order_by == "name" %}{{ not direction }}{% else %}{{ True }}{% endif %}">Name</a></th>
       {% endif %}
       {% for k,v in order_bys.iteritems() %}
         {% if k != "symbol" and k != "sic_code" and k != "name" %}
-            <th><a href="{{ path }}?{%if sector%}{{sector}}&{%elif industry%}{{industry}}&{%endif%}order_by={{k}}&direction={% if order_by == k %}{{ not direction }}{% else %}{{ True }}{% endif %}">{{v}}</a></th>
+            <th><a href="{{ path }}?{%if sector%}sector={{url_quote_plus(sector)}}&{%elif industry%}industry={{url_quote_plus(industry)}}&{%endif%}order_by={{k}}&direction={% if order_by == k %}{{ not direction }}{% else %}{{ True }}{% endif %}">{{v}}</a></th>
         {% endif %}
     {% endfor %}
     </tr>
@@ -56,9 +56,9 @@ Print out sorted table
 {% if objs %}
   {% for obj in objs %}
   <tr>
-      <td><a href="{{ url_for("main.company_detail", symbol=obj['symbol'])}}">{{ obj['symbol'] }}</a></td>
+      <td><a href="{{ url_for('main.company_detail', symbol=obj['symbol'])}}">{{ obj['symbol'] }}</a></td>
       {% if 'name' in order_bys.keys() %}
-        <td><a href="{{ url_for("main.company_detail", symbol=obj['name'])}}">{{ obj['name'] }}</a></td>
+        <td><a href="{{ url_for('main.company_detail', symbol=obj['symbol'])}}">{{ obj['name'] }}</a></td>
       {% endif %}
       {% for obs in order_bys %}
         {% if obs == "fcf" %}
@@ -69,13 +69,13 @@ Print out sorted table
           {% if obj[obs] == None %}
             <td>{{ obj[obs] }}</td>
           {% else %}
-            <td><a href="{{ url_for("main.listings", sector=obj['sector'])}}">{{ obj['sector'] }}</a></td>
+            <td><a href="{{ url_for('main.listings', sector=obj['sector'])}}">{{ obj['sector'] }}</a></td>
           {% endif %}
         {% elif obs == "industry" %}
           {% if obj[obs] == None %}
             <td>{{ obj[obs] }}</td>
           {% else %}
-            <td><a href="{{ url_for("main.listings", industry=obj['industry'])}}">{{ obj['industry'] }}</a></td>
+            <td><a href="{{ url_for('main.listings', industry=obj['industry'])}}">{{ obj['industry'] }}</a></td>
           {% endif %}
         {% elif obs != "symbol" and obs != "sic_code"  and obs != "name" %}
           <td>{{ obj[obs] }}</td>
