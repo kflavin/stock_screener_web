@@ -16,8 +16,9 @@ pip install -r requirements.txt
 ```
 
 # source environment
+[SQLAlchemy database URI's](http://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
 ```bash
-# [SQLAlchemy database URI's](http://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
+# Setup database URI
 export DEV_DATABASE_URL="sqlite:///stocks-dev.db"
 export TEST_DATABASE_URL="sqlite:///stocks-test.db"
 export DATABASE_URL="sqlite:///stocks-prod.db"
