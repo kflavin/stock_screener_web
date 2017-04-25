@@ -12,6 +12,7 @@ python manage.py tests
 # Configure (using virtualenvwrapper)
 ```bash
 mkvirtualenv stocks_web
+pip install -r requirements.txt
 ```
 
 # source environment
