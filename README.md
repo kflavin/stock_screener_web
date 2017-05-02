@@ -16,7 +16,7 @@ pip install -r requirements.txt
 ```
 
 # source environment
-[SQLAlchemy database URI's](http://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
+[Use SQLAlchemy database URI's](http://docs.sqlalchemy.org/en/latest/core/engines.html#database-urls)
 ```bash
 # Setup database URI
 export DEV_DATABASE_URL="sqlite:///stocks-dev.db"
@@ -45,8 +45,8 @@ grant all privileges on database dev_db to dev_user;
 ```
 
 # setup db for local testing
-``bash
+```bash
 python manage.py create_db
 python manage.py create_admin
-
-
+python manage.py runserver
+```
