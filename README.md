@@ -37,7 +37,16 @@ export CLI_PASSWORD=<cli_password>
 export CLI_HOST=http://127.0.0.1:5000
 ```
 
+# Create postgres table
+```postgres
+create user dev_user with password 'password';
+create database dev_db owner dev_user;
+grant all privileges on database dev_db to dev_user;
+```
+
 # setup db for local testing
 ``bash
 python manage.py create_db
 python manage.py create_admin
+
+
