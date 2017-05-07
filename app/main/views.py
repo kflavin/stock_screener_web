@@ -368,6 +368,7 @@ def listings(page):
     # query = query.order_by(nullslast(order))
     # query = query.with_entities(*entities)
 
+    print "The query", query
     pagination = query.paginate(page, current_app.config['INDICATORS_PER_PAGE'], error_out=False)
     listings = pagination.items
 
@@ -423,6 +424,11 @@ def logout():
 def send_css(path):
     print "Your path is", path
     return send_from_directory('static/css', path)
+
+@main.route('/vue/')
+@login_required
+def vue_page():
+    return "Some vue stuff"
 
 
 # def get_averages(type, search):

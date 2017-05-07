@@ -4,6 +4,10 @@ git push heroku master
 heroku ps:scale web=1
 ```
 
+# Dryscrape on Ubuntu: Ensure webkit dev installed:
+```
+sudo apt-get install libqtwebkit-dev
+
 # Tests
 ```bash
 python manage.py tests
