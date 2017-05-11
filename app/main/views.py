@@ -430,6 +430,10 @@ def send_css(path):
 def vue_page():
     return render_template('company_vue_table2.html')
 
+@main.route('/vue-demo/')
+@login_required
+def vue_demo():
+    return render_template('demo.html')
 
 # def get_averages(type, search):
 #     """
