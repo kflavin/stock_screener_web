@@ -4,6 +4,9 @@ from errors import conflict, bad_request
 from ..models import Company
 from .. import db
 from . import api
+# add following to views that need auth (after the api.route decorator)
+# from .authentication import auth
+# @auth.login_required
 
 
 @api.route('/company/', methods=['GET'])

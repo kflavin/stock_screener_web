@@ -428,7 +428,7 @@ def send_css(path):
 @main.route('/vue/')
 @login_required
 def vue_page():
-    return "Some vue stuff"
+    return render_template('company_vue_table2.html')
 
 
 # def get_averages(type, search):

@@ -21,8 +21,8 @@ def verify_password(email, password):
     return user.verify_password(password)
 
 
-@api.before_request
-@auth.login_required
-def before_request():
-    if not g.current_user.confirmed_at:
-        return unauthorized("Invalid credentials")
+#@api.before_request
+#@auth.login_required
+#def before_request():
+#    if not g.current_user.confirmed_at:
+#        return unauthorized("Invalid credentials")

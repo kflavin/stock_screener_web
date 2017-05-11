@@ -1,0 +1,32 @@
+{
+  "name": "stock_screener_web",
+  "version": "0.0.1",
+  "description": "Stock Screening App",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "axios": "^0.16.1",
+    "browserify": "^14.3.0",
+    "lodash": "^4.17.4",
+    "polyfill": "^0.1.0",
+    "require": "^2.4.20",
+    "vue": "^2.3.2",
+    "vuejs-paginate": "^0.9.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kflavin/stock_screener_web.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kflavin/stock_screener_web/issues"
+  },
+  "homepage": "https://github.com/kflavin/stock_screener_web#readme"
+}
