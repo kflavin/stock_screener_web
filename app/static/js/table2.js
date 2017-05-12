@@ -1,18 +1,33 @@
 var axios = require('axios');
-var Paginate = require('vuejs-paginate');
+//var Paginate = require('vuejs-paginate');
 
-Vue.component('paginate', Paginate);
-//Vue.component('paginate', VuejsPaginate)
+// Vue.component('paginate', Paginate);
+// //Vue.component('paginate', VuejsPaginate)
+
+// new Vue({
+//   el: '#app',
+//   methods: {
+//     clickCallback: function(pageNum) {
+//       console.log(pageNum)
+//     }
+//   }
+// })
+
+var App = require('./App.vue')
+var Paginate = require('vuejs-paginate')
+//var Vue = require('vue')
+var Vue = require('vue/dist/vue')
+
+Vue.component('paginate', Paginate)
 
 new Vue({
   el: '#app',
-  methods: {
-    clickCallback: function(pageNum) {
-      console.log(pageNum)
-    }
+  template: '<App/>',
+  components: { App },
+  render: function(createElement) {
+    return createElement(App)
   }
 })
-
 
 // register the grid component
 Vue.component('demo-grid', {
