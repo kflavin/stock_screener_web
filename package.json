@@ -12,11 +12,11 @@
     "lodash": "^4.17.4",
     "polyfill": "^0.1.0",
     "require": "^2.4.20",
-    "vue": "^2.3.2",
+    "vue": "^2.3.3",
     "vuejs-paginate": "^0.9.0"
   },
   "devDependencies": {
-    "vue-template-compiler": "^2.3.2",
+    "vue-template-compiler": "^2.3.3",
     "vueify": "^9.4.1"
   },
   "scripts": {
