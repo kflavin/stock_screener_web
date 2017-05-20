@@ -2,7 +2,7 @@ from flask import g
 from flask.ext.httpauth import HTTPBasicAuth
 from ..models import User
 from .errors import unauthorized, InvalidUsage
-from . import api
+from . import api as api_1_0
 
 auth = HTTPBasicAuth()
 
@@ -21,8 +21,8 @@ def verify_password(email, password):
     return user.verify_password(password)
 
 
-#@api.before_request
-#@auth.login_required
-#def before_request():
-#    if not g.current_user.confirmed_at:
-#        return unauthorized("Invalid credentials")
+@api_1_0.before_request
+@auth.login_required
+def before_request():
+    if not g.current_user.confirmed_at:
+        return unauthorized("Invalid credentials")

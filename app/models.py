@@ -1,4 +1,5 @@
 import json
+import jwt
 import datetime
 from datetime import date
 import re
@@ -55,6 +56,41 @@ class User(db.Model):
         self.password = bcrypt.generate_password_hash(password, current_app.config.get('BCRYPT_LOG_ROUNDS')).decode()
         self.active = True
         self.confirmed_at = datetime.datetime.utcnow()
+
+    def encode_auth_token(self, user_id):
+        """
+        Generate auth token
+        :param user_id: 
+        :return: the encoded payload or exception on error
+        """
+        try:
+            payload = {
+                'expiration': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=5),
+                'initialized': datetime.datetime.utcnow(),
+                'id': user_id
+            }
+            return jwt.encode(
+                payload,
+                current_app.config.get('SECRET_KEY'),
+                algorithm='HS256'
+            )
+        except Exception as e:
+            return e
+
+    @staticmethod
+    def decode_auth_token(auth_token):
+        """
+        Decode auth token
+        :param auth_token: 
+        :return: user id or error string
+        """
+        try:
+            payload = jwt.decode(auth_token, current_app.config.get('SECRET_KEY'))
+            return payload['id']
+        except jwt.ExpiredSignature:
+            return 'Signature expired.  Please log in again.'
+        except jwt.InvalidTokenError:
+            return 'Invalid token.  Please log in again'
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password, current_app.config.get('BCRYPT_LOG_ROUNDS')).decode()
