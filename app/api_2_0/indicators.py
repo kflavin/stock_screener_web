@@ -4,12 +4,12 @@ from sqlalchemy import distinct
 from sqlalchemy.exc import IntegrityError
 
 from .errors import bad_request, conflict
-from . import api as api_1_0
+from . import api
 from ..models import Indicators, Company
 from .. import db
 
 
-@api_1_0.route('/indicators/<int:id>')
+@api.route('/indicators/<int:id>')
 def get_indicators(id):
     mydate = request.args.get('date', None)
 
@@ -29,7 +29,7 @@ def get_indicators(id):
     return jsonify({'indicators': indicators.to_json()})
 
 
-@api_1_0.route('/indicators/<int:id>/dates')
+@api.route('/indicators/<int:id>/dates')
 def get_indicator_dates(id):
     company = Company.query.filter_by(id=id).first()
     dates = company.dates_to_json()
@@ -39,7 +39,7 @@ def get_indicator_dates(id):
     return jsonify({'dates': dates})
 
 
-@api_1_0.route('/indicators', methods=['POST'])
+@api.route('/indicators', methods=['POST'])
 def create_indicators():
     indicator = Indicators.from_json(request.json)
 
@@ -50,7 +50,7 @@ def create_indicators():
         except IntegrityError:
             return conflict("Could not create indicator, likely a duplicate date.")
         else:
-            return jsonify(indicator.to_json()), 201, {'Location': url_for('api_1_0.get_indicators', id=indicator.id,_external=True) }
+            return jsonify(indicator.to_json()), 201, {'Location': url_for('api.get_indicators', id=indicator.id,_external=True) }
     else:
         db.session.delete(indicator)
         db.session.commit()

@@ -51,6 +51,9 @@ def create_app(config_name):
     from .api_1_0 import api as api_1_0_0_blueprint
     app.register_blueprint(api_1_0_0_blueprint, url_prefix='/api/1.0')
 
+    from .api_2_0 import api as api_2_0_0_blueprint
+    app.register_blueprint(api_2_0_0_blueprint, url_prefix='/api/2.0')
+
     return app
 
 from app.models import User, Role
