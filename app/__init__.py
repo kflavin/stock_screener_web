@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_bcrypt import Bcrypt
 from flask.ext.sqlalchemy import SQLAlchemy
 from werkzeug.urls import url_quote_plus
 
@@ -10,6 +11,7 @@ from .utils import RegexConverter
 
 # Setup Flask-Security
 security = Security()
+bcrypt = Bcrypt()
 db = SQLAlchemy()
 mail = Mail()
 
@@ -24,6 +26,7 @@ def create_app(config_name):
     mail.init_app(app)
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     security.init_app(app, user_datastore)
+    bcrypt.init_app(app)
 
     if not app.debug and not app.testing and not app.config['SSL_DISABLE']:
         from flask.ext.sslify import SSLify

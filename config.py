@@ -5,6 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config(object):
     #WTF_CSRF_ENABLED = False
     PRESERVE_CONTEXT_ON_EXCEPTION = False
+    BCRYPT_LOG_ROUNDS = 13
 
     DEBUG = False
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'super-secret'
