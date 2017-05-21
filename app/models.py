@@ -51,11 +51,14 @@ class User(db.Model):
     current_login_ip = db.Column(db.String(255))
     login_count = db.Column(db.Integer)
 
-    def __init__(self, email, password):
+    def __init__(self, email, password, active=True, confirmed_at=datetime.datetime.utcnow):
         self.email = email
         self.password = bcrypt.generate_password_hash(password, current_app.config.get('BCRYPT_LOG_ROUNDS')).decode()
-        self.active = True
-        self.confirmed_at = datetime.datetime.utcnow()
+        self.active = active
+        if callable(confirmed_at):
+            self.confirmed_at = confirmed_at()
+        else:
+            self.confirmed_at = confirmed_at
 
     def encode_auth_token(self, user_id):
         """
@@ -65,8 +68,8 @@ class User(db.Model):
         """
         try:
             payload = {
-                'expiration': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=5),
-                'initialized': datetime.datetime.utcnow(),
+                'expiration': (datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=5)).strftime('%s'),
+                'initialized': datetime.datetime.utcnow().strftime('%s'),
                 'id': user_id
             }
             return jwt.encode(
@@ -75,6 +78,7 @@ class User(db.Model):
                 algorithm='HS256'
             )
         except Exception as e:
+            print e
             return e
 
     @staticmethod
