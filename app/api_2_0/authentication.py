@@ -1,6 +1,6 @@
 from flask.views import MethodView
 
-from flask import g, request, make_response, jsonify
+from flask import g, request, make_response, jsonify, current_app
 from flask.ext.httpauth import HTTPBasicAuth
 from ..models import User
 from .. import db
@@ -46,8 +46,46 @@ class RegisterAPI(MethodView):
             }
             return make_response(jsonify(response_object)), 202
 
+
+class LoginAPI(MethodView):
+    """
+    Login Resource
+    """
+    def post(self):
+        post_data = request.get_json()
+        try:
+            user = User.query.filter_by(email=post_data.get('email')).first()
+            if not user:
+                return make_response(jsonify(dict(
+                    status='fail',
+                    message='User does not exist, or password is invalid'
+                )))
+
+            if user.verify_password(post_data.get('password')):
+                return make_response(jsonify(dict(
+                    status='success',
+                    message='Logged in',
+                    token=user.encode_auth_token(user.id).decode()
+                )))
+            else:
+                return make_response(jsonify(dict(
+                    status='fail',
+                    message='User does not exist, or password is invalid'
+                )))
+        except Exception as e:
+            current_app.logger.debug(e.message)
+            return make_response((jsonify(dict(
+                status='fail',
+                message='Unknown error, please try again'
+            )), 500))
+
+
+
 registration_view = RegisterAPI.as_view('register_api')
+login_view = LoginAPI.as_view('login_api')
+
 api.add_url_rule('/auth/register', view_func=registration_view, methods=['POST'])
+api.add_url_rule('/auth/login', view_func=login_view, methods=['POST'])
 
 # auth = HTTPBasicAuth()
 #

@@ -6,8 +6,8 @@ import re
 import requests
 import sys
 from sqlalchemy import UniqueConstraint, desc
-from flask.ext.security.utils import verify_password
-from flask.ext.security import UserMixin, RoleMixin
+#from flask.ext.security.utils import verify_password
+#from flask.ext.security import UserMixin, RoleMixin
 from flask.ext.sqlalchemy import SQLAlchemy
 from random import seed, choice
 from string import ascii_uppercase
@@ -99,6 +99,9 @@ class User(db.Model):
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password, current_app.config.get('BCRYPT_LOG_ROUNDS')).decode()
 
+    def verify_password(self, password):
+        return bcrypt.check_password_hash(self.password, password)
+
     #@property
     #def password(self):
     #    raise AttributeError('password not a readable attribute')
@@ -107,8 +110,8 @@ class User(db.Model):
     #def password(self, password):
     #    self.password = encrypt_password(password)
 
-    def verify_password(self, password):
-        return verify_password(password, self.password)
+    # def verify_password(self, password):
+    #     return verify_password(password, self.password)
 
     strategy = db.relationship('Strategy', backref='user', lazy='dynamic')
 
