@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/kflavin/stock_screener_web/tree/master.svg?style=svg)](https://circleci.com/gh/kflavin/stock_screener_web/tree/master)
+
 # deploy to heroku
 ```bash
 git push heroku master
