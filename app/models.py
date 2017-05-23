@@ -60,16 +60,18 @@ class User(db.Model):
         else:
             self.confirmed_at = confirmed_at
 
-    def encode_auth_token(self, user_id):
+    def encode_auth_token(self, user_id, exp=86400):
         """
         Generate auth token
         :param user_id: 
+        :param exp: token expiration in seconds
         :return: the encoded payload or exception on error
         """
+        print "creating token with exp", exp
         try:
             payload = {
-                'expiration': (datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=5)).strftime('%s'),
-                'initialized': datetime.datetime.utcnow().strftime('%s'),
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=exp),
+                'iat': datetime.datetime.utcnow(),
                 'id': user_id
             }
             return jwt.encode(
@@ -86,7 +88,7 @@ class User(db.Model):
         """
         Decode auth token
         :param auth_token: 
-        :return: user id or error string
+        :return: user id (int) or error string
         """
         try:
             payload = jwt.decode(auth_token, current_app.config.get('SECRET_KEY'))
@@ -117,6 +119,27 @@ class User(db.Model):
 
     def __repr__(self):
         return "<Userid: {0}, Email: {1}>".format(self.id, self.email)
+
+
+class BlacklistToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(500), unique=True, nullable=False)
+    blacklisted_on = db.Column(db.DateTime, nullable=False)
+
+    def __init__(self, token):
+        self.token = token
+        self.blacklisted_on = datetime.datetime.now()
+
+    @staticmethod
+    def check_blacklist(auth_token):
+        res = BlacklistToken.query.filter_by(token=str(auth_token)).first()
+        if res:
+            return True
+        else:
+            return False
+
+    def __repr__(self):
+        return '<id: token: {}'.format(self.token)
 
 
 class Strategy(db.Model):
