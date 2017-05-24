@@ -111,3 +111,5 @@ class TestAuthenticationAPI(TestCase):
             bad_data = json.loads(response.get_data())
             self.assertEqual(bad_data.get('status'), 'fail')
             self.assertEqual(bad_data.get('message'), 'Signature expired.  Please log in again.')
+
+

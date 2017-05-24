@@ -1,4 +1,4 @@
-from flask import jsonify, abort
+from flask import jsonify, abort, request
 
 from . import api as api_2_0
 
@@ -27,6 +27,7 @@ def conflict(message):
     return response
 
 
+# Currently unused
 class InvalidUsage(Exception):
     status_code = 400
 
@@ -43,8 +44,16 @@ class InvalidUsage(Exception):
         return rv
 
 
-@api_2_0.errorhandler(InvalidUsage)
+# Currently unused
+@api_2_0.app_errorhandler(InvalidUsage)
 def handle_invalid_usage(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
+    return response
+
+
+@api_2_0.app_errorhandler(405)
+def handle_server_error(error):
+    response = jsonify({'error': 'method not accepted'})
+    response.status_code = 405
     return response

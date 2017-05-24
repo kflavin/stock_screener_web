@@ -1,11 +1,37 @@
 from flask.views import MethodView
+from functools import wraps
 
-from flask import g, request, make_response, jsonify, current_app
-from flask.ext.httpauth import HTTPBasicAuth
+from flask import g, request, make_response, jsonify, current_app, redirect, url_for
 from ..models import User, BlacklistToken
 from .. import db
 from .errors import unauthorized, InvalidUsage
 from . import api
+
+
+def login_required(f):
+    """
+    Decorator for protected pages
+    :param f: 
+    :return: decorated function
+    """
+    wraps(f)
+
+    def decorated_function(*args, **kwargs):
+        auth = request.headers.get('Authorization')
+        if auth:
+            auth_token = auth.split(" ")[1]
+        else:
+            auth_token = ''
+
+        # Ensure token exists and is not blacklisted
+        if auth_token and not BlacklistToken.query.filter_by(token=auth_token).first():
+            response = User.decode_auth_token(auth_token)
+            if isinstance(response, int):
+                return f(*args, **kwargs)
+
+        return unauthorized("Not logged in")
+
+    return decorated_function
 
 
 class RegisterAPI(MethodView):
@@ -169,26 +195,3 @@ api.add_url_rule('/auth/login', view_func=login_view, methods=['POST'])
 api.add_url_rule('/auth/status', view_func=user_view, methods=['GET'])
 api.add_url_rule('/auth/logout', view_func=logout_view, methods=['POST'])
 
-
-# auth = HTTPBasicAuth()
-#
-#
-# @auth.verify_password
-# def verify_password(email, password):
-#     if not email or not password:
-#         return False
-#
-#     user = User.query.filter(User.email.ilike(email)).first()
-#     g.current_user = user
-#
-#     if not user:
-#         raise InvalidUsage("Invalid credentials", status_code=401)
-#
-#     return user.verify_password(password)
-
-
-#@api.before_request
-#@auth.login_required
-#def before_request():
-#    if not g.current_user.confirmed_at:
-#        return unauthorized("Invalid credentials")

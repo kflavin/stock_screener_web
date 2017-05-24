@@ -1,8 +1,9 @@
 from sqlalchemy.exc import IntegrityError
-from flask import request, current_app, url_for, jsonify, abort
+from flask import request, current_app, url_for, jsonify, abort, g
 from errors import conflict, bad_request
 from ..models import Company
 from .. import db
+from .authentication import login_required
 from . import api as api_2_0
 # add following to views that need auth (after the api_2_0.route decorator)
 # from .authentication import auth
@@ -10,6 +11,7 @@ from . import api as api_2_0
 
 
 @api_2_0.route('/company/', methods=['GET'])
+@login_required
 def get_companies():
     """
     Query parameters:
