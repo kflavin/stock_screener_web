@@ -1,58 +1,12 @@
-import unittest
 import time
-from datetime import date
 from mock import Mock, patch, MagicMock
-from flask import current_app
-from flask_testing import TestCase
-from app import create_app, create_app, db
-from app.models import Company, Indicators, User
-import datetime
-import os
+from flask import current_app, request
 import json
-from base64 import b64encode
-
-email = os.environ.get('CLI_USER') or 'testuser'
-password = os.environ.get('CLI_PASSWORD') or 'password'
+from app.api_2_0.authentication import login_required
+from base import BaseTest
 
 
-def register_user(self, email, password):
-    return self.client.post(
-        '/api/2.0/auth/register',
-        data = json.dumps(dict(
-            email=email,
-            password=password
-        )),
-        content_type="application/json"
-    )
-
-
-def login_user(self, email, password):
-    return self.client.post(
-        '/api/2.0/auth/login',
-        data=json.dumps(dict(
-            email=email,
-            password=password
-        )),
-        content_type="application/json"
-    )
-
-
-class TestAuthenticationAPI(TestCase):
-    def create_app(self):
-        self.app = create_app('testing')
-        return self.app
-
-    def setUp(self):
-        self.buffer = True
-        self.app_context = self.app.app_context()
-        self.app_context.push()
-        db.create_all()
-        db.session.commit()
-
-    def tearDown(self):
-        db.session.remove()
-        db.drop_all()
-        self.app_context.pop()
+class TestAuthenticationAPI(BaseTest):
 
     def test_auth_register(self):
         """
@@ -62,28 +16,28 @@ class TestAuthenticationAPI(TestCase):
         """
         # pass
         with self.client:
-            response = register_user(self, email, password)
+            response = self.register_user(self.email, self.password)
             data = json.loads(response.data.decode())
             self.assertTrue(data['status'] == 'success')
 
     def test_auth_valid_login(self):
         # Register user
-        response = register_user(self, email, password)
+        response = self.register_user(self.email, self.password)
         # Login
-        data = json.loads(login_user(self, email, password).get_data())
+        data = json.loads(self.login_user(self.email, self.password).get_data())
         self.assertTrue(data.get('token'))
         self.assertEqual(data.get('status'), 'success')
 
     def test_auth_invalid_login(self):
-        response = register_user(self, email, password)
+        response = self.register_user(self.email, self.password)
         # Bad password
-        data = json.loads(login_user(self, email, "badpassword").get_data())
+        data = json.loads(self.login_user(self.email, "badpassword").get_data())
         self.assertFalse(data.get('token'))
         self.assertEqual(data.get('status'), 'fail')
 
     def test_auth_user_status(self):
-        register_user(self, email, password)
-        data = json.loads(login_user(self, email, password).get_data())
+        self.register_user(self.email, self.password)
+        data = json.loads(self.login_user(self.email, self.password).get_data())
         self.assertEqual(data.get('status'), 'success')
         self.assertEqual(data.get('message'), 'Logged in')
 
@@ -99,6 +53,36 @@ class TestAuthenticationAPI(TestCase):
             self.assertEqual(good_data.get('status'), 'success')
             self.assertEqual(good_data.get('data').get('id'), 1)
 
+            # No token
+            response = self.client.get(
+                '/api/2.0/auth/status',
+                content_type="application/json"
+            )
+            bad_data = json.loads(response.get_data())
+            self.assertEqual(response.status_code, 401)
+
+            # Null token
+            response = self.client.get(
+                '/api/2.0/auth/status',
+                headers=dict(
+                    Authorization='Bearer ' + ''
+                ),
+                content_type="application/json"
+            )
+            bad_data = json.loads(response.get_data())
+            self.assertEqual(response.status_code, 401)
+
+            # Malformed token
+            response = self.client.get(
+                '/api/2.0/auth/status',
+                headers=dict(
+                    Authorization='asdfasdasdf'
+                ),
+                content_type="application/json"
+            )
+            bad_data = json.loads(response.get_data())
+            self.assertEqual(response.status_code, 401)
+
             # check expired signature
             time.sleep(2)
             response = self.client.get(
@@ -111,5 +95,45 @@ class TestAuthenticationAPI(TestCase):
             bad_data = json.loads(response.get_data())
             self.assertEqual(bad_data.get('status'), 'fail')
             self.assertEqual(bad_data.get('message'), 'Signature expired.  Please log in again.')
+
+    def test_auth_login_required(self):
+        func = Mock(return_value="success")
+        decorated_func = login_required(func)
+        token = self.get_token()
+
+        # Valid request
+        with current_app.test_request_context(headers={'Authorization': 'Bearer ' + token}):
+            value = decorated_func()
+            self.assertEqual(value, 'success')
+
+        # No token just space provided
+        with current_app.test_request_context(headers={'Authorization': 'Bearer '}):
+            response = decorated_func()
+            data = json.loads(response.data.decode())
+            self.assertEqual(data.get('error'), 'unauthorized user')
+            self.assertEqual(data.get('message'), 'Not logged in')
+
+        # No token no space provided
+        with current_app.test_request_context(headers={'Authorization': 'Bearer'}):
+            response = decorated_func()
+            data = json.loads(response.data.decode())
+            self.assertEqual(data.get('error'), 'unauthorized user')
+            self.assertEqual(data.get('message'), 'Not logged in')
+
+        # Null authorization value
+        with current_app.test_request_context(headers={'Authorization': ''}):
+            response = decorated_func()
+            data = json.loads(response.data.decode())
+            self.assertEqual(data.get('error'), 'unauthorized user')
+            self.assertEqual(data.get('message'), 'Not logged in')
+
+        # No header provided
+        with current_app.test_request_context():
+            response = decorated_func()
+            data = json.loads(response.data.decode())
+            self.assertEqual(data.get('error'), 'unauthorized user')
+            self.assertEqual(data.get('message'), 'Not logged in')
+
+
 
 

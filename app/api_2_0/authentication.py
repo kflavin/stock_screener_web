@@ -19,7 +19,11 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         auth = request.headers.get('Authorization')
         if auth:
-            auth_token = auth.split(" ")[1]
+            try:
+                auth_token = auth.split(" ")[1]
+            except IndexError as e:
+                current_app.logger.debug(e)
+                auth_token = ''
         else:
             auth_token = ''
 
@@ -113,9 +117,13 @@ class UserAPI(MethodView):
     def get(self):
         auth_header = request.headers.get('Authorization')
         if auth_header:
-            auth_token = auth_header.split(" ")[1]
+            try:
+                auth_token = auth_header.split(" ")[1]
+            except IndexError as e:
+                current_app.logger.debug(e)
+                auth_token = ''
         else:
-            auth_token =''
+            auth_token = ''
 
         if auth_token:
             response = User.decode_auth_token(auth_token)
