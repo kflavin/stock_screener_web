@@ -1,4 +1,6 @@
 import json
+from calendar import timegm
+
 import jwt
 import datetime
 from datetime import date
@@ -50,7 +52,7 @@ class User(db.Model):
     last_login_ip = db.Column(db.String(255))
     current_login_ip = db.Column(db.String(255))
     login_count = db.Column(db.Integer)
-    last_password_change = db.Column(db.DateTime, default=func.now())
+    last_password_change = db.Column(db.DateTime, default=datetime.datetime.utcnow())
 
     def __init__(self, email, password, active=True, confirmed_at=datetime.datetime.utcnow):
         self.email = email
@@ -65,14 +67,17 @@ class User(db.Model):
         """
         Generate auth token
         :param user_id: 
-        :param exp: token expiration in seconds
+        :param exp: token expiration in seconds, set in global config per environment
         :return: the encoded payload or exception on error
         """
+        user = User.query.filter_by(id=user_id).first()
         try:
             payload = {
                 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=exp),
                 'iat': datetime.datetime.utcnow(),
-                'id': user_id
+                'id': user_id,
+                # Need this to serialize datetime like exp and iat.  In their case, it's handled in the jwt module
+                'last_password_change': timegm(user.last_password_change.utctimetuple())
             }
             return jwt.encode(
                 payload,
@@ -92,7 +97,16 @@ class User(db.Model):
         """
         try:
             payload = jwt.decode(auth_token, current_app.config.get('SECRET_KEY'))
-            return payload['id']
+            user_id = payload.get('id')
+
+            if user_id:
+                user = User.query.filter_by(id=user_id).first()
+                last_reported_password_change = payload.get('last_password_change')
+                last_actual_password_change = timegm(user.last_password_change.utctimetuple())
+                if user and (last_reported_password_change >= last_actual_password_change):
+                    return user_id
+
+            return 'Signature expired.  Please log in again.'
         except jwt.ExpiredSignature:
             return 'Signature expired.  Please log in again.'
         except jwt.InvalidTokenError:

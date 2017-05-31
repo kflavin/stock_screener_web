@@ -1,3 +1,6 @@
+import datetime
+from calendar import timegm
+
 from flask.views import MethodView
 from functools import wraps
 
@@ -121,7 +124,8 @@ class UserAPI(MethodView):
             try:
                 auth_token = auth_header.split(" ")[1]
             except IndexError as e:
-                current_app.logger.debug(e)
+                # current_app.logger.debug(e)
+                # current_app.logger.debug(auth_header)
                 auth_token = ''
         else:
             auth_token = ''
@@ -204,7 +208,9 @@ class ChangePasswordAPI(MethodView):
         user = User.query.filter_by(email=post_data['email']).first()
         if user:
             if user.verify_password(post_data['old_password']):
+                # Update password and last change time
                 user.set_password(post_data['new_password'])
+                user.last_password_change = datetime.datetime.utcnow()
                 db.session.add(user)
                 db.session.commit()
                 return make_response(jsonify(dict(

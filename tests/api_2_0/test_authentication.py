@@ -1,6 +1,6 @@
 import time
 from mock import Mock, patch, MagicMock
-from flask import current_app, request
+from flask import current_app, request, url_for
 import json
 from app.api_2_0.authentication import login_required
 from base import BaseTest
@@ -82,9 +82,25 @@ class TestAuthenticationAPI(BaseTest):
             )
             bad_data = json.loads(response.get_data())
             self.assertEqual(response.status_code, 401)
+            self.assertEqual(bad_data['message'], 'no auth token provided')
+            self.assertEqual(bad_data['status'], 'fail')
+
+            # Expired password should not be able to grab user status page
+            self.change_password(self.email, self.password, "NewShinyPassword")
+            time.sleep(1)
+            response = self.client.get(
+                url_for('api_2_0.user_api'),
+                headers=dict(
+                    Authorization='Bearer ' + data.get('token')
+                ),
+                content_type="application/json"
+            )
+            bad_data = json.loads(response.get_data())
+            self.assertEqual(bad_data.get('status'), 'fail')
+            self.assertEqual(bad_data.get('message'), 'Signature expired.  Please log in again.')
 
             # check expired signature
-            time.sleep(2)
+            time.sleep(1)
             response = self.client.get(
                 '/api/2.0/auth/status',
                 headers=dict(
@@ -96,9 +112,14 @@ class TestAuthenticationAPI(BaseTest):
             self.assertEqual(bad_data.get('status'), 'fail')
             self.assertEqual(bad_data.get('message'), 'Signature expired.  Please log in again.')
 
+            # Don't use the same token down here, it is EXPIRED!
+
+
+
     def test_auth_change_password(self):
         self.register_user(self.email, self.password)
         self.change_password(self.email, self.password, "ShinyNewPassword")
+        time.sleep(2)
 
         # Old login should fail
         data = json.loads(self.login_user(self.email, self.password).get_data())
