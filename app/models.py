@@ -5,7 +5,7 @@ from datetime import date
 import re
 import requests
 import sys
-from sqlalchemy import UniqueConstraint, desc
+from sqlalchemy import UniqueConstraint, desc, func
 #from flask.ext.security.utils import verify_password
 #from flask.ext.security import UserMixin, RoleMixin
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -50,6 +50,7 @@ class User(db.Model):
     last_login_ip = db.Column(db.String(255))
     current_login_ip = db.Column(db.String(255))
     login_count = db.Column(db.Integer)
+    last_password_change = db.Column(db.DateTime, default=func.now())
 
     def __init__(self, email, password, active=True, confirmed_at=datetime.datetime.utcnow):
         self.email = email
@@ -67,7 +68,6 @@ class User(db.Model):
         :param exp: token expiration in seconds
         :return: the encoded payload or exception on error
         """
-        print "creating token with exp", exp
         try:
             payload = {
                 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=exp),
@@ -99,7 +99,15 @@ class User(db.Model):
             return 'Invalid token.  Please log in again'
 
     def set_password(self, password):
+        """
+        Change the password, and update the timestamp so we can verify it against the token
+        :param password: new password string 
+        :return:
+        """
         self.password = bcrypt.generate_password_hash(password, current_app.config.get('BCRYPT_LOG_ROUNDS')).decode()
+        self.last_password_change = func.now()
+        db.session.add(self)
+        db.session.commit()
 
     def verify_password(self, password):
         return bcrypt.check_password_hash(self.password, password)

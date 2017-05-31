@@ -95,7 +95,8 @@ class LoginAPI(MethodView):
                 return make_response(jsonify(dict(
                     status='success',
                     message='Logged in',
-                    token=user.encode_auth_token(user.id, current_app.config.get('TOKEN_EXPIRATION_IN_SECONDS')).decode()
+                    token=user.encode_auth_token(user.id,
+                                                 current_app.config.get('TOKEN_EXPIRATION_IN_SECONDS')).decode()
                 )))
             else:
                 return make_response(jsonify(dict(
@@ -193,13 +194,39 @@ class LogoutAPI(MethodView):
             ))), 403
 
 
+class ChangePasswordAPI(MethodView):
+    """
+    Change password
+    """
+
+    def post(self):
+        post_data = request.get_json()
+        user = User.query.filter_by(email=post_data['email']).first()
+        if user:
+            if user.verify_password(post_data['old_password']):
+                user.set_password(post_data['new_password'])
+                db.session.add(user)
+                db.session.commit()
+                return make_response(jsonify(dict(
+                    status='success',
+                    message='password changed'
+                ))), 200
+
+        return make_response(jsonify(dict(
+            status='fail',
+            message='invalid user or password'
+        ))), 403
+
+
 registration_view = RegisterAPI.as_view('register_api')
 login_view = LoginAPI.as_view('login_api')
 user_view = UserAPI.as_view('user_api')
 logout_view = LogoutAPI.as_view('logout_api')
+password_view = ChangePasswordAPI.as_view('password_api')
 
 api.add_url_rule('/auth/register', view_func=registration_view, methods=['POST'])
 api.add_url_rule('/auth/login', view_func=login_view, methods=['POST'])
 api.add_url_rule('/auth/status', view_func=user_view, methods=['GET'])
 api.add_url_rule('/auth/logout', view_func=logout_view, methods=['POST'])
+api.add_url_rule('/auth/password', view_func=password_view, methods=['POST'])
 

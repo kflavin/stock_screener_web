@@ -1,6 +1,7 @@
 import os
 import json
 from flask_testing import TestCase
+from flask import url_for
 
 from app import create_app, db
 
@@ -46,10 +47,21 @@ class BaseTest(TestCase):
 
     def login_user(self, email, password):
         return self.client.post(
-            '/api/2.0/auth/login',
+            url_for('api_2_0.login_api'),
             data=json.dumps(dict(
                 email=email,
                 password=password
+            )),
+            content_type="application/json"
+        )
+
+    def change_password(self, email, old_password, new_password):
+        return self.client.post(
+            url_for('api_2_0.password_api'),
+            data=json.dumps(dict(
+                email=email,
+                old_password=old_password,
+                new_password=new_password
             )),
             content_type="application/json"
         )

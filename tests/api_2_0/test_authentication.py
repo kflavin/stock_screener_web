@@ -96,6 +96,20 @@ class TestAuthenticationAPI(BaseTest):
             self.assertEqual(bad_data.get('status'), 'fail')
             self.assertEqual(bad_data.get('message'), 'Signature expired.  Please log in again.')
 
+    def test_auth_change_password(self):
+        self.register_user(self.email, self.password)
+        self.change_password(self.email, self.password, "ShinyNewPassword")
+
+        # Old login should fail
+        data = json.loads(self.login_user(self.email, self.password).get_data())
+        self.assertEqual(data.get('status'), 'fail')
+        self.assertEqual(data.get('message'), 'User does not exist, or password is invalid')
+
+        # New login should succeed
+        data = json.loads(self.login_user(self.email, "ShinyNewPassword").get_data())
+        self.assertEqual(data.get('status'), 'success')
+        self.assertEqual(data.get('message'), 'Logged in')
+
     def test_auth_login_required(self):
         func = Mock(return_value="success")
         decorated_func = login_required(func)
