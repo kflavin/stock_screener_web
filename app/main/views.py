@@ -3,7 +3,7 @@ from urllib import urlencode
 
 from flask import Flask, render_template, redirect, \
        send_from_directory, request, current_app, url_for
-from flask.ext.security import login_required
+from flask_security import login_required
 from flask_login import logout_user
 #from app import app, db
 #from app import session, Indicators, Company, desc, asc

@@ -1,5 +1,5 @@
 from flask import g
-from flask.ext.httpauth import HTTPBasicAuth
+from flask_httpauth import HTTPBasicAuth
 from ..models import User
 from .errors import unauthorized, InvalidUsage
 from . import api as api_1_0

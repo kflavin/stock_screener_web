@@ -10,10 +10,9 @@ import sys
 from sqlalchemy import UniqueConstraint, desc, func
 #from flask.ext.security.utils import verify_password
 #from flask.ext.security import UserMixin, RoleMixin
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from random import seed, choice
 from string import ascii_uppercase
-from flask.ext.security.utils import encrypt_password
 from flask import current_app, abort
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.expression import bindparam

@@ -1,10 +1,10 @@
 from flask import Flask
 from flask_bcrypt import Bcrypt
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.urls import url_quote_plus
 
 from config import config
-from flask.ext.security import Security, SQLAlchemyUserDatastore
+from flask_security import Security, SQLAlchemyUserDatastore
 from utils import convert_to_cash, get_industry
 from flask_mail import Mail
 from flask_cors import CORS

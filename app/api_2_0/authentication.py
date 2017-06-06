@@ -7,7 +7,7 @@ from functools import wraps
 from flask import g, request, make_response, jsonify, current_app, redirect, url_for
 from ..models import User, BlacklistToken
 from .. import db
-from .errors import unauthorized, InvalidUsage
+from .errors import unauthorized, InvalidUsage, bad_request
 from . import api
 
 
@@ -46,7 +46,12 @@ class RegisterAPI(MethodView):
     Register a user
     """
     def post(self):
+        print "didn't make it here..."
         post_data = request.get_json()
+        print post_data.keys()
+        if not post_data.get("email") or not post_data.get("password"):
+            return bad_request("email and password should be defined")
+
         user = User.query.filter_by(email=post_data.get('email')).first()
         if not user:
             try:
@@ -201,8 +206,14 @@ class LogoutAPI(MethodView):
 class ChangePasswordAPI(MethodView):
     """
     Change password
+    {
+        "email": <email>
+        "old_password": <old password>
+        "new_password": <new password>
+    }
     """
 
+    # @login_required
     def post(self):
         post_data = request.get_json()
         user = User.query.filter_by(email=post_data['email']).first()
