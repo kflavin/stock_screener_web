@@ -95,7 +95,7 @@ class LoginAPI(MethodView):
                 return make_response(jsonify(dict(
                     status='fail',
                     message='User does not exist, or password is invalid'
-                )))
+                )), 400)
 
             if user.verify_password(post_data.get('password')):
                 return make_response(jsonify(dict(
@@ -103,12 +103,12 @@ class LoginAPI(MethodView):
                     message='Logged in',
                     token=user.encode_auth_token(user.id,
                                                  current_app.config.get('TOKEN_EXPIRATION_IN_SECONDS')).decode()
-                )))
+                )), 200)
             else:
                 return make_response(jsonify(dict(
                     status='fail',
                     message='User does not exist, or password is invalid'
-                )))
+                )), 400)
         except Exception as e:
             current_app.logger.debug(e.message)
             return make_response((jsonify(dict(

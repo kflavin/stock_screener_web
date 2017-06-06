@@ -84,7 +84,7 @@ class User(db.Model):
                 algorithm='HS256'
             )
         except Exception as e:
-            print e
+            current_app.logger.debug(e)
             return e
 
     @staticmethod
