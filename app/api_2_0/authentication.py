@@ -46,9 +46,7 @@ class RegisterAPI(MethodView):
     Register a user
     """
     def post(self):
-        print "didn't make it here..."
         post_data = request.get_json()
-        print post_data.keys()
         if not post_data.get("email") or not post_data.get("password"):
             return bad_request("email and password should be defined")
 
@@ -62,11 +60,11 @@ class RegisterAPI(MethodView):
 
                 db.session.add(user)
                 db.session.commit()
-                auth_token = user.encode_auth_token(user.id, current_app.config.get('TOKEN_EXPIRATION_IN_SECONDS'))
+                # auth_token = user.encode_auth_token(user.id, current_app.config.get('TOKEN_EXPIRATION_IN_SECONDS'))
                 response_object = {
                     'status': 'success',
                     'message': 'Registered user',
-                    'auth_token': auth_token.decode()
+                    # 'auth_token': auth_token.decode()
                 }
                 return make_response(jsonify(response_object)), 201
 
@@ -80,9 +78,9 @@ class RegisterAPI(MethodView):
         else:
             response_object = {
                 'status': 'fail',
-                'message': 'User already exists, please login'
+                'message': 'User already exists.'
             }
-            return make_response(jsonify(response_object)), 202
+            return make_response(jsonify(response_object)), 400
 
 
 class LoginAPI(MethodView):
@@ -175,9 +173,6 @@ class LogoutAPI(MethodView):
 
         if auth_token:
             response = User.decode_auth_token(auth_token)
-            print "the response"
-            print response
-            print type(response)
             if isinstance(response, int):
                 try:
                     db.session.add(BlacklistToken(auth_token))
