@@ -7,6 +7,7 @@ from config import config
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from utils import convert_to_cash, get_industry
 from flask_mail import Mail
+from flask_cors import CORS
 from .utils import RegexConverter
 
 # Setup Flask-Security
@@ -18,6 +19,7 @@ mail = Mail()
 
 def create_app(config_name):
     app = Flask(__name__)
+    CORS(app)
     app.config.from_object(config[config_name])
     app.url_map.converters['regex'] = RegexConverter
 
