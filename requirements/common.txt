@@ -9,6 +9,7 @@ coverage==4.0.3
 decorator==4.0.6
 Flask==0.12.2
 Flask-Bcrypt==0.7.1
+Flask-Cors==3.0.2
 Flask-HTTPAuth==3.2.1
 Flask-Login==0.3.2
 Flask-Mail==0.9.1
