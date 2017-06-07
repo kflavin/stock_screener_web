@@ -58,6 +58,9 @@ class RegisterAPI(MethodView):
                     password = post_data.get('password')
                 )
 
+                # make sure last_password_change is set
+                user.set_password(post_data.get('password'))
+
                 db.session.add(user)
                 db.session.commit()
                 # auth_token = user.encode_auth_token(user.id, current_app.config.get('TOKEN_EXPIRATION_IN_SECONDS'))
