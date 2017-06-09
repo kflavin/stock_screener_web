@@ -9,7 +9,7 @@ var AuthPlugin = {
   },
   getToken: function() {
     var token = localStorage.getItem('authToken');
-    var expiration = localStorage.getItem('expiration');
+    var expiration = localStorage.getItem('authTokenExpiration');
 
     if (!token || !expiration) {
       return null;

@@ -32,7 +32,7 @@
           .then(function(res) {
             this.$auth.setToken(res.body.token, Date.now() + 14400000);  // ms in 4 hours
             alertify.success("You have logged in!");
-            this.$router.push('/');
+            this.$router.push('/newsfeed');
           }); // catch block is handled in main.js as an interceptor
       }
     }

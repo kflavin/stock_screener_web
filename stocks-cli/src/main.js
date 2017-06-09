@@ -14,11 +14,19 @@ Vue.config.productionTip = false;
 // Configure alertify
 alertify.defaults.notifier.position = 'top-right';
 
+
+// Interceptor used to add host to XHR requests, and catch and display any error responses
+// handled from vue-resource http object
 Vue.http.interceptors.push(function(request, next) {
-  if (request.url[0] == '/') {
+  if (request.url[0] === '/') {
     // Load the API value from config files
     request.url = process.env.API + request.url;
-    console.log(process.env.API)
+
+    // Use interceptors to send back token, if it exists
+    var token = vue.auth.getToken();
+    if (token) {
+      request.headers.set('Authorization', 'Bearer ' + token)
+    }
   }
 
   next(function(res) {
@@ -29,6 +37,21 @@ Vue.http.interceptors.push(function(request, next) {
        alertify.error(res.body.message);
      }
   });
+});
+
+// Navigation guards are being used here to prevent logged in users from seeing login page
+// Checks "requiresGuest" property
+Router.beforeEach(function(to, from, next) {
+  console.log(Vue.auth.loggedIn());
+
+  if (to.matched.some(function(record) {return record.meta.requiresGuest; })
+        && Vue.auth.loggedIn()) {
+          next({
+            path: '/newsfeed'
+          });
+        } else {
+          next(); // always be sure to call next
+        }
 });
 
 /* eslint-disable no-new */
