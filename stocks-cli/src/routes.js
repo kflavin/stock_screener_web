@@ -4,6 +4,8 @@ import VueRouter from 'vue-router';
 import Login from './components/auth/Login.vue';
 import Auth from './components/auth/Auth.vue';
 import Register from './components/auth/Register.vue';
+import Home from './components/home/Home.vue';
+import Welcome from './components/home/Welcome.vue';
 
 Vue.use(VueRouter);
 
@@ -24,6 +26,18 @@ var router = new VueRouter({
           path: "register",
           component: Register,
           meta: { requiresGuest: true }
+        }
+      ]
+    },
+    {
+      path: "/home",
+      component: Home,
+      redirect: "/home/welcome",
+      children: [
+        {
+          path: "welcome",
+          component: Welcome,
+          meta: { requiresAuth: true }
         }
       ]
     }

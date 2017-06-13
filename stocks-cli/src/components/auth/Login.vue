@@ -28,11 +28,12 @@
     },
     methods: {
       login: function() {
+
         this.$http.post("/api/2.0/auth/login", this.user)
           .then(function(res) {
             this.$auth.setToken(res.body.token, Date.now() + 14400000);  // ms in 4 hours
             alertify.success("You have logged in!");
-            this.$router.push('/newsfeed');
+            this.$router.push('/welcome');
           }); // catch block is handled in main.js as an interceptor
       }
     }
