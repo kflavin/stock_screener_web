@@ -2,9 +2,9 @@
   <div>
     <h3 class="text-center">Login</h3>
     <input type="text" class="form-control m-b-15" placeholder="Email"
-      v-model="user.email">
+      v-model="user.email" v-on:keyup.enter="login">
     <input type="password" class="form-control m-b-15" placeholder="Password"
-      v-model="user.password">
+      v-model="user.password" v-on:keyup.enter="login">
     <hr>
     <button class="btn btn-lg btn-primary btn-block m-b-15"
       v-on:click="login">Sign in</button>
@@ -33,7 +33,7 @@
           .then(function(res) {
             this.$auth.setToken(res.body.token, Date.now() + 14400000);  // ms in 4 hours
             alertify.success("You have logged in!");
-            this.$router.push('/welcome');
+            this.$router.push('/home');
           }); // catch block is handled in main.js as an interceptor
       }
     }
