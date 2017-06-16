@@ -42,16 +42,23 @@ Vue.http.interceptors.push(function(request, next) {
 // Navigation guards are being used here to prevent logged in users from seeing login page
 // Checks "requiresGuest" property
 Router.beforeEach(function(to, from, next) {
-  console.log(Vue.auth.loggedIn());
 
   if (to.matched.some(function(record) {return record.meta.requiresGuest; })
         && Vue.auth.loggedIn()) {
           next({
             path: '/newsfeed'
           });
-        } else {
-          next(); // always be sure to call next
         }
+  // check all paths to see if any require auth
+  else if (to.matched.some(function(record) { return record.meta.requiresAuth; })
+          && !Vue.auth.loggedIn()) {
+    next({
+      path: '/auth/login'
+    });
+  }
+  else {
+    next(); // always be sure to call next
+  }
 });
 
 /* eslint-disable no-new */

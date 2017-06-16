@@ -30,8 +30,9 @@ var router = new VueRouter({
       ]
     },
     {
-      path: "/home",
+      path: "/",
       component: Home,
+      redirect: 'welcome',
       children: [
         {
           path: "welcome",
