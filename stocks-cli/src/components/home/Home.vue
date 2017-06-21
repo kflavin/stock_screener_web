@@ -3,20 +3,19 @@
     <div class="row">
         <div class="col-md-6">
             <ul class="nav nav-pills" role="tablist">
-                <li role="presentation" v-bind:class="{active: activeTab == 'home'}"><a href="/" @click.prevent="setActiveTab('home')">Home</span></a></li>
-                <li role="presentation" v-bind:class="{active: activeTab == 'listings'}"><a href="/listings" @click.prevent="setActiveTab('listings')">Listings</span></a></li>
-                <li role="presentation" v-bind:class="{active: activeTab == 'companies'}"><a href="/company" @click.prevent="setActiveTab('companies')">Companies</span></a></li>
-                <li role="presentation" v-bind:class="{active: activeTab == 'messages'}"><a href="#" @click.prevent="setActiveTab('messages')">Messages <span class="badge">3</span></a></li>
+                <li role="presentation" v-bind:class="{active: activeTab == 'home'}"><a v-bind:href="'/#/welcome'" @click="setActiveTab('home')">Home</a></li>
+                <li role="presentation" v-bind:class="{active: activeTab == 'listings'}"><a v-bind:href="'/#/listings'" @click="setActiveTab('listings')">Listings</a></li>
+                <li role="presentation" v-bind:class="{active: activeTab == 'companies'}"><a v-bind:href="'/#/companies'" @click="setActiveTab('companies')">Companies</a></li>
+                <li role="presentation" v-bind:class="{active: activeTab == 'messages'}"><a v-bind:href="'/#/messages'" @click="setActiveTab('messages')">Messages <span class="badge">3</span></a></li>
             </ul>
         </div>
 
         <div class="col-md-3 col-md-offset-2">
             <ul class="nav nav-pills" role="tablist">
-                <li role="presentation"><a href="/account">My Account</span></a></li>
+                <li role="presentation"><a href="/#/account">My Account</span></a></li>
                 <li role="presentation"><a href="#" @click.prevent="logout">Logout</a></li>
             </ul>
         </div>
-
     </div>
 
     <div class="row">

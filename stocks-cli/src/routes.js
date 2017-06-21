@@ -6,6 +6,9 @@ import Auth from './components/auth/Auth.vue';
 import Register from './components/auth/Register.vue';
 import Home from './components/home/Home.vue';
 import Welcome from './components/home/Welcome.vue';
+import Listings from './components/home/Listings.vue';
+import Companies from './components/home/Companies.vue';
+import Messages from './components/home/Messages.vue';
 
 Vue.use(VueRouter);
 
@@ -37,6 +40,21 @@ var router = new VueRouter({
         {
           path: "welcome",
           component: Welcome,
+          meta: { requiresAuth: true }
+        },
+        {
+          path: "listings",
+          component: Listings,
+          meta: { requiresAuth: true }
+        },
+        {
+          path: "companies",
+          component: Companies,
+          meta: { requiresAuth: true }
+        },
+        {
+          path: "messages",
+          component: Messages,
           meta: { requiresAuth: true }
         }
       ]
