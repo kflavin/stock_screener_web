@@ -51,8 +51,6 @@ export default {
         console.log("computed property");
         console.log(this.$route.path);
 
-
-
         return {
           active: true
         }
