@@ -12,7 +12,7 @@
 
         <div class="col-md-3 col-md-offset-2">
             <ul class="nav nav-pills" role="tablist">
-                <li role="presentation"><a href="/#/account">My Account</span></a></li>
+                <li role="presentation"><a href="/#/account">@{{user.email}}</span></a></li>
                 <li role="presentation"><a href="#" @click.prevent="logout">Logout</a></li>
             </ul>
         </div>
@@ -54,7 +54,11 @@ export default {
         return {
           active: true
         }
+      },
+      user: function() {
+        return this.$store.state.currentUser;
       }
+
     }
 }
 

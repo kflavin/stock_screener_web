@@ -5,6 +5,7 @@ import App from './App'
 import Router from './routes.js'  // default exports can be imported with any name
 import VueResource from 'vue-resource'
 import Auth from './plugins/Auth.js'
+import store from '@/store.js'
 
 Vue.use(VueResource);
 Vue.use(Auth);
@@ -65,6 +66,7 @@ Router.beforeEach(function(to, from, next) {
 new Vue({
   el: '#app',
   router: Router,
+  store: store,
   template: '<App/>',
   components: { App }
 })
