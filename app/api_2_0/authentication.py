@@ -17,8 +17,7 @@ def login_required(f):
     :param f: 
     :return: decorated function
     """
-    wraps(f)
-
+    @wraps(f)
     def decorated_function(*args, **kwargs):
         auth = request.headers.get('Authorization')
         if auth:
