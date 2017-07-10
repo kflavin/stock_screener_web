@@ -18,11 +18,12 @@
         </div>
     </div>
 
+<v-app>
     <div class="row">
         <router-view></router-view>
     </div>
+</v-app>
 </div>
-
 </template>
 
 <script>

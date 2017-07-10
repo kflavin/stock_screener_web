@@ -10,8 +10,8 @@ from . import api as api_2_0
 # @auth.login_required
 
 
-@api_2_0.route('/company/', methods=['GET'])
 @login_required
+@api_2_0.route('/company/', methods=['GET'])
 def get_companies():
     """
     Query parameters:
@@ -21,6 +21,8 @@ def get_companies():
         json response
 
     """
+    # Troubleshooting url map issues caused by decorators...
+    # current_app.url_map
 
     try:
         count = int(request.args.get('count'))
