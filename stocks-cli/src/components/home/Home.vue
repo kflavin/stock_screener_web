@@ -1,29 +1,52 @@
 <template>
-<div>
-    <div class="row">
-        <div class="col-md-6">
-            <ul class="nav nav-pills" role="tablist">
-                <li role="presentation" v-bind:class="{active: activeTab == 'home'}"><a v-bind:href="'/#/welcome'" @click="setActiveTab('home')">Home</a></li>
-                <li role="presentation" v-bind:class="{active: activeTab == 'listings'}"><a v-bind:href="'/#/listings'" @click="setActiveTab('listings')">Listings</a></li>
-                <li role="presentation" v-bind:class="{active: activeTab == 'companies'}"><a v-bind:href="'/#/companies'" @click="setActiveTab('companies')">Companies</a></li>
-                <li role="presentation" v-bind:class="{active: activeTab == 'messages'}"><a v-bind:href="'/#/messages'" @click="setActiveTab('messages')">Messages <span class="badge">3</span></a></li>
-            </ul>
-        </div>
-
-        <div class="col-md-3 col-md-offset-2">
-            <ul class="nav nav-pills" role="tablist">
-                <li role="presentation"><a href="/#/account">@{{user.email}}</span></a></li>
-                <li role="presentation"><a href="#" @click.prevent="logout">Logout</a></li>
-            </ul>
-        </div>
-    </div>
-
 <v-app>
-    <div class="row">
-        <router-view></router-view>
-    </div>
+    <v-navigation-drawer
+    persistent
+    :mini-variant="miniVariant"
+    :clipped="clipped"
+    v-model="drawer">
+    <v-list>
+      <v-list-item
+        v-for="(item, i) in items"
+        :key="i"
+        @click="navigate(item.title, item.url)"
+      >
+        <v-list-tile value="true">
+          <v-list-tile-action>
+            <v-icon light v-html="item.icon"></v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title v-text="item.title"></v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list-item>
+    </v-list>
+    </v-navigation-drawer>
+    <v-toolbar dark class="primary">
+      <v-toolbar-side-icon @click.native.stop="drawer = !drawer"></v-toolbar-side-icon>
+      <v-toolbar-title class="white--text">Stock Screener</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn icon>
+        <v-icon>assessment</v-icon>
+      </v-btn>
+      <v-btn icon>
+        <v-icon>apps</v-icon>
+      </v-btn>
+      <v-btn icon>
+        <v-icon>refresh</v-icon>
+      </v-btn>
+      <v-btn icon>
+        <v-icon>more_vert</v-icon>
+      </v-btn>
+    </v-toolbar>
+    <main>
+      <v-container fluid>
+        <div class="row">
+            <router-view></router-view>
+        </div>
+      </v-container>
+    </main>
 </v-app>
-</div>
 </template>
 
 <script>
@@ -35,7 +58,17 @@ export default {
     },
     data: function() {
       return {
-        activeTab: "home"
+        activeTab: "home",
+        clipped: false,
+        drawer: false,
+        items: [
+          { icon: 'home', title: 'Home', url:'/welcome'  },
+          { icon: 'view_list', title: 'Listings', url: '/listings' },
+          { icon: 'work', title: 'Companies', url: '/companies' },
+          { icon: 'message', title: 'Messages', url: '/messages' },
+          { icon: 'close', title: 'Logout', url: '/messages' },
+        ],
+        miniVariant: false,
       }
     },
     methods: {
@@ -45,6 +78,13 @@ export default {
         },
         setActiveTab: function(tab) {
           this.activeTab = tab;
+        },
+        navigate: function(action, url) {
+          if (action === "Logout") {
+            this.logout();
+          } else {
+            this.$router.push(url);
+          }
         }
     },
     computed: {
