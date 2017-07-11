@@ -114,8 +114,6 @@ class TestAuthenticationAPI(BaseTest):
 
             # Don't use the same token down here, it is EXPIRED!
 
-
-
     def test_auth_change_password(self):
         self.register_user(self.email, self.password)
         self.change_password(self.email, self.password, "ShinyNewPassword")
@@ -132,7 +130,9 @@ class TestAuthenticationAPI(BaseTest):
         self.assertEqual(data.get('message'), 'Logged in')
 
     def test_auth_login_required(self):
-        func = Mock(return_value="success")
+        # Mock a function to return a value of "success", then wrap it with the login decorator
+        func = Mock(name="test_auth_login_required_mock", return_value="success")
+        func.__name__ = "test_auth_login_required_mock"
         decorated_func = login_required(func)
         token = self.get_token()
 
@@ -168,7 +168,3 @@ class TestAuthenticationAPI(BaseTest):
             data = json.loads(response.data.decode())
             self.assertEqual(data.get('error'), 'unauthorized user')
             self.assertEqual(data.get('message'), 'Not logged in')
-
-
-
-

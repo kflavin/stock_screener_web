@@ -2,7 +2,7 @@ import datetime
 from calendar import timegm
 
 from flask.views import MethodView
-from functools import wraps
+from functools import wraps, WRAPPER_ASSIGNMENTS, update_wrapper, partial
 
 from flask import g, request, make_response, jsonify, current_app, redirect, url_for
 from ..models import User, BlacklistToken
@@ -17,6 +17,7 @@ def login_required(f):
     :param f: 
     :return: decorated function
     """
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
         auth = request.headers.get('Authorization')
