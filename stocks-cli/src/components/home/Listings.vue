@@ -1,15 +1,22 @@
 <template>
-  <v-data-table
-    v-bind:headers="headers"
-    v-bind:items="items"
-    v-bind:search="search"
-    class="elevation-1"
-  >
-    <template slot="items" scope="props">
-      <td>{{ props.item.name }}</td>
-      <td class="text-xs-right">{{ props.item.symbol }}</td>
-    </template>
-  </v-data-table>
+  <v-container fluid>
+  <v-layout>
+    <h4>Listings</h4>
+  </v-layout>
+    <v-layout>
+    <v-data-table
+      v-bind:headers="headers"
+      v-bind:items="items"
+      v-bind:search="search"
+      class="elevation-1"
+    >
+      <template slot="items" scope="props">
+        <td>{{ props.item.name }}</td>
+        <td class="text-xs-right">{{ props.item.symbol }}</td>
+      </template>
+    </v-data-table>
+  </v-layout>
+</v-container>
 </template>
 
 <script>

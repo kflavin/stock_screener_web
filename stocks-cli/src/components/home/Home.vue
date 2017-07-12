@@ -40,11 +40,9 @@
       </v-btn>
     </v-toolbar>
     <main>
-      <v-container fluid>
-        <div class="row">
+          <transition name="fade">
             <router-view></router-view>
-        </div>
-      </v-container>
+          </transition>
     </main>
 </v-app>
 </template>

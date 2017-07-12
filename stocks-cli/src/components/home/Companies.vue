@@ -1,5 +1,9 @@
 <template>
-  <h1>Companies</h1>
+  <v-container fluid>
+    <v-layout>
+      <h4>Companies</h4>
+    </v-layout>
+  </v-container>
 </template>
 
 <script>

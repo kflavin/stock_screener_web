@@ -1,5 +1,9 @@
 <template>
-  <h1>Messages</h1>
+  <v-container fluid>
+    <v-layout>
+      <h4>Messages</h4>
+    </v-layout>
+  </v-container>
 </template>
 
 <script>

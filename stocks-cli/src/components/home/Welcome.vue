@@ -1,9 +1,12 @@
 <template>
-  <div class="row">
-    <div class="col-md-2 col-md-offset-2">
-      <p>This is the welcome page!  Hello.</p>
-    </div>
-  </div>
+  <v-container fluid>
+    <v-layout>
+      <h4>Home</h4>
+    </v-layout>
+    <v-layout
+      <p>Let's buy some penny stocks!</p>
+    </v-layout>
+  </v-container>
 </template>
 
 <script>
