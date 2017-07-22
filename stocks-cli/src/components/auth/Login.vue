@@ -28,9 +28,9 @@
                   label="Enter your password"
                   v-model="user.password"
                   @keyup.native.enter="login"
+                  type="password"
                 ></v-text-field>
                 <v-btn v-on:keyup.enter.native="login" @click.native="login" primary dark raised>Login</v-btn>
-                <v-btn v-on:keyup.enter.native="login" @click.native="login" dark>Register</v-btn>
                 <p class="text-center">
                   Don't have an account?  <router-link to="/auth/register">Sign up!</router-link>
                 </p>

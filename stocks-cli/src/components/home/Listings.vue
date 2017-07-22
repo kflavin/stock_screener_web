@@ -13,6 +13,7 @@
       <template slot="items" scope="props">
         <td>{{ props.item.name }}</td>
         <td class="text-xs-right">{{ props.item.symbol }}</td>
+        <td class="text-xs-right">{{ props.item.industry }}</td>
       </template>
     </v-data-table>
   </v-layout>
@@ -37,7 +38,8 @@ export default {
             sortable: true,
             value: 'name'
           },
-          { text: 'Ticker', value: 'symbol' }
+          { text: 'Ticker', value: 'symbol' },
+          { text: 'Industry', value: 'industry' }
         ]
       }
     },
