@@ -23,7 +23,8 @@ alertify.defaults.notifier.position = 'top-right';
 Vue.http.interceptors.push(function(request, next) {
   if (request.url[0] === '/') {
     // Load the API value from config files
-    request.url = process.env.API + request.url;
+    request.url = process.env.API + "/api/2.0" + request.url;
+    console.log("Your request URL is " + request.url);
 
     // Use interceptors to send back token, if it exists
     var token = Vue.auth.getToken();

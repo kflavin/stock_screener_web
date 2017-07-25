@@ -48,7 +48,7 @@ var router = new VueRouter({
           meta: { requiresAuth: true }
         },
         {
-          path: "companies",
+          path: "company/:symbol",
           component: Companies,
           meta: { requiresAuth: true }
         },
