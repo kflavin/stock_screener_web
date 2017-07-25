@@ -7,7 +7,7 @@ from datetime import date
 import re
 import requests
 import sys
-from sqlalchemy import UniqueConstraint, desc, func
+from sqlalchemy import UniqueConstraint, desc, func, Float
 #from flask.ext.security.utils import verify_password
 #from flask.ext.security import UserMixin, RoleMixin
 from flask_sqlalchemy import SQLAlchemy
@@ -516,7 +516,7 @@ class Indicators(db.Model):
             If company does not exist, must provide a name and symbol to create it.
 
         Returns:
-            An Indicator object
+            An Indicator object, with sanitized values
 
         """
         symbol = json_indicators.get('symbol')
@@ -548,12 +548,21 @@ class Indicators(db.Model):
                             key != "company_id" and \
                             key != "id":
                 value = float_or_none(json_indicators.get(key))
+                column = getattr(Indicators, key)
                 if value:
-                    setattr(indicators, key, float_or_none(json_indicators.get(key)))
+                    print "setting value ", value
+                    setattr(indicators, key, value)
                 else:
-                    setattr(indicators, key, json_indicators.get(key))
+                    print "value not set"
+                    # If we didn't get the correct value type for a float, use a placeholder
+                    if isinstance(column.type, Float):
+                        print "didn't get a float for", column, key, value
+                        setattr(indicators, key, -999999999999.99)
+                    else:
+                        setattr(indicators, key, json_indicators.get(key))
 
         indicators.company = company
+        print "Indicators exiting", indicators, indicators.ev2ebitda
 
         return indicators
 
@@ -623,7 +632,9 @@ class Indicators(db.Model):
                 db.session.rollback()
 
     def __repr__(self):
-        return "<{cls}|Symbol: {symbol}, Date: {date}>".format(cls=self.__class__, symbol=self.company.symbol, date=self.date)
+        return "<{cls}|Symbol: {symbol}, Date: {date}>".format(cls=self.__class__,
+                                                               symbol=self.company.symbol,
+                                                               date=self.date)
 
 
 #class Sector(db.Model):

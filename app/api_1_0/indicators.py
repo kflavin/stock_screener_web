@@ -42,6 +42,7 @@ def get_indicator_dates(id):
 @api_1_0.route('/indicators', methods=['POST'])
 def create_indicators():
     indicator = Indicators.from_json(request.json)
+    print "indicator given ", indicator.ev2ebitda, indicator.fcf
 
     if not indicator.is_duplicate_of_last():
         try:
