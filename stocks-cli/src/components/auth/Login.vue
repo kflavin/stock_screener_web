@@ -60,7 +60,7 @@
     methods: {
       login: function() {
 
-        this.$http.post("/api/2.0/auth/login", this.user)
+        this.$http.post("/auth/login", this.user)
           .then(function(res) {
             this.$auth.setToken(res.body.token, Date.now() + 14400000);  // ms in 4 hours
             this.$store.commit('setCurrentUser', this.user);

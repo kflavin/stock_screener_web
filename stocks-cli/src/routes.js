@@ -9,6 +9,7 @@ import Welcome from './components/home/Welcome.vue';
 import Listings from './components/home/Listings.vue';
 import Companies from './components/home/Companies.vue';
 import Messages from './components/home/Messages.vue';
+import Tab1 from './components/home/Tab1.vue';
 
 Vue.use(VueRouter);
 
@@ -50,7 +51,24 @@ var router = new VueRouter({
         {
           path: "company/:symbol",
           component: Companies,
-          meta: { requiresAuth: true }
+          meta: { requiresAuth: true },
+          children: [
+            {
+              path: "details",
+              component: Tab1,
+              meta: { requiresAuth: true }
+            },
+            {
+              path: "indicators",
+              component: Tab1,
+              meta: { requiresAuth: true }
+            },
+            {
+              path: "news",
+              component: Tab1,
+              meta: { requiresAuth: true }
+            }
+          ]
         },
         {
           path: "messages",
