@@ -30,6 +30,10 @@
             ROE: {{indicators.roe}} <br />
             EV/EBITDA: {{indicators.ev2ebitda}} <br />
             Free Cash Flow: {{indicators.fcf}} <br />
+            <br />Cleaned versions<br />
+            ROE: {{roeClean}} <br />
+            EV/EBITDA: {{ev2ebitdaClean}} <br />
+            Free Cash Flow: {{fcfClean}} <br />
 
 
           </v-card-text>

@@ -49,6 +49,10 @@ var router = new VueRouter({
           meta: { requiresAuth: true }
         },
         {
+          path: "companies",
+          redirect: '/listings'
+        },
+        {
           path: "company/:symbol",
           component: Companies,
           meta: { requiresAuth: true },
