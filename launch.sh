@@ -1,2 +1,3 @@
 #!/bin/bash
-gunicorn manage:app
+gunicorn manage:app &
+echo "hello world" >> ./file
