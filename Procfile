@@ -1,1 +1,1 @@
-web: /app/launch.sh
+web: bash /app/launch.sh
