@@ -1,3 +1,4 @@
 #!/bin/bash
-gunicorn manage:app &
-echo "hello world" >> ./file
+echo "hello world" >> /app/myfile
+echo `pwd` >> /app/myfile
+gunicorn manage:app
