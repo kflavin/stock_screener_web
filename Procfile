@@ -1,1 +1,3 @@
-web: bash ./launch.sh
+web: gunicorn manage:app
+web: npm start dev
+
