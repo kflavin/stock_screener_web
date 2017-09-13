@@ -1,1 +1,1 @@
-web: gunicorn manage:app && sleep 500
+web: gunicorn manage:app && sleep 600
