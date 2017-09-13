@@ -143,7 +143,7 @@ def get_ratio_data(count=None, host="http://127.0.0.1:5000", user="user", passwo
                 #print(element.text)
                 d[indicator] = s
 
-        print "your indicator", d
+        print "Fetched indicator from source:", d
         r = requests.post("{}/api/1.0/indicators".format(host), auth=auth, json=d)
 
         if r.status_code == 201:

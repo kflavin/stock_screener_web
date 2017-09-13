@@ -3,7 +3,7 @@ from urllib import urlencode
 
 from flask import Flask, render_template, redirect, \
        send_from_directory, request, current_app, url_for
-from flask.ext.security import login_required
+from flask_security import login_required
 from flask_login import logout_user
 #from app import app, db
 #from app import session, Indicators, Company, desc, asc
@@ -24,19 +24,23 @@ from datetime import datetime
 
 # Views
 @main.route('/')
-@login_required
 def home():
-    """
-    Welcome screen
-    """
-    c = db.session.query(Company).first()
-    #date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date
-    if c:
-        context = {'symbol': c.symbol}
-    else:
-        context = {'symbol': "No listings"}
+    return current_app.send_static_file('index.html')
 
-    return render_template('index.html', company=context)
+# @main.route('/')
+# @login_required
+# def home():
+#     """
+#     Welcome screen
+#     """
+#     c = db.session.query(Company).first()
+#     #date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date
+#     if c:
+#         context = {'symbol': c.symbol}
+#     else:
+#         context = {'symbol': "No listings"}
+#
+#     return render_template('index.html', company=context)
 
 
 PER_PAGE = 50
@@ -428,8 +432,12 @@ def send_css(path):
 @main.route('/vue/')
 @login_required
 def vue_page():
-    return "Some vue stuff"
+    return render_template('company_vue_table2.html')
 
+@main.route('/vue-demo/')
+@login_required
+def vue_demo():
+    return render_template('demo.html')
 
 # def get_averages(type, search):
 #     """

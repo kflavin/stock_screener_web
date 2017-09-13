@@ -3,10 +3,13 @@ from flask import request, current_app, url_for, jsonify, abort
 from errors import conflict, bad_request
 from ..models import Company
 from .. import db
-from . import api
+from . import api as api_1_0
+# add following to views that need auth (after the api.route decorator)
+# from .authentication import auth
+# @auth.login_required
 
 
-@api.route('/company/', methods=['GET'])
+@api_1_0.route('/company/', methods=['GET'])
 def get_companies():
     """
     Query parameters:
@@ -40,10 +43,10 @@ def get_companies():
 
     prev = None
     if pagination.has_prev:
-        prev = url_for('api.get_companies', page=page-1, _external=True)
+        prev = url_for('api_1_0.get_companies', page=page-1, _external=True)
     next = None
     if pagination.has_next:
-        next = url_for('api.get_companies', page=page+1, _external=True)
+        next = url_for('api_1_0.get_companies', page=page+1, _external=True)
 
     return jsonify({
         'companies': [company.to_json() for company in companies],
@@ -55,7 +58,7 @@ def get_companies():
     })
 
 
-@api.route('/company/<regex("[A-Za-z]{1,4}"):symbol>', methods=['GET', 'POST'])
+@api_1_0.route('/company/<regex("[A-Za-z]{1,4}"):symbol>', methods=['GET', 'POST'])
 def get_company(symbol):
     company = Company.query.filter_by(symbol=symbol).first()
     if not company:
@@ -70,7 +73,7 @@ def get_company(symbol):
 
             c = Company.update(d)
             if c:
-                return jsonify(c.to_json()), 201, {'Location': url_for('api.get_company',
+                return jsonify(c.to_json()), 201, {'Location': url_for('api_1_0.get_company',
                                                                        symbol=company.symbol,
                                                                        _external=True)
                                                   }
@@ -85,9 +88,9 @@ def get_company(symbol):
         return bad_request("Invalid request.")
 
 
-#@api.route('/company/<int:id>', methods=['POST'])
-#@api.route('/company/<regex("[A-Z]{2,4}"):symbol>/', methods=['POST'])
-@api.route('/company/', methods=['POST'])
+#@api_1_0.route('/company/<int:id>', methods=['POST'])
+#@api_1_0.route('/company/<regex("[A-Z]{2,4}"):symbol>/', methods=['POST'])
+@api_1_0.route('/company/', methods=['POST'])
 def add_company():
     try:
         company = Company.from_json(request.json)
@@ -101,13 +104,13 @@ def add_company():
         db.session.rollback()
         return conflict("Value already exists.")
     else:
-        return jsonify(company.to_json()), 201, {'Location': url_for('api.get_company',
+        return jsonify(company.to_json()), 201, {'Location': url_for('api_1_0.get_company',
                                                                      symbol=company.symbol,
                                                                      _external=True)
                                                  }
 
 
-@api.route('/company/bulk/', methods=['POST'])
+@api_1_0.route('/company/bulk/', methods=['POST'])
 def bulk_add_company():
     # print request.json.get('companies')
 

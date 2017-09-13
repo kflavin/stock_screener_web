@@ -5,6 +5,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config(object):
     #WTF_CSRF_ENABLED = False
     PRESERVE_CONTEXT_ON_EXCEPTION = False
+    BCRYPT_LOG_ROUNDS = 13
+    TOKEN_EXPIRATION_IN_SECONDS = 86400
 
     DEBUG = False
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'super-secret'
@@ -49,6 +51,8 @@ class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
     DEBUG = True
+    TOKEN_EXPIRATION_IN_SECONDS = 1
+    PRESERVE_CONTEXT_ON_EXCEPTION = False   # For "AssertionError: Popped wrong app context"
 
     # @classmethod
     # def init_app(cls, app):

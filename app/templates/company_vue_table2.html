@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <script type="text/javascript" src="https://unpkg.com/vue"></script> 
+  <link rel="stylesheet" type="text/css" href="https://cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.css">
+</head>
+<body>
+
+
+<!-- component template -->
+<script type="text/x-template" id="grid-template">
+<div>
+  <table>
+    <thead>
+      <tr>
+        <th v-for="key in columns"
+          @click="sortBy(key)"
+          :class="{ active: sortKey == key }">
+          (( key | capitalize ))
+          <span class="arrow" :class="sortOrders[key] > 0 ? 'asc' : 'dsc'">
+          </span>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="entry in filteredData">
+        <td v-for="key in columns">
+          ((entry[key]))
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+<div id="one">
+<div>Hello world</div>
+
+</div>
+
+</div>
+</script>
+
+<div id="app">
+  <paginate
+    :page-count="10"
+    :container-class="pagination"
+    :prev-text="prev"
+    :next-text="next"
+    :click-handler="clickCallback">
+  </paginate>
+</div>
+
+<!-- demo root element -->
+<div id="demo">
+  <form id="search">
+    Search <input name="query" v-model="searchQuery">
+  </form>
+  <demo-grid
+    :blah="gridData"
+    :columns="gridColumns"
+    :filter-key="searchQuery"
+    :some-text="someText">
+    <child v-bind:my-message="searchQuery"></child>
+  </demo-grid>
+</div>
+
+
+
+  <script type="text/javascript" src="/static/js/bundle.js"></script> 
+
+
+</body>
+</html>

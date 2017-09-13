@@ -1,21 +1,25 @@
 from flask import Flask
-from flask.ext.sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.urls import url_quote_plus
 
 from config import config
-from flask.ext.security import Security, SQLAlchemyUserDatastore
+from flask_security import Security, SQLAlchemyUserDatastore
 from utils import convert_to_cash, get_industry
 from flask_mail import Mail
+from flask_cors import CORS
 from .utils import RegexConverter
 
 # Setup Flask-Security
 security = Security()
+bcrypt = Bcrypt()
 db = SQLAlchemy()
 mail = Mail()
 
 
 def create_app(config_name):
     app = Flask(__name__)
+    CORS(app)
     app.config.from_object(config[config_name])
     app.url_map.converters['regex'] = RegexConverter
 
@@ -24,6 +28,7 @@ def create_app(config_name):
     mail.init_app(app)
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     security.init_app(app, user_datastore)
+    bcrypt.init_app(app)
 
     if not app.debug and not app.testing and not app.config['SSL_DISABLE']:
         from flask.ext.sslify import SSLify
@@ -50,6 +55,9 @@ def create_app(config_name):
 
     from .api_1_0 import api as api_1_0_0_blueprint
     app.register_blueprint(api_1_0_0_blueprint, url_prefix='/api/1.0')
+
+    from .api_2_0 import api as api_2_0_0_blueprint
+    app.register_blueprint(api_2_0_0_blueprint, url_prefix='/api/2.0')
 
     return app
 

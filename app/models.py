@@ -1,15 +1,18 @@
 import json
+from calendar import timegm
+
+import jwt
+import datetime
 from datetime import date
 import re
 import requests
 import sys
-from sqlalchemy import UniqueConstraint, desc
-from flask.ext.security.utils import verify_password
-from flask.ext.security import UserMixin, RoleMixin
-from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy import UniqueConstraint, desc, func, Float
+#from flask.ext.security.utils import verify_password
+#from flask.ext.security import UserMixin, RoleMixin
+from flask_sqlalchemy import SQLAlchemy
 from random import seed, choice
 from string import ascii_uppercase
-from flask.ext.security.utils import encrypt_password
 from flask import current_app, abort
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.expression import bindparam
@@ -17,7 +20,7 @@ from sqlalchemy import inspect
 
 # from app.external.companies import get_name_from_symbol
 
-from app import db
+from app import db, bcrypt
 from app.utils import DateToJSON, float_or_none
 
 
@@ -29,13 +32,13 @@ roles_users = db.Table('roles_users',
         db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
 
 
-class Role(db.Model, RoleMixin):
+class Role(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80), unique=True)
     description = db.Column(db.String(255))
 
 
-class User(db.Model, UserMixin):
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255))
@@ -48,9 +51,79 @@ class User(db.Model, UserMixin):
     last_login_ip = db.Column(db.String(255))
     current_login_ip = db.Column(db.String(255))
     login_count = db.Column(db.Integer)
+    last_password_change = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+
+    def __init__(self, email, password, active=True, confirmed_at=datetime.datetime.utcnow):
+        self.email = email
+        self.password = bcrypt.generate_password_hash(password, current_app.config.get('BCRYPT_LOG_ROUNDS')).decode()
+        self.active = active
+        if callable(confirmed_at):
+            self.confirmed_at = confirmed_at()
+        else:
+            self.confirmed_at = confirmed_at
+
+    def encode_auth_token(self, user_id, exp=86400):
+        """
+        Generate auth token
+        :param user_id: 
+        :param exp: token expiration in seconds, set in global config per environment
+        :return: the encoded payload or exception on error
+        """
+        user = User.query.filter_by(id=user_id).first()
+        try:
+            payload = {
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=exp),
+                'iat': datetime.datetime.utcnow(),
+                'id': user_id,
+                # Need this to serialize datetime like exp and iat.  In their case, it's handled in the jwt module
+                'last_password_change': timegm(user.last_password_change.utctimetuple())
+            }
+            return jwt.encode(
+                payload,
+                current_app.config.get('SECRET_KEY'),
+                algorithm='HS256'
+            )
+        except Exception as e:
+            current_app.logger.debug(e)
+            return e
+
+    @staticmethod
+    def decode_auth_token(auth_token):
+        """
+        Decode auth token
+        :param auth_token: 
+        :return: user id (int) or error string
+        """
+        try:
+            payload = jwt.decode(auth_token, current_app.config.get('SECRET_KEY'))
+            user_id = payload.get('id')
+
+            if user_id:
+                user = User.query.filter_by(id=user_id).first()
+                last_reported_password_change = payload.get('last_password_change')
+                last_actual_password_change = timegm(user.last_password_change.utctimetuple())
+                if user and (last_reported_password_change >= last_actual_password_change):
+                    return user_id
+
+            return 'Signature expired.  Please log in again.'
+        except jwt.ExpiredSignature:
+            return 'Signature expired.  Please log in again.'
+        except jwt.InvalidTokenError:
+            return 'Invalid token.  Please log in again'
 
     def set_password(self, password):
-        self.password = encrypt_password(password)
+        """
+        Change the password, and update the timestamp so we can verify it against the token
+        :param password: new password string 
+        :return:
+        """
+        self.password = bcrypt.generate_password_hash(password, current_app.config.get('BCRYPT_LOG_ROUNDS')).decode()
+        self.last_password_change = func.now()
+        db.session.add(self)
+        db.session.commit()
+
+    def verify_password(self, password):
+        return bcrypt.check_password_hash(self.password, password)
 
     #@property
     #def password(self):
@@ -60,13 +133,34 @@ class User(db.Model, UserMixin):
     #def password(self, password):
     #    self.password = encrypt_password(password)
 
-    def verify_password(self, password):
-        return verify_password(password, self.password)
+    # def verify_password(self, password):
+    #     return verify_password(password, self.password)
 
     strategy = db.relationship('Strategy', backref='user', lazy='dynamic')
 
     def __repr__(self):
         return "<Userid: {0}, Email: {1}>".format(self.id, self.email)
+
+
+class BlacklistToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(500), unique=True, nullable=False)
+    blacklisted_on = db.Column(db.DateTime, nullable=False)
+
+    def __init__(self, token):
+        self.token = token
+        self.blacklisted_on = datetime.datetime.now()
+
+    @staticmethod
+    def check_blacklist(auth_token):
+        res = BlacklistToken.query.filter_by(token=str(auth_token)).first()
+        if res:
+            return True
+        else:
+            return False
+
+    def __repr__(self):
+        return '<id: token: {}'.format(self.token)
 
 
 class Strategy(db.Model):
@@ -422,7 +516,7 @@ class Indicators(db.Model):
             If company does not exist, must provide a name and symbol to create it.
 
         Returns:
-            An Indicator object
+            An Indicator object, with sanitized values
 
         """
         symbol = json_indicators.get('symbol')
@@ -454,12 +548,21 @@ class Indicators(db.Model):
                             key != "company_id" and \
                             key != "id":
                 value = float_or_none(json_indicators.get(key))
+                column = getattr(Indicators, key)
                 if value:
-                    setattr(indicators, key, float_or_none(json_indicators.get(key)))
+                    print "setting value ", value
+                    setattr(indicators, key, value)
                 else:
-                    setattr(indicators, key, json_indicators.get(key))
+                    print "value not set"
+                    # If we didn't get the correct value type for a float, use a placeholder
+                    if isinstance(column.type, Float):
+                        print "didn't get a float for", column, key, value
+                        setattr(indicators, key, -999999999999.99)
+                    else:
+                        setattr(indicators, key, json_indicators.get(key))
 
         indicators.company = company
+        print "Indicators exiting", indicators, indicators.ev2ebitda
 
         return indicators
 
@@ -529,7 +632,9 @@ class Indicators(db.Model):
                 db.session.rollback()
 
     def __repr__(self):
-        return "<{cls}|Symbol: {symbol}, Date: {date}>".format(cls=self.__class__, symbol=self.company.symbol, date=self.date)
+        return "<{cls}|Symbol: {symbol}, Date: {date}>".format(cls=self.__class__,
+                                                               symbol=self.company.symbol,
+                                                               date=self.date)
 
 
 #class Sector(db.Model):

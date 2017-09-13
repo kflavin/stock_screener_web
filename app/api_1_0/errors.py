@@ -1,6 +1,6 @@
 from flask import jsonify, abort
 
-from . import api
+from . import api as api_1_0
 
 
 def bad_request(message):
@@ -43,7 +43,7 @@ class InvalidUsage(Exception):
         return rv
 
 
-@api.errorhandler(InvalidUsage)
+@api_1_0.errorhandler(InvalidUsage)
 def handle_invalid_usage(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code

@@ -1,5 +1,5 @@
 from flask import Blueprint
 
-api = Blueprint('api',  __name__)
+api = Blueprint('api_1_0',  __name__)
 
 from . import companies, indicators, authentication
