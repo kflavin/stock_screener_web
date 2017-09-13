@@ -3,7 +3,7 @@
     <v-navigation-drawer
     persistent
     :mini-variant="miniVariant"
-    :clipped="clipped"
+    :clipped=true
     v-model="drawer">
     <v-list>
       <v-list-item

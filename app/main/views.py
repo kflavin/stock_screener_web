@@ -24,19 +24,23 @@ from datetime import datetime
 
 # Views
 @main.route('/')
-@login_required
 def home():
-    """
-    Welcome screen
-    """
-    c = db.session.query(Company).first()
-    #date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date
-    if c:
-        context = {'symbol': c.symbol}
-    else:
-        context = {'symbol': "No listings"}
+    return current_app.send_static_file('index.html')
 
-    return render_template('index.html', company=context)
+# @main.route('/')
+# @login_required
+# def home():
+#     """
+#     Welcome screen
+#     """
+#     c = db.session.query(Company).first()
+#     #date = db.session.query(Indicators.date).order_by(desc("date")).distinct().limit(2).all()[-1].date
+#     if c:
+#         context = {'symbol': c.symbol}
+#     else:
+#         context = {'symbol': "No listings"}
+#
+#     return render_template('index.html', company=context)
 
 
 PER_PAGE = 50
