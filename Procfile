@@ -1,2 +1,2 @@
-web: python -m SimpleHTTPServer
+web: cd stocks-cli/dist; python -m SimpleHTTPServer
 
