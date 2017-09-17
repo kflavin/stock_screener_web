@@ -1,4 +1,4 @@
 module.exports = {
   NODE_ENV: '"production"',
-  API: '"http://localhost:5000"'
+  API: '"https://kflavin-stocksweb.herokuapp.com"'
 }
