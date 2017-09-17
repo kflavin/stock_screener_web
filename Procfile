@@ -1,2 +1,2 @@
-web: ./launch.sh
+web: gunicorn manage:app
 
