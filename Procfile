@@ -1,2 +1,2 @@
-web: cd stocks-cli/dist; python -m SimpleHTTPServer $PORT
+web: ./launch.sh
 
