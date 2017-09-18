@@ -114,6 +114,7 @@ class LoginAPI(MethodView):
                 )), 400)
         except Exception as e:
             current_app.logger.debug(e.message)
+            print "Not sure what happened but things blew up!"
             return make_response((jsonify(dict(
                 status='fail',
                 message='Unknown error, please try again'
