@@ -116,16 +116,20 @@ def add_company():
 
 @api_2_0.route('/company/bulk/', methods=['POST'])
 def bulk_add_company():
-    # print request.json.get('companies')
+    print "Bulk adding companies"
+    print request.json.get('companies')
 
     count = 0
     for c in request.json.get('companies'):
+        print "c=", c
         try:
+            print "ADding company", c
             company = Company.from_json(c)
         except ValueError, e:
             # return bad_request("Invalid data.  Check symbol and company name.")
             print "Could not add", c, e
         else:
+            print "adding company under else"
             db.session.add(company)
             try:
                 db.session.commit()
