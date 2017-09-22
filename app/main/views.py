@@ -22,6 +22,9 @@ from ..models import Indicators, Company
 from datetime import datetime
 
 
+# These views have been deprecated in favor of VueJS.  They are no longer used.
+
+
 # Views
 @main.route('/')
 def home():

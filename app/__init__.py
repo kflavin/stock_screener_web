@@ -34,8 +34,10 @@ def create_app(config_name):
         from flask.ext.sslify import SSLify
         sslify = SSLify(app)
 
-    from .main import main as main_blueprint
-    app.register_blueprint(main_blueprint)
+    # We no longer use the main Blueprint.  This was providing the frontend UI through Flask.  We are now using
+    # a separate repo with VueJS for the frontend UI.
+    # from .main import main as main_blueprint
+    # app.register_blueprint(main_blueprint)
 
     # Add custom functions to Jinja templates
     from app.main.pages import url_for_other_page
