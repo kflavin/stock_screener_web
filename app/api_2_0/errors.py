@@ -28,6 +28,10 @@ def conflict(message):
 
 
 # Currently unused
+class AuthException(Exception):
+    pass
+
+# Currently unused
 class InvalidUsage(Exception):
     status_code = 400
 

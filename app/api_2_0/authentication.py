@@ -1,4 +1,5 @@
 import datetime
+import requests
 from calendar import timegm
 
 from flask.views import MethodView
@@ -7,7 +8,7 @@ from functools import wraps, WRAPPER_ASSIGNMENTS, update_wrapper, partial
 from flask import g, request, make_response, jsonify, current_app, redirect, url_for
 from ..models import User, BlacklistToken
 from .. import db
-from .errors import unauthorized, InvalidUsage, bad_request
+from .errors import unauthorized, InvalidUsage, bad_request, AuthException
 from . import api
 
 
@@ -46,6 +47,7 @@ class RegisterAPI(MethodView):
     Register a user
     """
     def post(self):
+
         post_data = request.get_json()
         if not post_data.get("email") or not post_data.get("password"):
             return bad_request("email and password should be defined")
@@ -69,9 +71,43 @@ class RegisterAPI(MethodView):
                     'message': 'Registered user',
                     # 'auth_token': auth_token.decode()
                 }
+
+                # We need to send the user a link to the front end app
+                # try:
+                #     reg_url = url_for('api_2_0.confirm_registration_view', user_id=user.id, code=user.registration_code,
+                #                       _external=True)
+                # except Exception as e:
+                #     print e
+                #     raise e
+
+                reg_url = "%s%s/%d?code=%s" % (current_app.config.get('FRONTEND_SERVER'),
+                                              current_app.config.get('REG_CONFIRM_URL'),
+                                              user.id, user.registration_code)
+                current_app.logger.debug("url is " + reg_url)
+
+                body_html = """Please <a href=\"%s\">click here</a> to activate your account.""" % reg_url
+                body_text = """Please navigate to %s to activate your account.""" % reg_url
+
+                # Send an email for confirmation
+                payload = (("from", current_app.config['MAIL_FROM']),
+                           ("to", post_data.get('email')),
+                           ("subject", "Activate Stock Screener Account"),
+                           ("text", body_text),
+                           ("html", body_html))
+
+                auth = requests.auth.HTTPBasicAuth('api', current_app.config.get('MAILGUN_API_KEY'))
+                r = requests.post(current_app.config['MAILGUN_API_URL'], data=payload, auth=auth)
+
+                current_app.logger.debug("Status code: " + str(r.status_code) + " response text: " + r.text)
+
+                # if not bool(re.search('2\d\d', r.status_code)):
+                if r.status_code not in range(200,299):
+                    raise AuthException("Could not send confirmation email")
+
                 return make_response(jsonify(response_object)), 201
 
             except Exception as e:
+                current_app.logger.debug("Exception: " + str(e))
                 response_object = {
                     'status': 'fail',
                     'message': 'Unknown error, failed to register user',
@@ -94,10 +130,19 @@ class LoginAPI(MethodView):
         post_data = request.get_json()
         try:
             user = User.query.filter_by(email=post_data.get('email')).first()
+
+            # user doesn't exist
             if not user:
                 return make_response(jsonify(dict(
                     status='fail',
                     message='User does not exist, or password is invalid'
+                )), 400)
+
+            # user hasn't been activated
+            if not user.active:
+                return make_response(jsonify(dict(
+                    status='fail',
+                    message='User is not active.  <a href="#">Resend confirmation?</a>'
                 )), 400)
 
             if user.verify_password(post_data.get('password')):
@@ -235,15 +280,65 @@ class ChangePasswordAPI(MethodView):
         ))), 403
 
 
+class ConfirmRegistrationAPI(MethodView):
+    """
+    Confirm registration by calling this with a GET
+    """
+
+    def get(self, user_id):
+        # user = request.args.get('user')
+        user = User.query.filter_by(id=user_id).first()
+
+        # If user doesn't exist
+        if not user:
+            current_app.logger.debug("Could not find user.")
+            return make_response(jsonify(dict(
+                status='fail',
+                message='Unknown error'
+            )), 503)
+
+        if user.registration_code == 1:
+            return make_response(jsonify(dict(
+                status='info',
+                message='User already registered'
+            )), 200)
+
+        if user.registration_code == request.args.get('code'):
+            user.registration_code = 1
+            user.active = True
+            db.session.commit()
+            return make_response(jsonify(dict(
+                status='success',
+                message='registration confirmed'
+            )), 201)
+        else:
+            return make_response(jsonify(dict(
+                status='success',
+                message='registration confirmed'
+            )), 201)
+
+        print "received get"
+        print "Your token is" + request.args.get('code', "")
+        return make_response(jsonify(dict(
+            status='success',
+            message='user retrieved'
+        )), 200)
+
+    def post(self):
+        pass
+
+
 registration_view = RegisterAPI.as_view('register_api')
 login_view = LoginAPI.as_view('login_api')
 user_view = UserAPI.as_view('user_api')
 logout_view = LogoutAPI.as_view('logout_api')
 password_view = ChangePasswordAPI.as_view('password_api')
+confirm_registration_view = ConfirmRegistrationAPI.as_view('confirm_registration_view')
 
 api.add_url_rule('/auth/register', view_func=registration_view, methods=['POST'])
 api.add_url_rule('/auth/login', view_func=login_view, methods=['POST'])
 api.add_url_rule('/auth/status', view_func=user_view, methods=['GET'])
 api.add_url_rule('/auth/logout', view_func=logout_view, methods=['POST'])
 api.add_url_rule('/auth/password', view_func=password_view, methods=['POST'])
+api.add_url_rule('/auth/confirm/<int:user_id>', view_func=confirm_registration_view, methods=["GET", "POST"])
 

@@ -3,6 +3,13 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config(object):
+    SERVER_NAME = os.environ.get('SERVER_NAME') or "localhost:5000"
+
+    # For sending email registration confirmation links
+    FRONTEND_SERVER = os.environ.get('FRONTEND_SERVER', 'localhost:8080')
+    REG_CONFIRM_URL = os.environ.get("REG_CONFIRM_URL", "/api/2.0/auth/confirm/")
+
+
     #WTF_CSRF_ENABLED = False
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     BCRYPT_LOG_ROUNDS = 13
@@ -30,6 +37,10 @@ class Config(object):
     MAIL_USERNAME = os.environ.get("MAIL_USER")
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
     MAIL_SENDER = os.environ.get('MAIL_SENDER')
+    # Replace with mailgun
+    MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY')
+    MAILGUN_API_URL = os.environ.get('MAILGUN_API_URL')
+    MAIL_FROM = os.environ.get('MAILGUN_FROM')
 
     COMPANIES_PER_PAGE = 25
     INDICATORS_PER_PAGE = 25

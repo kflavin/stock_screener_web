@@ -1,4 +1,5 @@
 import json
+import uuid
 from calendar import timegm
 
 import jwt
@@ -53,10 +54,13 @@ class User(db.Model):
     login_count = db.Column(db.Integer)
     last_password_change = db.Column(db.DateTime, default=datetime.datetime.utcnow())
 
-    def __init__(self, email, password, active=True, confirmed_at=datetime.datetime.utcnow):
+    registration_code = db.Column(db.String(36))
+
+    def __init__(self, email, password, active=False, confirmed_at=datetime.datetime.utcnow):
         self.email = email
         self.password = bcrypt.generate_password_hash(password, current_app.config.get('BCRYPT_LOG_ROUNDS')).decode()
         self.active = active
+        self.registration_code = str(uuid.uuid4())
         if callable(confirmed_at):
             self.confirmed_at = confirmed_at()
         else:
