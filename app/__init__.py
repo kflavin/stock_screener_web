@@ -27,8 +27,10 @@ def create_app(config_name):
     # Check if we're on Heroku
 
     if app.debug:
+        print "DEBUG ON"
         app.logger.setLevel(logging.DEBUG)
     else:
+        print "DEBUG OFF"
         if 'DYNO' in os.environ:
             app.logger.setLevel(logging.WARNING)
 
