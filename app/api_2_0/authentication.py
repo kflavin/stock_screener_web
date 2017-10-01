@@ -94,7 +94,7 @@ class RegisterAPI(MethodView):
                        ("text", body_text),
                        ("html", body_html))
 
-            current_app.logger.debug("Sending email confirmation: %s" % payload)
+            current_app.logger.debug("Sending email confirmation: %s" % str(payload))
 
             try:
                 auth = requests.auth.HTTPBasicAuth('api', current_app.config.get('MAILGUN_API_KEY'))
