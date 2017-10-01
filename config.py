@@ -3,7 +3,9 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config(object):
-    SERVER_NAME = os.environ.get('SERVER_NAME') or "localhost:5000"
+    # Commenting this out because we're not currently using it for external URL generation.  Setting it can also be
+    # problematic (if the value is incorrect), so be careful!
+    # SERVER_NAME = os.environ.get('SERVER_NAME') or "localhost:5000"
 
     # For sending email registration confirmation links
     FRONTEND_SERVER = os.environ.get('FRONTEND_SERVER', 'localhost:8080')
