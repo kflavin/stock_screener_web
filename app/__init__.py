@@ -37,18 +37,11 @@ def create_app(config_name):
     security.init_app(app, user_datastore)
     bcrypt.init_app(app)
 
-    print "os.environ", os.environ
-    print "Logging level is:"
-
-    app.logger.debug("Bringing up app")
-    app.logger.info("Bringing up app")
-    app.logger.warning("Bringing up app")
-    app.logger.critical("Bringing up app")
-
-    try:
-        raise Exception("an exception!")
-    except Exception as e:
-        app.logger.exception("Bringing up app")
+    app.logger.debug("Debug Bringing up app")
+    app.logger.info("Info Bringing up app")
+    app.logger.warning("Warning Bringing up app")
+    app.logger.critical("Critical Bringing up app")
+    app.logger.error("Error Bringing up app")
 
     if not app.debug and not app.testing and not app.config['SSL_DISABLE']:
         # from flask.ext.sslify import SSLify
