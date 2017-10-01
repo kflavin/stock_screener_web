@@ -25,8 +25,13 @@ def create_app(config_name):
     app.logger.addHandler(logging.StreamHandler(sys.stdout))
     # if not app.debug and not app.testing:
     # Check if we're on Heroku
-    if 'DYNO' in os.environ:
-        app.logger.setLevel(logging.WARNING)
+
+    if app.debug:
+        app.logger.setLevel(logging.DEBUG)
+    else:
+        if 'DYNO' in os.environ:
+            app.logger.setLevel(logging.WARNING)
+            
     print "Logging level set to: ", app.logger.getEffectiveLevel()
 
     CORS(app)
