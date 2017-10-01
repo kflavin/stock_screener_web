@@ -43,7 +43,11 @@ def create_app(config_name):
     app.logger.info("Bringing up app")
     app.logger.warning("Bringing up app")
     app.logger.critical("Bringing up app")
-    app.logger.exception("Bringing up app")
+
+    try:
+        raise Exception("an exception!")
+    except Exception as e:
+        app.logger.exception("Bringing up app")
 
     if not app.debug and not app.testing and not app.config['SSL_DISABLE']:
         # from flask.ext.sslify import SSLify
