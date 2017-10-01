@@ -23,8 +23,11 @@ def create_app(config_name):
 
     app = Flask(__name__)
     app.logger.addHandler(logging.StreamHandler(sys.stdout))
-    app.logger.setLevel(logging.INFO)
-    print "app level: ", app.logger.getEffectiveLevel()
+    # if not app.debug and not app.testing:
+    # Check if we're on Heroku
+    if 'DYNO' in os.environ:
+        app.logger.setLevel(logging.INFO)
+    print "Logging level set to: ", app.logger.getEffectiveLevel()
 
     CORS(app)
     app.config.from_object(config[config_name])
@@ -36,12 +39,6 @@ def create_app(config_name):
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     security.init_app(app, user_datastore)
     bcrypt.init_app(app)
-
-    app.logger.debug("Debug Bringing up app")
-    app.logger.info("Info Bringing up app")
-    app.logger.warning("Warning Bringing up app")
-    app.logger.critical("Critical Bringing up app")
-    app.logger.error("Error Bringing up app")
 
     if not app.debug and not app.testing and not app.config['SSL_DISABLE']:
         # from flask.ext.sslify import SSLify
