@@ -26,7 +26,7 @@ def create_app(config_name):
     # if not app.debug and not app.testing:
     # Check if we're on Heroku
     if 'DYNO' in os.environ:
-        app.logger.setLevel(logging.INFO)
+        app.logger.setLevel(logging.NOTSET)
     print "Logging level set to: ", app.logger.getEffectiveLevel()
 
     CORS(app)
