@@ -54,47 +54,49 @@ class RegisterAPI(MethodView):
 
         user = User.query.filter_by(email=post_data.get('email')).first()
         if not user:
+            user = User(
+                email = post_data.get('email'),
+                password = post_data.get('password')
+            )
+
+            # make sure last_password_change is set
+            user.set_password(post_data.get('password'))
+
+            db.session.add(user)
+            db.session.commit()
+            # auth_token = user.encode_auth_token(user.id, current_app.config.get('TOKEN_EXPIRATION_IN_SECONDS'))
+            response_object = {
+                'status': 'success',
+                'message': 'Registered user',
+                # 'auth_token': auth_token.decode()
+            }
+
+            # We need to send the user a link to the front end app
+            # try:
+            #     reg_url = url_for('api_2_0.confirm_registration_view', user_id=user.id, code=user.registration_code,
+            #                       _external=True)
+            # except Exception as e:
+            #     print e
+            #     raise e
+
+            reg_url = "%s%s/%d?code=%s" % (current_app.config.get('FRONTEND_SERVER'),
+                                          current_app.config.get('REG_CONFIRM_URL'),
+                                          user.id, user.registration_code)
+            current_app.logger.debug("Registration confirmation url is " + reg_url)
+
+            body_html = """Please <a href=\"%s\">click here</a> to activate your account.""" % reg_url
+            body_text = """Please navigate to %s to activate your account.""" % reg_url
+
+            # Send an email for confirmation
+            payload = (("from", current_app.config['MAIL_FROM']),
+                       ("to", post_data.get('email')),
+                       ("subject", "Activate Stock Screener Account"),
+                       ("text", body_text),
+                       ("html", body_html))
+
+            current_app.logger.debug("Sending email confirmation: %s" % payload)
+
             try:
-                user = User(
-                    email = post_data.get('email'),
-                    password = post_data.get('password')
-                )
-
-                # make sure last_password_change is set
-                user.set_password(post_data.get('password'))
-
-                db.session.add(user)
-                db.session.commit()
-                # auth_token = user.encode_auth_token(user.id, current_app.config.get('TOKEN_EXPIRATION_IN_SECONDS'))
-                response_object = {
-                    'status': 'success',
-                    'message': 'Registered user',
-                    # 'auth_token': auth_token.decode()
-                }
-
-                # We need to send the user a link to the front end app
-                # try:
-                #     reg_url = url_for('api_2_0.confirm_registration_view', user_id=user.id, code=user.registration_code,
-                #                       _external=True)
-                # except Exception as e:
-                #     print e
-                #     raise e
-
-                reg_url = "%s%s/%d?code=%s" % (current_app.config.get('FRONTEND_SERVER'),
-                                              current_app.config.get('REG_CONFIRM_URL'),
-                                              user.id, user.registration_code)
-                current_app.logger.debug("url is " + reg_url)
-
-                body_html = """Please <a href=\"%s\">click here</a> to activate your account.""" % reg_url
-                body_text = """Please navigate to %s to activate your account.""" % reg_url
-
-                # Send an email for confirmation
-                payload = (("from", current_app.config['MAIL_FROM']),
-                           ("to", post_data.get('email')),
-                           ("subject", "Activate Stock Screener Account"),
-                           ("text", body_text),
-                           ("html", body_html))
-
                 auth = requests.auth.HTTPBasicAuth('api', current_app.config.get('MAILGUN_API_KEY'))
                 r = requests.post(current_app.config['MAILGUN_API_URL'], data=payload, auth=auth)
 
@@ -115,6 +117,7 @@ class RegisterAPI(MethodView):
                 }
                 return make_response(jsonify(response_object)), 401
         else:
+            current_app.logger.debug("User already exists.")
             response_object = {
                 'status': 'fail',
                 'message': 'User already exists.'
