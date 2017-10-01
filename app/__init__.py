@@ -18,9 +18,14 @@ mail = Mail()
 
 
 def create_app(config_name):
+    import logging, sys, os
     print "Initializing Flask app"
 
     app = Flask(__name__)
+    app.logger.addHandler(logging.StreamHandler(sys.stdout))
+    app.logger.setLevel(logging.INFO)
+    print "app level: ", app.logger.getEffectiveLevel()
+
     CORS(app)
     app.config.from_object(config[config_name])
     app.url_map.converters['regex'] = RegexConverter
@@ -32,12 +37,8 @@ def create_app(config_name):
     security.init_app(app, user_datastore)
     bcrypt.init_app(app)
 
-    import logging
-    print "logging level: ", logging.getLogger().getEffectiveLevel()
-
+    print "os.environ", os.environ
     print "Logging level is:"
-    app.logger.getEffectiveLevel()
-    app.logger.setLevel(logging.INFO)
 
     app.logger.debug("Bringing up app")
     app.logger.info("Bringing up app")
