@@ -37,6 +37,7 @@ def create_app(config_name):
 
     print "Logging level is:"
     app.logger.getEffectiveLevel()
+    app.logger.setLevel(logging.INFO)
 
     app.logger.debug("Bringing up app")
     app.logger.info("Bringing up app")
