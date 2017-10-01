@@ -32,6 +32,9 @@ def create_app(config_name):
     security.init_app(app, user_datastore)
     bcrypt.init_app(app)
 
+    import logging
+    print "logging level: ", logging.getLogger().getEffectiveLevel()
+
     print "Logging level is:"
     app.logger.getEffectiveLevel()
 
