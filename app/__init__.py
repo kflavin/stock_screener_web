@@ -18,6 +18,8 @@ mail = Mail()
 
 
 def create_app(config_name):
+    print "Creating app"
+
     app = Flask(__name__)
     CORS(app)
     app.config.from_object(config[config_name])
@@ -30,8 +32,12 @@ def create_app(config_name):
     security.init_app(app, user_datastore)
     bcrypt.init_app(app)
 
+    app.logger.info("Bringing up app")
+
     if not app.debug and not app.testing and not app.config['SSL_DISABLE']:
-        from flask.ext.sslify import SSLify
+        # from flask.ext.sslify import SSLify
+        from flask_sslify import SSLify
+
         sslify = SSLify(app)
 
     # We no longer use the main Blueprint.  This was providing the frontend UI through Flask.  We are now using
