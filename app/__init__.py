@@ -32,7 +32,7 @@ def create_app(config_name):
     security.init_app(app, user_datastore)
     bcrypt.init_app(app)
 
-    app.logger.info("Bringing up app")
+    app.logger.error("Bringing up app")
 
     if not app.debug and not app.testing and not app.config['SSL_DISABLE']:
         # from flask.ext.sslify import SSLify
@@ -66,6 +66,8 @@ def create_app(config_name):
 
     from .api_2_0 import api as api_2_0_0_blueprint
     app.register_blueprint(api_2_0_0_blueprint, url_prefix='/api/2.0')
+
+    print "URL map", app.url_map
 
     return app
 
