@@ -7,11 +7,6 @@ class Config(object):
     # problematic (if the value is incorrect), so be careful!
     # SERVER_NAME = os.environ.get('SERVER_NAME') or "localhost:5000"
 
-    # For sending email registration confirmation links
-    FRONTEND_SERVER = os.environ.get('FRONTEND_SERVER', 'localhost:8080')
-    REG_CONFIRM_URL = os.environ.get("REG_CONFIRM_URL", "/api/2.0/auth/confirm/")
-
-
     #WTF_CSRF_ENABLED = False
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     BCRYPT_LOG_ROUNDS = 13
@@ -32,17 +27,21 @@ class Config(object):
     SECURITY_PASSWORD_HASH = os.environ.get('SECURITY_PASSWORD_HASH')
     SECURITY_PASSWORD_SALT = os.environ.get('SECURITY_PASSWORD_SALT')
 
-    MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp.googlemail.com'
-    MAIL_PORT = os.environ.get('MAIL_PORT') or 587
-    MAIL_USE_TLS = True
-    MAIL_USE_SSL = False
-    MAIL_USERNAME = os.environ.get("MAIL_USER")
-    MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
-    MAIL_SENDER = os.environ.get('MAIL_SENDER')
-    # Replace with mailgun
+    # Removing SMTP settings, replace with mailgun
+    # MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'smtp.googlemail.com'
+    # MAIL_PORT = os.environ.get('MAIL_PORT') or 587
+    # MAIL_USE_TLS = True
+    # MAIL_USE_SSL = False
+    # MAIL_USERNAME = os.environ.get("MAIL_USER")
+    # MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
+    # MAIL_SENDER = os.environ.get('MAIL_SENDER')
+
+    # For sending email registration confirmation links
+    FRONTEND_SERVER = os.environ.get('FRONTEND_SERVER', 'localhost:8080')
+    REG_CONFIRM_URL = os.environ.get("REG_CONFIRM_URL", "/api/2.0/auth/confirm/")
     MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY')
     MAILGUN_API_URL = os.environ.get('MAILGUN_API_URL')
-    MAIL_FROM = os.environ.get('MAILGUN_FROM')
+    MAIL_FROM = os.environ.get('MAIL_FROM')
 
     COMPANIES_PER_PAGE = 25
     INDICATORS_PER_PAGE = 25
