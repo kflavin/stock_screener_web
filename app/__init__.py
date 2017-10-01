@@ -32,6 +32,9 @@ def create_app(config_name):
     security.init_app(app, user_datastore)
     bcrypt.init_app(app)
 
+    print "Logging level is:"
+    app.logger.getEffectiveLevel()
+
     app.logger.debug("Bringing up app")
     app.logger.info("Bringing up app")
     app.logger.warning("Bringing up app")
