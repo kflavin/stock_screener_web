@@ -31,7 +31,7 @@ def create_app(config_name):
     else:
         if 'DYNO' in os.environ:
             app.logger.setLevel(logging.WARNING)
-            
+
     print "Logging level set to: ", app.logger.getEffectiveLevel()
 
     CORS(app)
