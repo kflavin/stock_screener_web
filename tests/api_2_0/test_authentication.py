@@ -4,6 +4,7 @@ from flask import current_app, request, url_for
 import json
 from app.api_2_0.authentication import login_required
 from base import BaseTest
+from app.models import User
 
 
 @patch('requests.post')
@@ -22,13 +23,49 @@ class TestAuthenticationAPI(BaseTest):
         Returns:
 
         """
-        # pass
         with self.client:
             post_mock.return_value = self.status_mock
             response = self.register_user(self.email, self.password)
             data = json.loads(response.data.decode())
             print data
             self.assertTrue(data['status'] == 'success')
+
+    def test_auth_register_unconfirmed_account(self, post_mock):
+        """
+        Ensure account creations need to be confirmed over email first
+
+        """
+        with self.client:
+            post_mock.return_value = self.status_mock
+            response = self.register_unconfirmed_user(self.email, self.password)
+            user_data = json.loads(response.data.decode())
+            print user_data
+
+            # Account should not be active, and should have a 36 character activation string
+            u = User.query.filter_by(email=self.email).first()
+            self.assertTrue(len(u.registration_code) == 36)
+            self.assertFalse(u.active)
+
+            # We shouldn't be able to login with an unconfirmed account
+            data = json.loads(self.login_user(self.email, self.password).get_data())
+
+            print data
+            self.assertEqual(data.get('status'), 'fail')
+            self.assertTrue('User is not active' in data.get('message'))
+
+            data = self.client.get(url_for('api_2_0.confirm_registration_view',
+                                   user_id=user_data.get('body').get('user_id'),
+                                   code=user_data.get('body').get('code')))
+
+            # The account should now be active, with no registration code set
+            u = User.query.filter_by(email=self.email).first()
+            self.assertEqual(u.registration_code, "1")
+            self.assertTrue(u.active)
+
+            # Login should now succeed
+            data = json.loads(self.login_user(self.email, self.password).get_data())
+            self.assertEqual(data.get('status'), 'success')
+            self.assertEqual(data.get('message'), 'Logged in')
 
     def test_auth_valid_login(self, post_mock):
         post_mock.return_value = self.status_mock

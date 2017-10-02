@@ -68,6 +68,7 @@ class RegisterAPI(MethodView):
             response_object = {
                 'status': 'success',
                 'message': 'Registered user',
+                'body': {'user_id': user.id, 'code': user.registration_code}
                 # 'auth_token': auth_token.decode()
             }
 
@@ -292,8 +293,6 @@ class ConfirmRegistrationAPI(MethodView):
         # user = request.args.get('user')
         user = User.query.filter_by(id=user_id).first()
 
-        print "here we are"
-
         # If user doesn't exist
         if not user:
             print "user doesn't exist"
@@ -311,10 +310,10 @@ class ConfirmRegistrationAPI(MethodView):
             )), 200)
 
         if user.registration_code == request.args.get('code'):
-            print "confirming the registration"
             user.registration_code = 1
             user.active = True
             db.session.commit()
+            current_app.logger.debug("Registration confirmed")
             return make_response(jsonify(dict(
                 status='success',
                 message='Registration confirmed'

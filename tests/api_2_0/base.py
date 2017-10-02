@@ -36,6 +36,16 @@ class BaseTest(TestCase):
         db.drop_all()
         self.app_context.pop()
 
+    def register_unconfirmed_user(self, email, password):
+        return self.client.post(
+            '/api/2.0/auth/register',
+            data=json.dumps(dict(
+                email=email,
+                password=password
+            )),
+            content_type="application/json"
+        )
+
     def register_user(self, email, password):
         res = self.client.post(
             '/api/2.0/auth/register',
