@@ -100,10 +100,10 @@ class RegisterAPI(MethodView):
                 auth = requests.auth.HTTPBasicAuth('api', current_app.config.get('MAILGUN_API_KEY'))
                 r = requests.post(current_app.config['MAILGUN_API_URL'], data=payload, auth=auth)
 
-                current_app.logger.debug("Status code: " + str(r.status_code) + " response text: " + r.text)
+                current_app.logger.debug("Status code: " + str(r.status_code) + " response text: " + str(r.text))
 
                 # if not bool(re.search('2\d\d', r.status_code)):
-                if r.status_code not in range(200,299):
+                if r.status_code not in range(200, 299):
                     raise AuthException("Could not send confirmation email")
 
                 return make_response(jsonify(response_object)), 201
@@ -115,7 +115,7 @@ class RegisterAPI(MethodView):
                     'message': 'Unknown error, failed to register user',
                     'error': e.message
                 }
-                return make_response(jsonify(response_object)), 401
+                return make_response(jsonify(response_object)), 400
         else:
             current_app.logger.debug("User already exists.")
             response_object = {
@@ -292,8 +292,11 @@ class ConfirmRegistrationAPI(MethodView):
         # user = request.args.get('user')
         user = User.query.filter_by(id=user_id).first()
 
+        print "here we are"
+
         # If user doesn't exist
         if not user:
+            print "user doesn't exist"
             current_app.logger.debug("Could not find user.")
             return make_response(jsonify(dict(
                 status='fail',
@@ -301,12 +304,14 @@ class ConfirmRegistrationAPI(MethodView):
             )), 503)
 
         if user.registration_code == "1":
+            print "user already registered"
             return make_response(jsonify(dict(
                 status='info',
                 message='User already registered'
             )), 200)
 
         if user.registration_code == request.args.get('code'):
+            print "confirming the registration"
             user.registration_code = 1
             user.active = True
             db.session.commit()

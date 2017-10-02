@@ -6,9 +6,17 @@ from app.api_2_0.authentication import login_required
 from base import BaseTest
 
 
+@patch('requests.post')
 class TestAuthenticationAPI(BaseTest):
 
-    def test_auth_register(self):
+    def setUp(self):
+        super(TestAuthenticationAPI, self).setUp()
+        self.status_mock = Mock()
+        self.status_mock.status_code = 200
+        self.status_mock.text = "success"
+        # post_mock.return_value = status_mock
+
+    def test_auth_register(self, post_mock):
         """
         Test registration to api
         Returns:
@@ -16,11 +24,14 @@ class TestAuthenticationAPI(BaseTest):
         """
         # pass
         with self.client:
+            post_mock.return_value = self.status_mock
             response = self.register_user(self.email, self.password)
             data = json.loads(response.data.decode())
+            print data
             self.assertTrue(data['status'] == 'success')
 
-    def test_auth_valid_login(self):
+    def test_auth_valid_login(self, post_mock):
+        post_mock.return_value = self.status_mock
         # Register user
         response = self.register_user(self.email, self.password)
         # Login
@@ -28,14 +39,16 @@ class TestAuthenticationAPI(BaseTest):
         self.assertTrue(data.get('token'))
         self.assertEqual(data.get('status'), 'success')
 
-    def test_auth_invalid_login(self):
+    def test_auth_invalid_login(self, post_mock):
+        post_mock.return_value = self.status_mock
         response = self.register_user(self.email, self.password)
         # Bad password
         data = json.loads(self.login_user(self.email, "badpassword").get_data())
         self.assertFalse(data.get('token'))
         self.assertEqual(data.get('status'), 'fail')
 
-    def test_auth_user_status(self):
+    def test_auth_user_status(self, post_mock):
+        post_mock.return_value = self.status_mock
         self.register_user(self.email, self.password)
         data = json.loads(self.login_user(self.email, self.password).get_data())
         self.assertEqual(data.get('status'), 'success')
@@ -114,7 +127,8 @@ class TestAuthenticationAPI(BaseTest):
 
             # Don't use the same token down here, it is EXPIRED!
 
-    def test_auth_change_password(self):
+    def test_auth_change_password(self, post_mock):
+        post_mock.return_value = self.status_mock
         self.register_user(self.email, self.password)
         self.change_password(self.email, self.password, "ShinyNewPassword")
         time.sleep(2)
@@ -129,7 +143,9 @@ class TestAuthenticationAPI(BaseTest):
         self.assertEqual(data.get('status'), 'success')
         self.assertEqual(data.get('message'), 'Logged in')
 
-    def test_auth_login_required(self):
+    def test_auth_login_required(self, post_mock):
+        post_mock.return_value = self.status_mock
+
         # Mock a function to return a value of "success", then wrap it with the login decorator
         func = Mock(name="test_auth_login_required_mock", return_value="success")
         func.__name__ = "test_auth_login_required_mock"

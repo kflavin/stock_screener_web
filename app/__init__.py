@@ -19,7 +19,7 @@ mail = Mail()
 
 def create_app(config_name):
     import logging, sys, os
-    print "Initializing Flask app"
+    # print "Initializing Flask app"
 
     app = Flask(__name__)
     app.logger.addHandler(logging.StreamHandler(sys.stdout))
@@ -29,10 +29,11 @@ def create_app(config_name):
     # if not app.debug and not app.testing:
     # Check if we're on Heroku
     if 'DYNO' in os.environ:
-        print "Setting log level for Heroku"
+        # print "Setting log level for Heroku"
         app.logger.setLevel(app.config.get('LOG_LEVEL', logging.WARNING))
 
-    print "Logging level set to: ", app.logger.getEffectiveLevel()
+    # print "Logging level set to: ", app.logger.getEffectiveLevel()
+    app.logger.info("Logging level set to: %d" % app.logger.getEffectiveLevel())
 
     app.url_map.converters['regex'] = RegexConverter
 
