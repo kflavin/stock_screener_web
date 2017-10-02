@@ -300,7 +300,7 @@ class ConfirmRegistrationAPI(MethodView):
                 message='Unknown error'
             )), 503)
 
-        if user.registration_code == 1:
+        if user.registration_code == "1":
             return make_response(jsonify(dict(
                 status='info',
                 message='User already registered'
@@ -312,12 +312,12 @@ class ConfirmRegistrationAPI(MethodView):
             db.session.commit()
             return make_response(jsonify(dict(
                 status='success',
-                message='registration confirmed'
+                message='Registration confirmed'
             )), 201)
         else:
             return make_response(jsonify(dict(
-                status='success',
-                message='registration confirmed'
+                status='fail',
+                message='Invalid request'
             )), 201)
 
         print "received get"
