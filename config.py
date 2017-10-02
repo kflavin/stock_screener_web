@@ -1,4 +1,4 @@
-import os
+import os, logging
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -90,6 +90,7 @@ class Production(Config):
 
 class HerokuConfig(Production):
     SSL_DISABLE = bool(os.environ.get('SSL_DISABLE'))
+    LOG_LEVEL = logging.WARNING
 
     @classmethod
     def init_app(cls, app):
