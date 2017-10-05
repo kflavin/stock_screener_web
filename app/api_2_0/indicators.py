@@ -50,7 +50,7 @@ def create_indicators():
         except IntegrityError:
             return conflict("Could not create indicator, likely a duplicate date.")
         else:
-            return jsonify(indicator.to_json()), 201, {'Location': url_for('api.get_indicators', id=indicator.id,_external=True) }
+            return jsonify(indicator.to_json()), 201, {'Location': url_for('api_2_0.get_indicators', id=indicator.id,_external=True) }
     else:
         db.session.delete(indicator)
         db.session.commit()

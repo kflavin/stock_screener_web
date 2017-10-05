@@ -12,11 +12,12 @@ logger = logging.getLogger('populators.sectors')
 def get_sectors_and_industries(count=None,
                                host="http://localhost:5000",
                                user="user", password="password",
-                               empty_only=True):
+                               empty_only=True,
+                               api_url="api/2.0"):
 
     logger.debug("count: {}, host: {}, user: {}, empty_only: {}".format(count, host, user, empty_only))
     auth = HTTPBasicAuth(user, password)
-    url = "{}/api/1.0/company/".format(host)
+    url = "{}/{}/company/".format(host, api_url)
 
     if count:
         r = requests.get("{}?count={}&empty_only={}".format(url, count, empty_only), auth=auth)
@@ -36,7 +37,7 @@ def get_sectors_and_industries(count=None,
         symbol = company.get('symbol')
         sector_and_industry = get_sector_and_industry(symbol)
         if sector_and_industry:
-            r = requests.post("{}/api/1.0/company/{}".format(host, symbol), json=sector_and_industry, auth=auth)
+            r = requests.post("{}{}".format(url, symbol), json=sector_and_industry, auth=auth)
 
             if r.status_code == 201:
                 print "Added", company.get('symbol')
