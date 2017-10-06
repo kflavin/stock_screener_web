@@ -42,6 +42,29 @@ def login_required(f):
     return decorated_function
 
 
+def get_user_id():
+    """
+    Utility function that grabs the user id from a token.  Ugly, merge with login_required somehow, without using session
+    data
+    :return:
+    """
+    auth = request.headers.get('Authorization')
+    if auth:
+        try:
+            auth_token = auth.split(" ")[1]
+        except IndexError as e:
+            current_app.logger.debug(e)
+            auth_token = ''
+    else:
+        auth_token = ''
+
+    if auth_token and not BlacklistToken.query.filter_by(token=auth_token).first():
+        response = User.decode_auth_token(auth_token)
+        return response
+    else:
+        return 0
+
+
 class RegisterAPI(MethodView):
     """
     Register a user

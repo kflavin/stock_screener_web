@@ -55,6 +55,7 @@ class User(db.Model):
     last_password_change = db.Column(db.DateTime, default=datetime.datetime.utcnow())
 
     registration_code = db.Column(db.String(36))
+    companies = db.relationship('Company', backref='user', lazy='dynamic')
 
     def __init__(self, email, password, active=False, confirmed_at=datetime.datetime.utcnow):
         self.email = email
@@ -128,6 +129,19 @@ class User(db.Model):
 
     def verify_password(self, password):
         return bcrypt.check_password_hash(self.password, password)
+
+    def to_json(self):
+        indicators = {}
+        for k,v in self.get_attributes_no_fk().iteritems():
+            if k == "symbol":
+                indicators[k] = self.company.symbol
+            else:
+                indicators[k] = getattr(self, k)
+
+        indicators['id'] = self.id
+        indicators['date'] = self.date.isoformat()
+
+        return indicators
 
     #@property
     #def password(self):
@@ -222,6 +236,7 @@ class Company(db.Model):
     industry = db.Column(db.String(200), nullable=True)
     active = db.Column(db.Boolean, default=True)
     indicators = db.relationship('Indicators', backref='company', lazy='dynamic')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     # "Special" attributes that we ignore
     ignore_attrs = ['id', 'indicators']

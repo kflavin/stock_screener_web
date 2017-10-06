@@ -66,6 +66,7 @@ def get_companies():
 def status():
     return jsonify({'status': 'success'})
 
+
 @api_2_0.route('/company/<regex("[A-Za-z]{1,4}"):symbol>', methods=['GET', 'POST'])
 def get_company(symbol):
     company = Company.query.filter_by(symbol=symbol).first()
